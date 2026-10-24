@@ -1,0 +1,408 @@
+{
+  "title": "UniPocket 设计手册",
+  "references": [
+    {
+      "id": "core-home",
+      "name": "首页与周课表",
+      "path": "docs/design/resources/core-pages/01-首页与周课表.png",
+      "prompt": "docs/design/resources/core-pages/生成提示词.md",
+      "note": "浅蓝白底、课程层级、淡紫导航与贴纸。组合图覆盖两个页面。"
+    },
+    {
+      "id": "core-tasks",
+      "name": "学习任务与倒计时",
+      "path": "docs/design/resources/core-pages/02-学习任务与倒计时.png",
+      "prompt": "docs/design/resources/core-pages/生成提示词.md",
+      "note": "任务强调截止状态，倒计时用大数字和彩纸便笺。"
+    },
+    {
+      "id": "core-tools",
+      "name": "工具箱与随机点名",
+      "path": "docs/design/resources/core-pages/03-随机工具箱与点名.png",
+      "prompt": "docs/design/resources/core-pages/生成提示词.md",
+      "note": "两列工具色块、统一白边贴纸、名单和抽取轮次。"
+    },
+    {
+      "id": "core-settings",
+      "name": "设置",
+      "path": "docs/design/resources/core-pages/04-设置.png",
+      "prompt": "docs/design/resources/core-pages/设置页提示词.md",
+      "note": "学习安排、提醒、本地备份与关于；功能分组清楚。"
+    },
+    {
+      "id": "wheel",
+      "name": "转盘",
+      "path": "docs/design/resources/random-tools/01-转盘.png",
+      "prompt": "docs/design/resources/random-tools/01-转盘-提示词.md",
+      "note": "大尺寸纯文字转盘，文字沿各扇区半径排布；固定指针和明确结果，自定义项不匹配图标。"
+    },
+    {
+      "id": "groups",
+      "name": "随机分组 · 水平标签",
+      "path": "docs/design/resources/random-tools/02-随机分组-v2-水平标签.png",
+      "prompt": "docs/design/resources/random-tools/02-随机分组-v2-提示词.md",
+      "note": "分组纸卡与水平姓名标签。"
+    },
+    {
+      "id": "lottery",
+      "name": "抽签",
+      "path": "docs/design/resources/random-tools/03-抽签.png",
+      "prompt": "docs/design/resources/random-tools/03-抽签-提示词.md",
+      "note": "桃色签袋、独立纸签、完整签文与本轮进度。"
+    },
+    {
+      "id": "die",
+      "name": "掷骰子",
+      "path": "docs/design/resources/random-tools/04-掷骰子.png",
+      "prompt": "docs/design/resources/random-tools/04-掷骰子-提示词.md",
+      "note": "单颗蓝色六面骰、薄荷色投掷台、大号结果数字。"
+    },
+    {
+      "id": "coin",
+      "name": "抛硬币",
+      "path": "docs/design/resources/random-tools/05-抛硬币.png",
+      "prompt": "docs/design/resources/random-tools/05-抛硬币-提示词.md",
+      "note": "单枚金色硬币，星星正面、月牙反面，浅粉投掷台。"
+    }
+  ],
+  "assetPrompts": [
+    {
+      "name": "抽签袋素材生成记录",
+      "path": "docs/design/resources/random-tools/素材-签袋-提示词.md",
+      "asset": "docs/design/resources/illustrations/lottery-bag.png"
+    }
+  ],
+  "pages": [
+    {
+      "id": "home",
+      "name": "首页",
+      "group": "学习与日常",
+      "ref": "core-home",
+      "shot": "home.png",
+      "content": "今日课程 → 未完成学习任务 → 近期倒计时事件 → 常用工具",
+      "actions": "快捷添加、课程详情、任务完成与撤销、进入二级页",
+      "rule": "课程时间与地点优先；逾期任务保留，状态同时使用文字。",
+      "pending": "无数据、无课日、任务较多时的完整状态。"
+    },
+    {
+      "id": "timetable",
+      "name": "周课表",
+      "group": "学习与日常",
+      "ref": "core-home",
+      "shot": "timetable.png",
+      "content": "当前学期与校园时区 → 周切换 → 七天课表网格",
+      "actions": "切周、回本周、今日列表、课程详情",
+      "rule": "课程色用于识别课程；今天高亮，横纵网格保持清晰。",
+      "pending": "课程新增、编辑和删除影响确认；导入预览与纠错、重复及冲突提示；单次调停课与失去关联的例外处理。"
+    },
+    {
+      "id": "tasks",
+      "name": "学习任务",
+      "group": "学习与日常",
+      "ref": "core-tasks",
+      "shot": "tasks.png",
+      "content": "逾期 → 今天 → 接下来；课程与状态筛选",
+      "actions": "新增、完成、撤销、筛选",
+      "rule": "学习任务具有明确截止时间和完成状态，与倒计时事件分开。",
+      "pending": "完整编辑、删除与单项提醒配置。"
+    },
+    {
+      "id": "events",
+      "name": "倒计时",
+      "group": "学习与日常",
+      "ref": "core-tasks",
+      "shot": "events.png",
+      "content": "置顶事件 → 按临近日期排序 → 历史入口",
+      "actions": "新增、编辑、置顶、删除",
+      "rule": "使用日历日期计算剩余天数，当天显示“就是今天”；使用彩纸和大数字。",
+      "pending": "单项提醒配置及更多日期边界状态。"
+    },
+    {
+      "id": "tools",
+      "name": "随机工具箱",
+      "group": "工具与设置",
+      "ref": "core-tools",
+      "shot": "tools.png",
+      "content": "搜索 → 全部／收藏／最近 → 六项随机工具",
+      "actions": "搜索、收藏、进入工具",
+      "rule": "两列圆角色块、统一贴纸插画；只展示首版六项工具。",
+      "pending": "最近使用展示及搜索、收藏的空状态。"
+    },
+    {
+      "id": "draw",
+      "name": "随机点名",
+      "group": "工具与设置",
+      "ref": "core-tools",
+      "currentShot": "docs/design/qa/live-v2-draw.png",
+      "content": "名单 → 重复模式 → 抽取结果 → 本轮进度",
+      "actions": "抽取、修改名单、主动开始新一轮",
+      "rule": "同名成员分别保留；离开页面保留轮次，修改名单前说明重置影响。",
+      "pending": "多名单命名保存、重名成员区分及修改名单的重置确认。"
+    },
+    {
+      "id": "settings",
+      "name": "设置",
+      "group": "工具与设置",
+      "ref": "core-settings",
+      "shot": "settings.png",
+      "content": "学习安排 → 提醒 → 本地备份 → 关于",
+      "actions": "查看设置、演示导出和恢复",
+      "rule": "普通设置行按分组组织；通知展示真实状态，正式应用适配设备安全区域。",
+      "pending": "多学期管理、完整节次配置、校园时区设置；权限关闭反馈及备份校验、覆盖确认和失败状态。"
+    },
+    {
+      "id": "tool-wheel",
+      "name": "转盘",
+      "group": "随机工具详情",
+      "ref": "wheel",
+      "currentShot": "docs/design/qa/live-v2-wheel.png",
+      "content": "选项列表 → 大转盘 → 结果便笺 → 主操作",
+      "actions": "编辑选项、转动、再次转动",
+      "rule": "转盘随可用宽度适配，393px 视口下约 353px 作为参考；选项仅显示用户文字，沿扇区半径排布并处理朝向；固定指针与结果一致。",
+      "pending": "选项列表命名保存、重复选项提示及长文本、文本放大状态。"
+    },
+    {
+      "id": "tool-groups",
+      "name": "随机分组",
+      "group": "随机工具详情",
+      "ref": "groups",
+      "currentShot": "docs/design/qa/live-v2-groups.png",
+      "content": "名单 → 分组方式 → 数量设置 → 分组纸卡",
+      "actions": "按组数或人数上限分组、重新分组",
+      "rule": "完成后所有姓名标签水平排列；洗牌与逐张发牌表现见 HTML 动效参考，分组人数规则见首版规格。",
+      "pending": "名单命名保存、同名成员区分及更大名单的展示。"
+    },
+    {
+      "id": "tool-lottery",
+      "name": "抽签",
+      "group": "随机工具详情",
+      "ref": "lottery",
+      "currentShot": "docs/design/qa/lottery-v3-result.png",
+      "content": "签池 → 重复模式 → 签袋和纸签 → 进度与主操作",
+      "actions": "编辑签池、抽签、新一轮",
+      "rule": "桃色签袋配 spark-yellow.svg、spark-lavender.svg 的实心浅色白边星星，签文完整可读；纸签姿态与落位见 HTML 动效参考，轮次规则见状态反馈与首版规格。",
+      "pending": "多签池命名保存、重复签文提示及修改签池的重置确认。"
+    },
+    {
+      "id": "tool-die",
+      "name": "掷骰子",
+      "group": "随机工具详情",
+      "ref": "die",
+      "currentShot": "docs/design/qa/live-v2-die.png",
+      "content": "单颗立体骰子 → 大号点数 → 主操作",
+      "actions": "投掷、再次投掷",
+      "rule": "单颗六面骰，展示点数与文字结果一致；六面结构、翻滚与落地回弹见 HTML 动效参考。",
+      "pending": "Android 首版的简化投掷反馈，包含投掷前、进行中与结果状态。"
+    },
+    {
+      "id": "tool-coin",
+      "name": "抛硬币",
+      "group": "随机工具详情",
+      "ref": "coin",
+      "currentShot": "docs/design/qa/live-v2-coin.png",
+      "content": "单枚硬币 → 正反面结果 → 主操作 → 币面图例",
+      "actions": "抛掷、再次抛掷",
+      "rule": "单枚硬币，星星正面、月牙反面，展示币面与文字结果一致；上抛与翻转见 HTML 动效参考。",
+      "pending": "Android 首版的简化抛掷反馈，包含抛掷前、进行中与结果状态。"
+    }
+  ],
+  "rules": [
+    {
+      "title": "视觉方向",
+      "items": [
+        "浅蓝白为底，主蓝承担主要操作，淡紫用于选中态；奶黄、浅桃、薄荷、柔粉分配给课程与工具场景。",
+        "采用圆润卡片、白边贴纸和局部纸感；所有页面可以适当活泼，保持文字和操作优先。",
+        "每个区域只设一个视觉重点。插画与装饰避让文字和点击区域，普通设置行按组组织。"
+      ]
+    },
+    {
+      "title": "排版与布局",
+      "items": [
+        "HTML 页面参考视口为 393 × 852 CSS px，并检查 320px 窄屏；正式应用按平台逻辑尺寸、设备安全区域和文本缩放适配。",
+        "间距基准 4px，页面常规左右留白 20px；圆角采用 12／18／24／30px 和胶囊。卡片轻阴影，靠留白与浅色表面区分层次。",
+        "中文无衬线字体回退使用 --font-ui；首页标题参考 26px、模块标题 15px、正文基础 14px，按页面层级与文本放大需求调整。",
+        "四个主导航固定为：首页、课表、工具、设置。二级页保留返回与必要操作；滚动末项可触达，长标题允许换行。"
+      ]
+    },
+    {
+      "title": "图标与插画",
+      "items": [
+        "界面图标使用 24 × 24 viewBox、1.9px 圆头圆角描边，常规显示为 22px；导航图标按页面截图的层级适配。优先使用 resources/icons 中的现有 SVG。",
+        "插画使用独立 SVG 或透明 PNG，统一白边与轻阴影；界面图标和装饰插画分别使用，不把整张效果图作为交互界面。",
+        "可生图、画 SVG 或采用合适的现成素材；新增第三方资源时记录来源、许可和使用范围。界面文字使用真实文本，不嵌入整页位图；按内容需要支持选择或复制。"
+      ]
+    },
+    {
+      "title": "纸张与材质",
+      "items": [
+        "纸纹低对比、局部使用，保持正文清晰；装饰层避开文字并不拦截操作。",
+        "撕纸边随卡片底色变化，底边留出空间；胶带用于局部装饰，横线与网格保持克制，网格纸不叠加在周课表网格上。",
+        "贴纸使用统一轻阴影。倾斜用于装饰、纸签规定的静态姿态或动作过程；随机分组完成后的姓名标签必须水平。"
+      ]
+    },
+    {
+      "title": "状态反馈",
+      "items": [
+        "逾期、完成、选中和禁用有文字或图标反馈，状态不能只靠颜色区分；保留键盘焦点和可理解的操作名称。",
+        "随机结果清晰可读，指针、骰面或币面与文字结果一致；骰子与硬币只展示本次结果，点名与抽签按抽取轮次管理。可重复抽签显示完整签池，不显示耗尽进度。",
+        "触发操作时确定本次结果，反馈完成后提交结果并更新轮次；一次操作只提交一次，取消未完成操作不消耗点名或抽签轮次。"
+      ]
+    }
+  ],
+  "motions": [
+    {
+      "page": "转盘",
+      "duration": "约 3.1s",
+      "path": "转盘绕中心连续转动至少 5 圈，逐渐减速至停止；指针固定在顶部，仅在转动期间小幅摆动，文字随扇区旋转。",
+      "result": "指针对准获选扇区中心，停稳后显示对应文字；单选项也应正确落位。",
+      "id": "tool-wheel",
+      "trigger": "点击“转动”，选项列表非空。"
+    },
+    {
+      "id": "draw",
+      "page": "随机点名",
+      "duration": "约 1.4s",
+      "path": "姓名在固定高度的结果窗口内纵向滚动，逐渐减速并定格；容器与周围进度区保持稳定，不随姓名长度跳动。",
+      "result": "姓名及可选学号或备注对应同一成员，完整可读；不重复模式完成后更新本轮已抽与剩余人数。",
+      "trigger": "点击“开始点名”或“再抽一位”，存在可抽成员。"
+    },
+    {
+      "page": "随机分组",
+      "duration": "洗牌约 0.8s；发牌 480ms／张，间隔 65ms",
+      "path": "名签先在牌堆两侧交错展开、收拢，再从牌堆逐张飞向目标组；飞行中可轻微倾斜，落位时归正。飞行名签位于分组纸卡上层，目标位置在落位前隐藏，避免重影。",
+      "result": "每位成员恰好出现一次，同名成员按独立名签保留；标签落位后归正，分组人数符合首版规格。",
+      "id": "tool-groups",
+      "trigger": "点击“开始分组”或“重新分组”，名单与分组参数有效。"
+    },
+    {
+      "page": "抽签",
+      "duration": "摇袋 850ms + 抽签 750ms",
+      "path": "初始长纸签隐藏，袋内短签仅露出签头。签袋与袋内短签整体左右摇动，摆幅逐次收敛；袋身停稳后，长纸签从袋口向上抽出，略微越过终点再回落。抽出区域限制在袋口上方，纸签不得从袋底穿出；袋身遮住纸签下部。",
+      "result": "停稳后的纸签保留约 −4° 的轻微倾斜，短签文全部露在袋口上方；较长的自定义签文可在纸签内滚动，并在下方提供完整文字，不以默认示例长度限制输入。新一轮恢复初始姿态。",
+      "id": "tool-lottery",
+      "trigger": "点击“抽一签”或“再抽一签”，签池中存在可抽签项。"
+    },
+    {
+      "page": "掷骰子",
+      "duration": "约 1.9s",
+      "path": "单颗六面骰同时绕两个轴翻滚并向上抛起，下落触地时短暂压缩，随后小幅回弹、停稳；阴影在腾空时缩小变淡，落地时扩大加深，最终恢复。各面随空间朝向显隐，不以切换点数图片代替翻滚。",
+      "result": "停稳后主可见面点数与大号结果一致；投掷过程中不提前显示本次点数。",
+      "id": "tool-die",
+      "trigger": "点击“掷一下”或“再掷一次”。"
+    },
+    {
+      "page": "抛硬币",
+      "duration": "约 1.8s",
+      "path": "单枚硬币上抛并连续翻转，正反面交替显露，侧转时可见厚度；下落后轻弹一次再停稳。阴影随腾空缩小变淡、落地扩大加深，保持与投掷台的位置关系。",
+      "result": "最终展示星星正面或月牙反面，与文字结果一致；翻转期间不同时透出两面。",
+      "id": "tool-coin",
+      "trigger": "点击“抛一下”或“再抛一次”。"
+    }
+  ],
+  "materials": [
+    {
+      "name": "细纸纹",
+      "class": "paper-surface",
+      "path": "paper-grain.png",
+      "use": "低强度平铺，给便笺增加触感。"
+    },
+    {
+      "name": "微纤维",
+      "class": "paper-surface",
+      "path": "paper-fibers.svg",
+      "use": "与细纸纹叠加，保持正文对比度。"
+    },
+    {
+      "name": "撕纸边",
+      "class": "paper-torn",
+      "path": "torn-edge.svg",
+      "use": "底边 SVG 蒙版，随卡片底色变化。"
+    },
+    {
+      "name": "和纸胶带",
+      "class": "with-tape",
+      "path": "washi-tape.svg",
+      "use": "局部半透明装饰，避开交互控件。"
+    }
+  ],
+  "labels": {
+    "arrow": "箭头",
+    "back": "返回",
+    "badge": "口袋标识",
+    "bell": "提醒",
+    "book": "书本",
+    "calendar": "日历",
+    "check": "完成",
+    "clock": "时间",
+    "close": "关闭",
+    "coin": "硬币",
+    "die": "骰子",
+    "down": "展开",
+    "download": "下载",
+    "export": "导出",
+    "folder": "文件夹",
+    "globe": "时区",
+    "grid": "工具箱",
+    "heart": "收藏",
+    "home": "首页",
+    "info": "说明",
+    "layers": "素材",
+    "left": "上一项",
+    "location": "地点",
+    "more": "更多",
+    "pin": "置顶",
+    "plus": "添加",
+    "restore": "恢复",
+    "right": "下一项",
+    "search": "搜索",
+    "settings": "设置",
+    "shuffle": "随机",
+    "star": "星星",
+    "task": "任务",
+    "ticket": "抽签",
+    "users": "成员",
+    "warning": "警告",
+    "wheel": "转盘",
+    "coin-head": "星星正面",
+    "coin-tail": "月牙反面",
+    "draw": "纸签",
+    "flag": "旗帜",
+    "groups": "分组",
+    "lottery-bag": "签袋",
+    "spark-yellow": "浅黄白边星星",
+    "spark-lavender": "淡紫白边星星",
+    "pencil": "铅笔",
+    "pocket": "口袋吉祥物",
+    "sun": "太阳"
+  },
+  "updatedAt": "2026-10-24",
+  "authority": [
+    "用户最新明确要求优先；业务范围、行为与发布验收以首版规格为准，视觉表现与资源使用以本规范为准。",
+    "效果图提供视觉方向，运行截图记录采集时布局；提示词、示例文案和展示外壳不覆盖现行规范。",
+    "Flutter 应用尚未实现；HTML 演示和截图的验证范围见检查记录。"
+  ],
+  "workflow": [
+    "按效果图、HTML 样板截图与交互说明、设计资源、设计规范的顺序查看所改页面；缺少的状态明确标为待设计或待采集。",
+    "复用现有变量与素材，按首版规格核对业务行为；页面规则描述采用目标，实际达成情况查看检查记录。",
+    "完成与变更相关的验收项，在维护源更新说明与资源关联，再生成两版手册。"
+  ],
+  "checklist": [
+    "页面标识与当前采用的参考稿明确；已实现状态关联运行截图，尚未设计或实现的状态明确标注缺项。",
+    "复用现行变量、图标与材质；新增资源记录来源、用途及替代关系，历史证据与当前稿分开索引。",
+    "视觉、布局或交互变更后更新对应运行截图，检查受影响的 393px、320px 布局、长文本、空状态、焦点、滚动与交互。纯说明或链接修改只检查相关文档和入口。",
+    "涉及随机工具时核对结果、轮次和反馈；修改 HTML 动效时按动作参考检查取消、落位与临时图层清理。",
+    "两版手册同步，本地引用有效；检查记录注明对象、方式、证据与未验证项，只将实际检查的内容记为通过。"
+  ],
+  "motionScope": "以下为六项随机工具的 HTML 动效表现参考，时长、圈数及三维翻转用于展示动作。正式应用的结果与轮次要求见“状态反馈”和首版规格；Android 首版采用简化反馈，复杂动画后置。",
+  "htmlReuse": [
+    "先引入 tokens.css，再引入 materials.css，并保留 materials 目录与样式文件的相对位置。CSS px 和 CSS 类名是 HTML 复用方式；正式应用按平台逻辑尺寸、安全区域和文本缩放适配。",
+    "纸纹使用 .paper-surface，默认 --paper-grain-opacity 为 .18；撕纸使用 .paper-torn，底色来自 --paper-color，底边预留 12px。",
+    "胶带使用 .with-tape，默认宽 76px；横线、网格和贴纸分别使用 .paper-ruled、.paper-grid、.sticker。",
+    ".paper-torn 与 .with-tape 都使用 ::after；组合时以外层 .with-tape 包裹内层 .paper-surface.paper-torn。"
+  ],
+  "motionRules": [
+    "结果确定、提交与取消遵循“状态反馈”；动画期间不得重新抽取。",
+    "播放期间锁定编辑、模式切换与重复触发，保留返回以取消动作。演示状态的保留范围见维护说明。",
+    "运动范围随容器尺寸适配，不遮挡主操作或裁切主体；动作完成或取消时清除临时图层、飞行副本和进行中状态，撤销动作带来的额外倾斜，恢复各场景规定的静态姿态。"
+  ]
+}

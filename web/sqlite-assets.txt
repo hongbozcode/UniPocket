@@ -1,0 +1,10 @@
+SQLite Web runtime, distributed locally for the Web preview.
+
+Source: https://github.com/simolus3/drift/releases/tag/drift-2.35.3
+drift_worker.js SHA-256: a54b81412d4c4ab56653bb9e4c02912b0820bb37e2bba00722ddef4d78083d4a
+sqlite3.wasm SHA-256: efd308be92a34f3aa15f289a37f213b0230fd80888a1364326ee29579d892d37
+Digests checked against the GitHub release asset metadata at download.
+
+Drift: MIT license, https://github.com/simolus3/drift/blob/drift-2.35.3/LICENSE
+SQLite: public domain, https://www.sqlite.org/copyright.html
+When upgrading Drift, obtain matching Web runtime assets and verify their digests.

@@ -1,0 +1,3 @@
+# Preserve the verified bytes of the upstream Web SQLite runtime.
+web/drift_worker.js -text
+web/sqlite3.wasm binary

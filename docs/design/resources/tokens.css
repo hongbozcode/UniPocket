@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light;
+  --color-primary: #3867e8;
+  --color-primary-strong: #2854d9;
+  --color-primary-soft: #eaf2ff;
+  --color-lavender: #bba3f4;
+  --color-lavender-soft: #f0eaff;
+  --color-butter: #fff4d2;
+  --color-peach: #ffecdf;
+  --color-mint: #e6f5ed;
+  --color-pink: #fcecf3;
+  --color-ink: #202b40;
+  --color-muted: #73819a;
+  --color-faint: #93a0b5;
+  --color-line: #e9edf5;
+  --color-surface: #fff;
+  --color-canvas: #f5f8fd;
+  --color-danger: #d94c62;
+  --color-danger-soft: #ffedf0;
+  --color-success: #198568;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 30px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --shadow-card: 0 3px 16px #506b9b05, inset 0 1px 0 #ffffffd9;
+  --shadow-sticker: 0 5px 3px #6d7ba817;
+  --shadow-float: 0 8px 24px #3260c329;
+  --font-ui: "MiSans", "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --ease-out: cubic-bezier(.2,.7,.2,1);
+  --duration-fast: 160ms;
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniPocket · 动效样板</title>
+  <link rel="stylesheet" href="resources/tokens.css">
+  <link rel="stylesheet" href="resources/materials.css">
+  <link rel="stylesheet" href="motion-demo.css?v=20261024-lottery-v3">
+  <style>html{scrollbar-width:none}html::-webkit-scrollbar{display:none}body{margin:0;background:#edf2f9}nav{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;padding:12px}nav a{font:12px var(--font-ui);text-decoration:none;color:#6380a5;padding:7px 13px;border-radius:20px;background:white}nav a[aria-current]{background:#3867e8;color:white}.demo-controls{padding:6px 12px 15px}.demo-phone{border-radius:0}</style>
+</head>
+<body>
+  <nav aria-label="选择动效"><a href="?tool=wheel">转盘</a><a href="?tool=draw">点名</a><a href="?tool=groups">分组</a><a href="?tool=lottery">抽签</a><a href="?tool=die">骰子</a><a href="?tool=coin">硬币</a><a href="index.html#prototypes">返回手册</a></nav>
+  <main id="demo"></main>
+  <script src="motion-demo.js?v=20261024-lottery-v3"></script>
+  <script>
+    const requested = new URLSearchParams(location.search).get('tool');
+    const tool = ['wheel','draw','groups','lottery','die','coin'].includes(requested) ? requested : 'wheel';
+    document.querySelector(`nav a[href="?tool=${tool}"]`).setAttribute('aria-current','page');
+    const dispose = window.mountMotionDemo(document.getElementById('demo'),tool === 'draw' ? tool : 'tool-'+tool);
+    document.querySelector('[data-back]').addEventListener('click',()=>{dispose();location.href='index.html#prototypes';});
+    addEventListener('pagehide',dispose,{once:true});
+  </script>
+</body>
+</html>

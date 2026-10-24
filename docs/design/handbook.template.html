@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UniPocket 设计手册：从当前效果图、HTML 样板截图到可下载的设计资源和统一规范。">
+  <title>UniPocket · 设计手册</title>
+  <link rel="icon" href="resources/illustrations/badge.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="resources/tokens.css">
+  <link rel="stylesheet" href="resources/materials.css">
+  <link rel="stylesheet" href="handbook.css">
+  <link rel="stylesheet" href="motion-demo.css?v=20261024-lottery-v3">
+  <script src="motion-demo.js?v=20261024-lottery-v3" defer></script>
+  <script src="handbook.js?v=20261024-docs-cleanup" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到手册内容</a>
+  <aside class="sidebar" aria-label="手册导航">
+    <a class="brand" href="#top"><img src="resources/illustrations/badge.svg" alt="" width="38" height="38"><span>UniPocket<small>DESIGN HANDBOOK</small></span></a>
+    <p class="sidebar-label">从画面，到页面</p>
+    <nav><a href="#references"><span>01</span>效果图</a><a href="#prototypes"><span>02</span>样板截图</a><a href="#assets"><span>03</span>设计资源</a><a href="#guidelines"><span>04</span>设计规范</a></nav>
+    <div class="sidebar-note paper-surface paper-torn" style="--paper-color:var(--color-lavender-soft)"><strong>一点纸感，<br>一点好心情。</strong><p>浅蓝白底，圆润色块，<br>把校园日常轻轻收好。</p></div>
+    <div class="sidebar-footer"><a href="../product/design.md">AI 文档版 ↗</a><small>{{VERSION}}</small></div>
+  </aside>
+  <main id="main">
+    <header class="intro" id="top">
+      <div><p class="eyebrow">UNIPOCKET / DESIGN LIBRARY</p><h1>让设计有据可循<span>。</span></h1><p class="intro-text">从一张效果图，到页面的实现依据。<br>在这里找到当前采用的设计、可复用的素材，以及下一页的起点。</p><div class="intro-links"><a class="primary-link" href="#references">开始浏览 <span>↓</span></a><a href="../product/design.md">阅读 AI 文档版 ↗</a></div></div>
+      <div class="intro-art"><div class="art-paper paper-surface paper-ruled"><span class="eyebrow">THE VISUAL DNA</span><img src="resources/illustrations/pocket.png" alt="蓝紫色口袋吉祥物"><div class="mini-swatches"><i style="background:var(--color-primary)"></i><i style="background:var(--color-lavender)"></i><i style="background:var(--color-butter)"></i><i style="background:var(--color-mint)"></i></div><span>清爽 · 圆润 · 轻松</span></div></div>
+    </header>
+    <div class="summary"><div><b>{{REFERENCE_COUNT}}</b><span>当前效果图</span></div><div><b>{{PAGE_COUNT}}</b><span>应用页面</span></div><div><b>{{ASSET_COUNT}}</b><span>可复用素材</span></div><div><b>01→04</b><span>完整设计路径</span></div></div>
+    <div class="scope-note"><span class="status-dot"></span><p>本手册提供效果图、样板截图、交互动效和设计资源。<a href="../../.scratch/unipocket-v1/spec.md">首版范围 ↗</a> · <a href="verification.md">验证记录 ↗</a></p></div>
+    <div class="rule-grid"><article class="rule-card"><h3>依据与范围</h3>{{AUTHORITY}}</article><article class="rule-card"><h3>使用流程</h3>{{WORKFLOW}}</article></div>
+
+    <section id="references" class="chapter">
+      <div class="chapter-heading"><div><p class="eyebrow">01 / VISUAL DIRECTION</p><h2>先看，页面的样子。</h2></div><span class="chapter-mark">效果图</span></div>
+      <p class="section-lead">{{REFERENCE_COUNT}} 张当前稿，覆盖 {{PAGE_COUNT}} 个页面。保留原图比例，点击可放大；组合图可对应多个页面。提示词为历史生成记录。<a href="resources/README.md">资源与提示词说明 ↗</a></p>
+      <div class="reference-grid">{{REFERENCES}}</div>
+    </section>
+
+    <section id="prototypes" class="chapter">
+      <div class="chapter-heading"><div><p class="eyebrow">02 / FROM IMAGE TO INTERACTION</p><h2>再看，页面的落地。</h2></div><span class="chapter-mark">样板截图</span></div>
+      <p class="section-lead">六项随机工具可播放当前演示；其余页面仅保留历史截图，原完整应用样板源码未纳入仓库。卡片中的逻辑标识用于清单关联，不是页面锚点或应用路由。<a href="motion.html">独立打开动效样板 ↗</a></p>
+      <div class="filter-bar"><div class="filter-group" aria-label="筛选页面"><button class="active" data-page-filter="all" aria-pressed="true">全部 {{PAGE_COUNT}} 页</button><button data-page-filter="学习与日常" aria-pressed="false">学习与日常</button><button data-page-filter="工具与设置" aria-pressed="false">工具与设置</button><button data-page-filter="随机工具详情" aria-pressed="false">工具详情</button></div><label class="search-field"><span>搜索页面</span><input id="page-search" type="search" placeholder="名称或内容…"></label></div>
+      <p class="result-count" id="page-count" role="status">显示 {{PAGE_COUNT}} 个页面</p>
+      <div class="page-grid">{{PAGES}}</div><p class="empty-result" id="page-empty" hidden>没有匹配页面，试试其他名称。</p>
+      <div class="evidence-note"><strong>截图与演示</strong><p>页面截图与补充状态集中在截图索引；动作直接播放当前演示，编辑与观看控制见使用说明。</p><a href="resources/screenshots/README.md">截图索引 ↗</a><a href="README.md">演示使用说明 ↗</a></div>
+    </section>
+
+    <section id="assets" class="chapter">
+      <div class="chapter-heading"><div><p class="eyebrow">03 / REUSABLE BY DESIGN</p><h2>拿走，一点好用的细节。</h2></div><span class="chapter-mark">设计资源</span></div>
+      <p class="section-lead">{{ICONS_COUNT}} 个界面图标、{{ILLUSTRATIONS_COUNT}} 个贴纸与场景插画、{{MATERIALS_COUNT}} 个材质文件。点击素材即可下载；文件统一保存在 resources，供后续页面复用。</p>
+      <div class="material-demos"><article class="paper-surface" style="--paper-color:var(--color-primary-soft)"><span>01 / PAPER</span><h3>低对比细纸纹</h3><p>轻轻增加触感，<br>让内容始终清晰。</p></article><article class="paper-surface paper-torn" style="--paper-color:var(--color-lavender-soft)"><span>02 / TORN EDGE</span><h3>随底色变化的撕边</h3><p>独立 SVG 蒙版，<br>适合便笺和结果区。</p></article><div class="with-tape"><article class="paper-surface paper-ruled" style="--paper-color:#fff8df"><span>03 / WASHI TAPE</span><h3>用胶带贴住好心情</h3><p>材质可以组合，<br>记得避开点击区域。</p></article></div></div>
+      <div class="resource-links"><a href="resources/materials.css" download>下载通用材质样式 ↓</a><a href="resources/tokens.css" download>下载视觉变量 ↓</a><a href="resources/random-tools/素材-签袋-提示词.md">签袋生成记录 ↗</a></div>
+      <div class="filter-bar"><div class="filter-group" aria-label="筛选素材"><button class="active" data-asset-filter="all" aria-pressed="true">全部 {{ASSET_COUNT}}</button><button data-asset-filter="icons" aria-pressed="false">界面图标 {{ICONS_COUNT}}</button><button data-asset-filter="illustrations" aria-pressed="false">插画 {{ILLUSTRATIONS_COUNT}}</button><button data-asset-filter="materials" aria-pressed="false">材质 {{MATERIALS_COUNT}}</button></div><label class="search-field"><span>搜索素材</span><input id="asset-search" type="search" placeholder="中文名或文件名…"></label></div>
+      <p class="result-count" id="asset-count" role="status">显示 {{ASSET_COUNT}} 个素材</p>
+      <div class="asset-grid">{{ASSETS}}</div><p class="empty-result" id="asset-empty" hidden>没有匹配素材，试试中文名或英文文件名。</p>
+      <p class="source-note">SVG 为项目内资源；透明口袋、签袋与纸纹由内置生图生成。新引入的第三方素材需记录来源和许可。界面文字保留为真实文本。</p>
+      <details class="rule-card"><summary>HTML 资源复用说明</summary>{{HTML_REUSE}}</details>
+    </section>
+
+    <section id="guidelines" class="chapter">
+      <div class="chapter-heading"><div><p class="eyebrow">04 / ONE SHARED VISUAL LANGUAGE</p><h2>最后，让下一页保持一致。</h2></div><span class="chapter-mark">设计规范</span></div>
+      <p class="section-lead">以下规则与 AI 文档版共用同一份内容。配色、间距和阴影读取独立保存的视觉变量；后续设计从已有成果继续。</p>
+      <div class="rule-grid">{{RULES}}</div>
+      <div class="subheading"><h3>统一视觉变量中的颜色</h3><span>点击复制色值</span></div><div class="color-grid">{{COLORS}}</div>
+      <div class="foundation-grid"><article><span class="eyebrow">TYPE & SPACE</span><h3 class="type-sample">今天，也从容一点。</h3><p>本地中文无衬线 · {{SPACE_BASE}} 间距基准 · 常规左右留白 {{PAGE_PADDING}}</p><div class="radius-samples">{{RADII}}</div></article><div class="with-tape"><article class="paper-surface paper-torn" style="--paper-color:var(--color-lavender-soft)"><span class="eyebrow">A NOTE FOR THE NEXT PAGE</span><h3>让装饰恰到好处。</h3><p>纸纹、胶带、撕边和贴纸局部使用。文字和操作始终优先。</p><a href="resources/tokens.css">查看全部变量 ↗</a></article></div></div>
+      <div class="subheading" id="motion-spec"><h3>随机工具 HTML 动效参考</h3></div><p class="section-lead">{{MOTION_SCOPE}}</p>{{MOTIONS}}
+      <div class="subheading"><h3>更新与验收清单</h3><span>按变更影响检查</span></div><div class="rule-card">{{CHECKLIST}}</div>
+      <div class="final-note"><div><p class="eyebrow">KEEP IT IN SYNC</p><h3>维护源与检查记录</h3><p>两版手册由同一资源清单生成；更新方式和验证结果分别在维护说明与检查记录中查阅。</p></div><a class="primary-link" href="README.md">阅读维护说明 ↗</a></div>
+    </section>
+    <footer><span>UniPocket · {{VERSION}}</span><a href="catalog.json">资源清单 ↗</a><a href="#top">回到顶部 ↑</a></footer>
+  </main>
+  <dialog id="viewer" aria-labelledby="viewer-title"><div class="viewer-header"><h2 id="viewer-title"></h2><button id="viewer-close" aria-label="关闭预览">关闭 ×</button></div><div id="viewer-content"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="application/json" id="handbook-data">{{DATA}}</script>
+</body>
+</html>

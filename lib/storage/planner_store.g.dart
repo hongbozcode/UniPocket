@@ -1,0 +1,1976 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'planner_store.dart';
+
+// ignore_for_file: type=lint
+class $SemesterRecordsTable extends SemesterRecords
+    with TableInfo<$SemesterRecordsTable, StoredSemester> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SemesterRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firstMondayMeta = const VerificationMeta(
+    'firstMonday',
+  );
+  @override
+  late final GeneratedColumn<String> firstMonday = GeneratedColumn<String>(
+    'first_monday',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _totalWeeksMeta = const VerificationMeta(
+    'totalWeeks',
+  );
+  @override
+  late final GeneratedColumn<int> totalWeeks = GeneratedColumn<int>(
+    'total_weeks',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, firstMonday, totalWeeks];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'semester_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredSemester> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('first_monday')) {
+      context.handle(
+        _firstMondayMeta,
+        firstMonday.isAcceptableOrUnknown(
+          data['first_monday']!,
+          _firstMondayMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_firstMondayMeta);
+    }
+    if (data.containsKey('total_weeks')) {
+      context.handle(
+        _totalWeeksMeta,
+        totalWeeks.isAcceptableOrUnknown(data['total_weeks']!, _totalWeeksMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_totalWeeksMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredSemester map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredSemester(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      firstMonday: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_monday'],
+      )!,
+      totalWeeks: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_weeks'],
+      )!,
+    );
+  }
+
+  @override
+  $SemesterRecordsTable createAlias(String alias) {
+    return $SemesterRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredSemester extends DataClass implements Insertable<StoredSemester> {
+  final int id;
+  final String name;
+  final String firstMonday;
+  final int totalWeeks;
+  const StoredSemester({
+    required this.id,
+    required this.name,
+    required this.firstMonday,
+    required this.totalWeeks,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['first_monday'] = Variable<String>(firstMonday);
+    map['total_weeks'] = Variable<int>(totalWeeks);
+    return map;
+  }
+
+  SemesterRecordsCompanion toCompanion(bool nullToAbsent) {
+    return SemesterRecordsCompanion(
+      id: Value(id),
+      name: Value(name),
+      firstMonday: Value(firstMonday),
+      totalWeeks: Value(totalWeeks),
+    );
+  }
+
+  factory StoredSemester.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredSemester(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      firstMonday: serializer.fromJson<String>(json['firstMonday']),
+      totalWeeks: serializer.fromJson<int>(json['totalWeeks']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'firstMonday': serializer.toJson<String>(firstMonday),
+      'totalWeeks': serializer.toJson<int>(totalWeeks),
+    };
+  }
+
+  StoredSemester copyWith({
+    int? id,
+    String? name,
+    String? firstMonday,
+    int? totalWeeks,
+  }) => StoredSemester(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    firstMonday: firstMonday ?? this.firstMonday,
+    totalWeeks: totalWeeks ?? this.totalWeeks,
+  );
+  StoredSemester copyWithCompanion(SemesterRecordsCompanion data) {
+    return StoredSemester(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      firstMonday: data.firstMonday.present
+          ? data.firstMonday.value
+          : this.firstMonday,
+      totalWeeks: data.totalWeeks.present
+          ? data.totalWeeks.value
+          : this.totalWeeks,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredSemester(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('firstMonday: $firstMonday, ')
+          ..write('totalWeeks: $totalWeeks')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, firstMonday, totalWeeks);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredSemester &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.firstMonday == this.firstMonday &&
+          other.totalWeeks == this.totalWeeks);
+}
+
+class SemesterRecordsCompanion extends UpdateCompanion<StoredSemester> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> firstMonday;
+  final Value<int> totalWeeks;
+  const SemesterRecordsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.firstMonday = const Value.absent(),
+    this.totalWeeks = const Value.absent(),
+  });
+  SemesterRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String firstMonday,
+    required int totalWeeks,
+  }) : name = Value(name),
+       firstMonday = Value(firstMonday),
+       totalWeeks = Value(totalWeeks);
+  static Insertable<StoredSemester> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? firstMonday,
+    Expression<int>? totalWeeks,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (firstMonday != null) 'first_monday': firstMonday,
+      if (totalWeeks != null) 'total_weeks': totalWeeks,
+    });
+  }
+
+  SemesterRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? firstMonday,
+    Value<int>? totalWeeks,
+  }) {
+    return SemesterRecordsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      firstMonday: firstMonday ?? this.firstMonday,
+      totalWeeks: totalWeeks ?? this.totalWeeks,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (firstMonday.present) {
+      map['first_monday'] = Variable<String>(firstMonday.value);
+    }
+    if (totalWeeks.present) {
+      map['total_weeks'] = Variable<int>(totalWeeks.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SemesterRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('firstMonday: $firstMonday, ')
+          ..write('totalWeeks: $totalWeeks')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PeriodRecordsTable extends PeriodRecords
+    with TableInfo<$PeriodRecordsTable, StoredPeriod> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PeriodRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _semesterIdMeta = const VerificationMeta(
+    'semesterId',
+  );
+  @override
+  late final GeneratedColumn<int> semesterId = GeneratedColumn<int>(
+    'semester_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES semester_records (id)',
+    ),
+  );
+  static const VerificationMeta _weekdayMeta = const VerificationMeta(
+    'weekday',
+  );
+  @override
+  late final GeneratedColumn<int> weekday = GeneratedColumn<int>(
+    'weekday',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numberMeta = const VerificationMeta('number');
+  @override
+  late final GeneratedColumn<int> number = GeneratedColumn<int>(
+    'number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startMinutesMeta = const VerificationMeta(
+    'startMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> startMinutes = GeneratedColumn<int>(
+    'start_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endMinutesMeta = const VerificationMeta(
+    'endMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> endMinutes = GeneratedColumn<int>(
+    'end_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    semesterId,
+    weekday,
+    number,
+    startMinutes,
+    endMinutes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'period_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredPeriod> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('semester_id')) {
+      context.handle(
+        _semesterIdMeta,
+        semesterId.isAcceptableOrUnknown(data['semester_id']!, _semesterIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_semesterIdMeta);
+    }
+    if (data.containsKey('weekday')) {
+      context.handle(
+        _weekdayMeta,
+        weekday.isAcceptableOrUnknown(data['weekday']!, _weekdayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_weekdayMeta);
+    }
+    if (data.containsKey('number')) {
+      context.handle(
+        _numberMeta,
+        number.isAcceptableOrUnknown(data['number']!, _numberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_numberMeta);
+    }
+    if (data.containsKey('start_minutes')) {
+      context.handle(
+        _startMinutesMeta,
+        startMinutes.isAcceptableOrUnknown(
+          data['start_minutes']!,
+          _startMinutesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startMinutesMeta);
+    }
+    if (data.containsKey('end_minutes')) {
+      context.handle(
+        _endMinutesMeta,
+        endMinutes.isAcceptableOrUnknown(data['end_minutes']!, _endMinutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endMinutesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {semesterId, weekday, number};
+  @override
+  StoredPeriod map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredPeriod(
+      semesterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}semester_id'],
+      )!,
+      weekday: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weekday'],
+      )!,
+      number: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}number'],
+      )!,
+      startMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_minutes'],
+      )!,
+      endMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_minutes'],
+      )!,
+    );
+  }
+
+  @override
+  $PeriodRecordsTable createAlias(String alias) {
+    return $PeriodRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredPeriod extends DataClass implements Insertable<StoredPeriod> {
+  final int semesterId;
+  final int weekday;
+  final int number;
+  final int startMinutes;
+  final int endMinutes;
+  const StoredPeriod({
+    required this.semesterId,
+    required this.weekday,
+    required this.number,
+    required this.startMinutes,
+    required this.endMinutes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['semester_id'] = Variable<int>(semesterId);
+    map['weekday'] = Variable<int>(weekday);
+    map['number'] = Variable<int>(number);
+    map['start_minutes'] = Variable<int>(startMinutes);
+    map['end_minutes'] = Variable<int>(endMinutes);
+    return map;
+  }
+
+  PeriodRecordsCompanion toCompanion(bool nullToAbsent) {
+    return PeriodRecordsCompanion(
+      semesterId: Value(semesterId),
+      weekday: Value(weekday),
+      number: Value(number),
+      startMinutes: Value(startMinutes),
+      endMinutes: Value(endMinutes),
+    );
+  }
+
+  factory StoredPeriod.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredPeriod(
+      semesterId: serializer.fromJson<int>(json['semesterId']),
+      weekday: serializer.fromJson<int>(json['weekday']),
+      number: serializer.fromJson<int>(json['number']),
+      startMinutes: serializer.fromJson<int>(json['startMinutes']),
+      endMinutes: serializer.fromJson<int>(json['endMinutes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'semesterId': serializer.toJson<int>(semesterId),
+      'weekday': serializer.toJson<int>(weekday),
+      'number': serializer.toJson<int>(number),
+      'startMinutes': serializer.toJson<int>(startMinutes),
+      'endMinutes': serializer.toJson<int>(endMinutes),
+    };
+  }
+
+  StoredPeriod copyWith({
+    int? semesterId,
+    int? weekday,
+    int? number,
+    int? startMinutes,
+    int? endMinutes,
+  }) => StoredPeriod(
+    semesterId: semesterId ?? this.semesterId,
+    weekday: weekday ?? this.weekday,
+    number: number ?? this.number,
+    startMinutes: startMinutes ?? this.startMinutes,
+    endMinutes: endMinutes ?? this.endMinutes,
+  );
+  StoredPeriod copyWithCompanion(PeriodRecordsCompanion data) {
+    return StoredPeriod(
+      semesterId: data.semesterId.present
+          ? data.semesterId.value
+          : this.semesterId,
+      weekday: data.weekday.present ? data.weekday.value : this.weekday,
+      number: data.number.present ? data.number.value : this.number,
+      startMinutes: data.startMinutes.present
+          ? data.startMinutes.value
+          : this.startMinutes,
+      endMinutes: data.endMinutes.present
+          ? data.endMinutes.value
+          : this.endMinutes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredPeriod(')
+          ..write('semesterId: $semesterId, ')
+          ..write('weekday: $weekday, ')
+          ..write('number: $number, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(semesterId, weekday, number, startMinutes, endMinutes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredPeriod &&
+          other.semesterId == this.semesterId &&
+          other.weekday == this.weekday &&
+          other.number == this.number &&
+          other.startMinutes == this.startMinutes &&
+          other.endMinutes == this.endMinutes);
+}
+
+class PeriodRecordsCompanion extends UpdateCompanion<StoredPeriod> {
+  final Value<int> semesterId;
+  final Value<int> weekday;
+  final Value<int> number;
+  final Value<int> startMinutes;
+  final Value<int> endMinutes;
+  final Value<int> rowid;
+  const PeriodRecordsCompanion({
+    this.semesterId = const Value.absent(),
+    this.weekday = const Value.absent(),
+    this.number = const Value.absent(),
+    this.startMinutes = const Value.absent(),
+    this.endMinutes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PeriodRecordsCompanion.insert({
+    required int semesterId,
+    required int weekday,
+    required int number,
+    required int startMinutes,
+    required int endMinutes,
+    this.rowid = const Value.absent(),
+  }) : semesterId = Value(semesterId),
+       weekday = Value(weekday),
+       number = Value(number),
+       startMinutes = Value(startMinutes),
+       endMinutes = Value(endMinutes);
+  static Insertable<StoredPeriod> custom({
+    Expression<int>? semesterId,
+    Expression<int>? weekday,
+    Expression<int>? number,
+    Expression<int>? startMinutes,
+    Expression<int>? endMinutes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (semesterId != null) 'semester_id': semesterId,
+      if (weekday != null) 'weekday': weekday,
+      if (number != null) 'number': number,
+      if (startMinutes != null) 'start_minutes': startMinutes,
+      if (endMinutes != null) 'end_minutes': endMinutes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PeriodRecordsCompanion copyWith({
+    Value<int>? semesterId,
+    Value<int>? weekday,
+    Value<int>? number,
+    Value<int>? startMinutes,
+    Value<int>? endMinutes,
+    Value<int>? rowid,
+  }) {
+    return PeriodRecordsCompanion(
+      semesterId: semesterId ?? this.semesterId,
+      weekday: weekday ?? this.weekday,
+      number: number ?? this.number,
+      startMinutes: startMinutes ?? this.startMinutes,
+      endMinutes: endMinutes ?? this.endMinutes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (semesterId.present) {
+      map['semester_id'] = Variable<int>(semesterId.value);
+    }
+    if (weekday.present) {
+      map['weekday'] = Variable<int>(weekday.value);
+    }
+    if (number.present) {
+      map['number'] = Variable<int>(number.value);
+    }
+    if (startMinutes.present) {
+      map['start_minutes'] = Variable<int>(startMinutes.value);
+    }
+    if (endMinutes.present) {
+      map['end_minutes'] = Variable<int>(endMinutes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodRecordsCompanion(')
+          ..write('semesterId: $semesterId, ')
+          ..write('weekday: $weekday, ')
+          ..write('number: $number, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SettingsRecordsTable extends SettingsRecords
+    with TableInfo<$SettingsRecordsTable, StoredSettings> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SettingsRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currentSemesterIdMeta = const VerificationMeta(
+    'currentSemesterId',
+  );
+  @override
+  late final GeneratedColumn<int> currentSemesterId = GeneratedColumn<int>(
+    'current_semester_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES semester_records (id)',
+    ),
+  );
+  static const VerificationMeta _campusTimeZoneMeta = const VerificationMeta(
+    'campusTimeZone',
+  );
+  @override
+  late final GeneratedColumn<String> campusTimeZone = GeneratedColumn<String>(
+    'campus_time_zone',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Asia/Shanghai'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, currentSemesterId, campusTimeZone];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'settings_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredSettings> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('current_semester_id')) {
+      context.handle(
+        _currentSemesterIdMeta,
+        currentSemesterId.isAcceptableOrUnknown(
+          data['current_semester_id']!,
+          _currentSemesterIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('campus_time_zone')) {
+      context.handle(
+        _campusTimeZoneMeta,
+        campusTimeZone.isAcceptableOrUnknown(
+          data['campus_time_zone']!,
+          _campusTimeZoneMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredSettings map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredSettings(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      currentSemesterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_semester_id'],
+      ),
+      campusTimeZone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}campus_time_zone'],
+      )!,
+    );
+  }
+
+  @override
+  $SettingsRecordsTable createAlias(String alias) {
+    return $SettingsRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredSettings extends DataClass implements Insertable<StoredSettings> {
+  final int id;
+  final int? currentSemesterId;
+  final String campusTimeZone;
+  const StoredSettings({
+    required this.id,
+    this.currentSemesterId,
+    required this.campusTimeZone,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || currentSemesterId != null) {
+      map['current_semester_id'] = Variable<int>(currentSemesterId);
+    }
+    map['campus_time_zone'] = Variable<String>(campusTimeZone);
+    return map;
+  }
+
+  SettingsRecordsCompanion toCompanion(bool nullToAbsent) {
+    return SettingsRecordsCompanion(
+      id: Value(id),
+      currentSemesterId: currentSemesterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentSemesterId),
+      campusTimeZone: Value(campusTimeZone),
+    );
+  }
+
+  factory StoredSettings.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredSettings(
+      id: serializer.fromJson<int>(json['id']),
+      currentSemesterId: serializer.fromJson<int?>(json['currentSemesterId']),
+      campusTimeZone: serializer.fromJson<String>(json['campusTimeZone']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'currentSemesterId': serializer.toJson<int?>(currentSemesterId),
+      'campusTimeZone': serializer.toJson<String>(campusTimeZone),
+    };
+  }
+
+  StoredSettings copyWith({
+    int? id,
+    Value<int?> currentSemesterId = const Value.absent(),
+    String? campusTimeZone,
+  }) => StoredSettings(
+    id: id ?? this.id,
+    currentSemesterId: currentSemesterId.present
+        ? currentSemesterId.value
+        : this.currentSemesterId,
+    campusTimeZone: campusTimeZone ?? this.campusTimeZone,
+  );
+  StoredSettings copyWithCompanion(SettingsRecordsCompanion data) {
+    return StoredSettings(
+      id: data.id.present ? data.id.value : this.id,
+      currentSemesterId: data.currentSemesterId.present
+          ? data.currentSemesterId.value
+          : this.currentSemesterId,
+      campusTimeZone: data.campusTimeZone.present
+          ? data.campusTimeZone.value
+          : this.campusTimeZone,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredSettings(')
+          ..write('id: $id, ')
+          ..write('currentSemesterId: $currentSemesterId, ')
+          ..write('campusTimeZone: $campusTimeZone')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, currentSemesterId, campusTimeZone);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredSettings &&
+          other.id == this.id &&
+          other.currentSemesterId == this.currentSemesterId &&
+          other.campusTimeZone == this.campusTimeZone);
+}
+
+class SettingsRecordsCompanion extends UpdateCompanion<StoredSettings> {
+  final Value<int> id;
+  final Value<int?> currentSemesterId;
+  final Value<String> campusTimeZone;
+  const SettingsRecordsCompanion({
+    this.id = const Value.absent(),
+    this.currentSemesterId = const Value.absent(),
+    this.campusTimeZone = const Value.absent(),
+  });
+  SettingsRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    this.currentSemesterId = const Value.absent(),
+    this.campusTimeZone = const Value.absent(),
+  });
+  static Insertable<StoredSettings> custom({
+    Expression<int>? id,
+    Expression<int>? currentSemesterId,
+    Expression<String>? campusTimeZone,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (currentSemesterId != null) 'current_semester_id': currentSemesterId,
+      if (campusTimeZone != null) 'campus_time_zone': campusTimeZone,
+    });
+  }
+
+  SettingsRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? currentSemesterId,
+    Value<String>? campusTimeZone,
+  }) {
+    return SettingsRecordsCompanion(
+      id: id ?? this.id,
+      currentSemesterId: currentSemesterId ?? this.currentSemesterId,
+      campusTimeZone: campusTimeZone ?? this.campusTimeZone,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (currentSemesterId.present) {
+      map['current_semester_id'] = Variable<int>(currentSemesterId.value);
+    }
+    if (campusTimeZone.present) {
+      map['campus_time_zone'] = Variable<String>(campusTimeZone.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('currentSemesterId: $currentSemesterId, ')
+          ..write('campusTimeZone: $campusTimeZone')
+          ..write(')'))
+        .toString();
+  }
+}
+
+abstract class _$PlannerStore extends GeneratedDatabase {
+  _$PlannerStore(QueryExecutor e) : super(e);
+  $PlannerStoreManager get managers => $PlannerStoreManager(this);
+  late final $SemesterRecordsTable semesterRecords = $SemesterRecordsTable(
+    this,
+  );
+  late final $PeriodRecordsTable periodRecords = $PeriodRecordsTable(this);
+  late final $SettingsRecordsTable settingsRecords = $SettingsRecordsTable(
+    this,
+  );
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    semesterRecords,
+    periodRecords,
+    settingsRecords,
+  ];
+}
+
+typedef $$SemesterRecordsTableCreateCompanionBuilder =
+    SemesterRecordsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String firstMonday,
+      required int totalWeeks,
+    });
+typedef $$SemesterRecordsTableUpdateCompanionBuilder =
+    SemesterRecordsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> firstMonday,
+      Value<int> totalWeeks,
+    });
+
+final class $$SemesterRecordsTableReferences
+    extends
+        BaseReferences<_$PlannerStore, $SemesterRecordsTable, StoredSemester> {
+  $$SemesterRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$PeriodRecordsTable, List<StoredPeriod>>
+  _periodRecordsRefsTable(_$PlannerStore db) => MultiTypedResultKey.fromTable(
+    db.periodRecords,
+    aliasName: 'semester_records__id__period_records__semester_id',
+  );
+
+  $$PeriodRecordsTableProcessedTableManager get periodRecordsRefs {
+    final manager = $$PeriodRecordsTableTableManager(
+      $_db,
+      $_db.periodRecords,
+    ).filter((f) => f.semesterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_periodRecordsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$SettingsRecordsTable, List<StoredSettings>>
+  _settingsRecordsRefsTable(_$PlannerStore db) => MultiTypedResultKey.fromTable(
+    db.settingsRecords,
+    aliasName: 'semester_records__id__settings_records__current_semester_id',
+  );
+
+  $$SettingsRecordsTableProcessedTableManager get settingsRecordsRefs {
+    final manager = $$SettingsRecordsTableTableManager(
+      $_db,
+      $_db.settingsRecords,
+    ).filter((f) => f.currentSemesterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _settingsRecordsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$SemesterRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $SemesterRecordsTable> {
+  $$SemesterRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstMonday => $composableBuilder(
+    column: $table.firstMonday,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalWeeks => $composableBuilder(
+    column: $table.totalWeeks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> periodRecordsRefs(
+    Expression<bool> Function($$PeriodRecordsTableFilterComposer f) f,
+  ) {
+    final $$PeriodRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.periodRecords,
+      getReferencedColumn: (t) => t.semesterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PeriodRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.periodRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> settingsRecordsRefs(
+    Expression<bool> Function($$SettingsRecordsTableFilterComposer f) f,
+  ) {
+    final $$SettingsRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.settingsRecords,
+      getReferencedColumn: (t) => t.currentSemesterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SettingsRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.settingsRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$SemesterRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $SemesterRecordsTable> {
+  $$SemesterRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firstMonday => $composableBuilder(
+    column: $table.firstMonday,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalWeeks => $composableBuilder(
+    column: $table.totalWeeks,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SemesterRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $SemesterRecordsTable> {
+  $$SemesterRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get firstMonday => $composableBuilder(
+    column: $table.firstMonday,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get totalWeeks => $composableBuilder(
+    column: $table.totalWeeks,
+    builder: (column) => column,
+  );
+
+  Expression<T> periodRecordsRefs<T extends Object>(
+    Expression<T> Function($$PeriodRecordsTableAnnotationComposer a) f,
+  ) {
+    final $$PeriodRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.periodRecords,
+      getReferencedColumn: (t) => t.semesterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PeriodRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.periodRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> settingsRecordsRefs<T extends Object>(
+    Expression<T> Function($$SettingsRecordsTableAnnotationComposer a) f,
+  ) {
+    final $$SettingsRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.settingsRecords,
+      getReferencedColumn: (t) => t.currentSemesterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SettingsRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.settingsRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$SemesterRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $SemesterRecordsTable,
+          StoredSemester,
+          $$SemesterRecordsTableFilterComposer,
+          $$SemesterRecordsTableOrderingComposer,
+          $$SemesterRecordsTableAnnotationComposer,
+          $$SemesterRecordsTableCreateCompanionBuilder,
+          $$SemesterRecordsTableUpdateCompanionBuilder,
+          (StoredSemester, $$SemesterRecordsTableReferences),
+          StoredSemester,
+          PrefetchHooks Function({
+            bool periodRecordsRefs,
+            bool settingsRecordsRefs,
+          })
+        > {
+  $$SemesterRecordsTableTableManager(
+    _$PlannerStore db,
+    $SemesterRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SemesterRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SemesterRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SemesterRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> firstMonday = const Value.absent(),
+                Value<int> totalWeeks = const Value.absent(),
+              }) => SemesterRecordsCompanion(
+                id: id,
+                name: name,
+                firstMonday: firstMonday,
+                totalWeeks: totalWeeks,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String firstMonday,
+                required int totalWeeks,
+              }) => SemesterRecordsCompanion.insert(
+                id: id,
+                name: name,
+                firstMonday: firstMonday,
+                totalWeeks: totalWeeks,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SemesterRecordsTable, StoredSemester>(table),
+                  $$SemesterRecordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({periodRecordsRefs = false, settingsRecordsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (periodRecordsRefs) db.periodRecords,
+                    if (settingsRecordsRefs) db.settingsRecords,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (periodRecordsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          StoredSemester,
+                          $SemesterRecordsTable,
+                          StoredPeriod,
+                          $PeriodRecordsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SemesterRecordsTableReferences
+                              ._periodRecordsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SemesterRecordsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).periodRecordsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'semester_id',
+                          typedResults: items,
+                        ),
+                      if (settingsRecordsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          StoredSemester,
+                          $SemesterRecordsTable,
+                          StoredSettings,
+                          $SettingsRecordsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SemesterRecordsTableReferences
+                              ._settingsRecordsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SemesterRecordsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).settingsRecordsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'current_semester_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$SemesterRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $SemesterRecordsTable,
+      StoredSemester,
+      $$SemesterRecordsTableFilterComposer,
+      $$SemesterRecordsTableOrderingComposer,
+      $$SemesterRecordsTableAnnotationComposer,
+      $$SemesterRecordsTableCreateCompanionBuilder,
+      $$SemesterRecordsTableUpdateCompanionBuilder,
+      (StoredSemester, $$SemesterRecordsTableReferences),
+      StoredSemester,
+      PrefetchHooks Function({bool periodRecordsRefs, bool settingsRecordsRefs})
+    >;
+typedef $$PeriodRecordsTableCreateCompanionBuilder =
+    PeriodRecordsCompanion Function({
+      required int semesterId,
+      required int weekday,
+      required int number,
+      required int startMinutes,
+      required int endMinutes,
+      Value<int> rowid,
+    });
+typedef $$PeriodRecordsTableUpdateCompanionBuilder =
+    PeriodRecordsCompanion Function({
+      Value<int> semesterId,
+      Value<int> weekday,
+      Value<int> number,
+      Value<int> startMinutes,
+      Value<int> endMinutes,
+      Value<int> rowid,
+    });
+
+final class $$PeriodRecordsTableReferences
+    extends BaseReferences<_$PlannerStore, $PeriodRecordsTable, StoredPeriod> {
+  $$PeriodRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SemesterRecordsTable _semesterIdTable(_$PlannerStore db) => db
+      .semesterRecords
+      .createAlias('period_records__semester_id__semester_records__id');
+
+  $$SemesterRecordsTableProcessedTableManager get semesterId {
+    final $_column = $_itemColumn<int>('semester_id')!;
+
+    final manager = $$SemesterRecordsTableTableManager(
+      $_db,
+      $_db.semesterRecords,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_semesterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PeriodRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $PeriodRecordsTable> {
+  $$PeriodRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get weekday => $composableBuilder(
+    column: $table.weekday,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get number => $composableBuilder(
+    column: $table.number,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SemesterRecordsTableFilterComposer get semesterId {
+    final $$SemesterRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.semesterId,
+      referencedTable: $db.semesterRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SemesterRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.semesterRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PeriodRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $PeriodRecordsTable> {
+  $$PeriodRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get weekday => $composableBuilder(
+    column: $table.weekday,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get number => $composableBuilder(
+    column: $table.number,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SemesterRecordsTableOrderingComposer get semesterId {
+    final $$SemesterRecordsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.semesterId,
+      referencedTable: $db.semesterRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SemesterRecordsTableOrderingComposer(
+            $db: $db,
+            $table: $db.semesterRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PeriodRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $PeriodRecordsTable> {
+  $$PeriodRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get weekday =>
+      $composableBuilder(column: $table.weekday, builder: (column) => column);
+
+  GeneratedColumn<int> get number =>
+      $composableBuilder(column: $table.number, builder: (column) => column);
+
+  GeneratedColumn<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => column,
+  );
+
+  $$SemesterRecordsTableAnnotationComposer get semesterId {
+    final $$SemesterRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.semesterId,
+      referencedTable: $db.semesterRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SemesterRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.semesterRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PeriodRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $PeriodRecordsTable,
+          StoredPeriod,
+          $$PeriodRecordsTableFilterComposer,
+          $$PeriodRecordsTableOrderingComposer,
+          $$PeriodRecordsTableAnnotationComposer,
+          $$PeriodRecordsTableCreateCompanionBuilder,
+          $$PeriodRecordsTableUpdateCompanionBuilder,
+          (StoredPeriod, $$PeriodRecordsTableReferences),
+          StoredPeriod,
+          PrefetchHooks Function({bool semesterId})
+        > {
+  $$PeriodRecordsTableTableManager(_$PlannerStore db, $PeriodRecordsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PeriodRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PeriodRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PeriodRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> semesterId = const Value.absent(),
+                Value<int> weekday = const Value.absent(),
+                Value<int> number = const Value.absent(),
+                Value<int> startMinutes = const Value.absent(),
+                Value<int> endMinutes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PeriodRecordsCompanion(
+                semesterId: semesterId,
+                weekday: weekday,
+                number: number,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int semesterId,
+                required int weekday,
+                required int number,
+                required int startMinutes,
+                required int endMinutes,
+                Value<int> rowid = const Value.absent(),
+              }) => PeriodRecordsCompanion.insert(
+                semesterId: semesterId,
+                weekday: weekday,
+                number: number,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PeriodRecordsTable, StoredPeriod>(table),
+                  $$PeriodRecordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({semesterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (semesterId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.semesterId,
+                        referencedTable: $$PeriodRecordsTableReferences
+                            ._semesterIdTable(db),
+                        referencedColumn: $$PeriodRecordsTableReferences
+                            ._semesterIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PeriodRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $PeriodRecordsTable,
+      StoredPeriod,
+      $$PeriodRecordsTableFilterComposer,
+      $$PeriodRecordsTableOrderingComposer,
+      $$PeriodRecordsTableAnnotationComposer,
+      $$PeriodRecordsTableCreateCompanionBuilder,
+      $$PeriodRecordsTableUpdateCompanionBuilder,
+      (StoredPeriod, $$PeriodRecordsTableReferences),
+      StoredPeriod,
+      PrefetchHooks Function({bool semesterId})
+    >;
+typedef $$SettingsRecordsTableCreateCompanionBuilder =
+    SettingsRecordsCompanion Function({
+      Value<int> id,
+      Value<int?> currentSemesterId,
+      Value<String> campusTimeZone,
+    });
+typedef $$SettingsRecordsTableUpdateCompanionBuilder =
+    SettingsRecordsCompanion Function({
+      Value<int> id,
+      Value<int?> currentSemesterId,
+      Value<String> campusTimeZone,
+    });
+
+final class $$SettingsRecordsTableReferences
+    extends
+        BaseReferences<_$PlannerStore, $SettingsRecordsTable, StoredSettings> {
+  $$SettingsRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SemesterRecordsTable _currentSemesterIdTable(_$PlannerStore db) =>
+      db.semesterRecords.createAlias(
+        'settings_records__current_semester_id__semester_records__id',
+      );
+
+  $$SemesterRecordsTableProcessedTableManager? get currentSemesterId {
+    final $_column = $_itemColumn<int>('current_semester_id');
+    if ($_column == null) return null;
+    final manager = $$SemesterRecordsTableTableManager(
+      $_db,
+      $_db.semesterRecords,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_currentSemesterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SettingsRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $SettingsRecordsTable> {
+  $$SettingsRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get campusTimeZone => $composableBuilder(
+    column: $table.campusTimeZone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SemesterRecordsTableFilterComposer get currentSemesterId {
+    final $$SemesterRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.currentSemesterId,
+      referencedTable: $db.semesterRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SemesterRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.semesterRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SettingsRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $SettingsRecordsTable> {
+  $$SettingsRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get campusTimeZone => $composableBuilder(
+    column: $table.campusTimeZone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SemesterRecordsTableOrderingComposer get currentSemesterId {
+    final $$SemesterRecordsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.currentSemesterId,
+      referencedTable: $db.semesterRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SemesterRecordsTableOrderingComposer(
+            $db: $db,
+            $table: $db.semesterRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SettingsRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $SettingsRecordsTable> {
+  $$SettingsRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get campusTimeZone => $composableBuilder(
+    column: $table.campusTimeZone,
+    builder: (column) => column,
+  );
+
+  $$SemesterRecordsTableAnnotationComposer get currentSemesterId {
+    final $$SemesterRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.currentSemesterId,
+      referencedTable: $db.semesterRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SemesterRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.semesterRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SettingsRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $SettingsRecordsTable,
+          StoredSettings,
+          $$SettingsRecordsTableFilterComposer,
+          $$SettingsRecordsTableOrderingComposer,
+          $$SettingsRecordsTableAnnotationComposer,
+          $$SettingsRecordsTableCreateCompanionBuilder,
+          $$SettingsRecordsTableUpdateCompanionBuilder,
+          (StoredSettings, $$SettingsRecordsTableReferences),
+          StoredSettings,
+          PrefetchHooks Function({bool currentSemesterId})
+        > {
+  $$SettingsRecordsTableTableManager(
+    _$PlannerStore db,
+    $SettingsRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SettingsRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SettingsRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SettingsRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> currentSemesterId = const Value.absent(),
+                Value<String> campusTimeZone = const Value.absent(),
+              }) => SettingsRecordsCompanion(
+                id: id,
+                currentSemesterId: currentSemesterId,
+                campusTimeZone: campusTimeZone,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> currentSemesterId = const Value.absent(),
+                Value<String> campusTimeZone = const Value.absent(),
+              }) => SettingsRecordsCompanion.insert(
+                id: id,
+                currentSemesterId: currentSemesterId,
+                campusTimeZone: campusTimeZone,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SettingsRecordsTable, StoredSettings>(table),
+                  $$SettingsRecordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({currentSemesterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (currentSemesterId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.currentSemesterId,
+                        referencedTable: $$SettingsRecordsTableReferences
+                            ._currentSemesterIdTable(db),
+                        referencedColumn: $$SettingsRecordsTableReferences
+                            ._currentSemesterIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$SettingsRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $SettingsRecordsTable,
+      StoredSettings,
+      $$SettingsRecordsTableFilterComposer,
+      $$SettingsRecordsTableOrderingComposer,
+      $$SettingsRecordsTableAnnotationComposer,
+      $$SettingsRecordsTableCreateCompanionBuilder,
+      $$SettingsRecordsTableUpdateCompanionBuilder,
+      (StoredSettings, $$SettingsRecordsTableReferences),
+      StoredSettings,
+      PrefetchHooks Function({bool currentSemesterId})
+    >;
+
+class $PlannerStoreManager {
+  final _$PlannerStore _db;
+  $PlannerStoreManager(this._db);
+  $$SemesterRecordsTableTableManager get semesterRecords =>
+      $$SemesterRecordsTableTableManager(_db, _db.semesterRecords);
+  $$PeriodRecordsTableTableManager get periodRecords =>
+      $$PeriodRecordsTableTableManager(_db, _db.periodRecords);
+  $$SettingsRecordsTableTableManager get settingsRecords =>
+      $$SettingsRecordsTableTableManager(_db, _db.settingsRecords);
+}

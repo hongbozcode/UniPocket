@@ -1,0 +1,40 @@
+name: unipocket
+description: "UniPocket：离线校园学习安排。"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  drift: ^2.35.3
+  drift_flutter: ^0.3.1
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_svg: ^2.3.0
+  timezone: ^0.11.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.35.2
+  build_runner: ^2.17.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - docs/design/resources/icons/badge.svg
+    - docs/design/resources/icons/home.svg
+    - docs/design/resources/icons/calendar.svg
+    - docs/design/resources/icons/grid.svg
+    - docs/design/resources/icons/settings.svg
+    - docs/design/resources/icons/clock.svg
+    - docs/design/resources/icons/globe.svg
+    - docs/design/resources/illustrations/calendar.svg
+    - docs/design/resources/illustrations/book.svg
+    - docs/design/resources/illustrations/sun.svg

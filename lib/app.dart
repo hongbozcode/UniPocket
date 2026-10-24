@@ -1,0 +1,377 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'semesters/model.dart';
+import 'semesters/planner.dart';
+import 'semesters/semester_editor.dart';
+import 'semesters/semester_pages.dart';
+import 'ui/design.dart';
+
+class UniPocketApp extends StatelessWidget {
+  const UniPocketApp({required this.planner, super.key});
+  final SemesterPlanner planner;
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'UniPocket',
+    debugShowCheckedModeBanner: false,
+    theme: appTheme(),
+    locale: const Locale('zh', 'CN'),
+    supportedLocales: const [Locale('zh', 'CN'), Locale('en')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    home: _AppShell(planner: planner),
+  );
+}
+
+class _AppShell extends StatefulWidget {
+  const _AppShell({required this.planner});
+  final SemesterPlanner planner;
+  @override
+  State<_AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
+  PlannerState? _state;
+  String? _error;
+  var _page = 0;
+  var _busy = false;
+  Timer? _clockRefresh;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _load();
+    _clockRefresh = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _load();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _clockRefresh?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    try {
+      final state = await widget.planner.load();
+      if (mounted) {
+        setState(() {
+          _state = state;
+          _error = null;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = '无法读取本地数据，请重试。现有数据不会被清空。');
+    }
+  }
+
+  Future<void> _edit([Semester? semester]) async {
+    final state = _state!;
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SemesterEditor(
+          planner: widget.planner,
+          campusNow: state.campusTime(DateTime.now().toUtc()),
+          campusTimeZone: state.campusTimeZone,
+          currentSemesterId: state.currentSemesterId,
+          semester: semester,
+        ),
+      ),
+    );
+    if (saved == true) {
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('学期已保存到本机')));
+      }
+    }
+  }
+
+  Future<void> _manage() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SemesterManagement(planner: widget.planner),
+      ),
+    );
+    await _load();
+  }
+
+  Future<void> _timeZone() async {
+    final zone = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            CampusTimeZonePicker(currentZone: _state!.campusTimeZone),
+      ),
+    );
+    if (zone == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await widget.planner.setCampusTimeZone(zone);
+      await _load();
+    } catch (_) {
+      if (mounted) setState(() => _error = '时区保存失败，原设置保持不变，请重试。');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Widget _startCard() => SurfaceCard(
+    color: lavenderSoft,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '先创建一个学期',
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        const Text('设置教学周和每日节次，为接下来的学习安排做好准备。无需账号，断网也能保存。'),
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed: () => _edit(),
+          icon: const Icon(Icons.add),
+          label: const Text('创建学期'),
+        ),
+      ],
+    ),
+  );
+
+  Widget _semesterCard(Semester semester) => SurfaceCard(
+    color: lavenderSoft,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('当前学期', style: TextStyle(color: primaryBlue)),
+        const SizedBox(height: 8),
+        Text(
+          semester.name,
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '第 1 周周一 · ${dateText(semester.firstMonday)}\n共 ${semester.totalWeeks} 个教学周',
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            FilledButton(
+              onPressed: () => _edit(semester),
+              child: const Text('编辑学期与节次'),
+            ),
+            TextButton(onPressed: _manage, child: const Text('管理全部学期')),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  Widget _home() {
+    final now = _state!.campusTime(DateTime.now().toUtc());
+    return PageContent(
+      children: [
+        const Row(
+          children: [
+            DesignIcon('badge', size: 28),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'UniPocket',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        PageHeading(
+          '今天，也从容一点',
+          '${now.month}月${now.day}日 ${weekdayNames[now.weekday - 1]}\n校园时间 · ${_state!.campusTimeZone}',
+          art: 'sun',
+        ),
+        if (_state!.currentSemester == null)
+          _startCard()
+        else
+          _semesterCard(_state!.currentSemester!),
+        const SizedBox(height: 20),
+        const SurfaceCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '学习安排，从学期开始',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text('当前版本支持学期、节次和校园时区配置。课程、学习任务与倒计时将在后续版本开放。'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _timetable() => PageContent(
+    children: [
+      PageHeading('我的课表', '校园时间 · ${_state!.campusTimeZone}', art: 'book'),
+      if (_state!.currentSemester == null)
+        _startCard()
+      else ...[
+        _semesterCard(_state!.currentSemester!),
+        const SizedBox(height: 20),
+        const SurfaceCard(child: Text('学期配置已就绪。课程录入与课表查看将在后续版本开放。')),
+      ],
+    ],
+  );
+
+  Widget _tools() => const PageContent(
+    children: [
+      PageHeading('给日常一点小帮手', '工具陆续准备中', art: 'book'),
+      SurfaceCard(child: Text('当前尚无已上线工具。随机工具上线后会出现在这里。')),
+    ],
+  );
+
+  Widget _settings() => PageContent(
+    children: [
+      const PageHeading('校园设置', '让校园日常，更合你的节奏'),
+      Text(
+        '学习安排',
+        style: Theme.of(context).textTheme.titleMedium
+            ?.copyWith(fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 12),
+      Card(
+        child: Column(
+          children: [
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              leading: const DesignIcon('calendar'),
+              title: const Text('学期管理'),
+              subtitle: Text(_state!.currentSemester?.name ?? '尚未创建学期'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _manage,
+            ),
+            const Divider(height: 1, indent: 20, endIndent: 20),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              leading: const DesignIcon('clock'),
+              title: const Text('节次时间'),
+              subtitle: Text(
+                _state!.currentSemester == null ? '请先创建学期' : '按当前学期分别设置每天的节次',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _edit(_state!.currentSemester),
+            ),
+            const Divider(height: 1, indent: 20, endIndent: 20),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              leading: const DesignIcon('globe'),
+              title: const Text('校园时区'),
+              subtitle: Text(_state!.campusTimeZone),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _busy ? null : _timeZone,
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 24),
+      SurfaceCard(
+        color: const Color(0xffe6f5ed),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '数据留在自己手中',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            const Text('无需账号，离线使用。学习数据保存在当前设备，应用不会主动上传。'),
+            if (kIsWeb) ...[
+              const SizedBox(height: 10),
+              const Text('网页数据保存在当前浏览器的此站点中。清除站点数据或结束隐私浏览可能会丢失记录。'),
+            ],
+            const SizedBox(height: 10),
+            const Text('备份恢复与系统提醒将在后续版本开放。'),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: Column(
+                children: [
+                  ProblemBanner(_error!),
+                  TextButton(onPressed: _load, child: const Text('重新读取')),
+                ],
+              ),
+            ),
+          if (_busy) const LinearProgressIndicator(),
+          Expanded(
+            child: _state == null
+                ? (_error == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : const SizedBox.shrink())
+                : switch (_page) {
+                    0 => _home(),
+                    1 => _timetable(),
+                    2 => _tools(),
+                    _ => _settings(),
+                  },
+          ),
+        ],
+      ),
+    ),
+    bottomNavigationBar: NavigationBar(
+      key: const ValueKey('main-navigation'),
+      selectedIndex: _page,
+      onDestinationSelected: (index) => setState(() => _page = index),
+      destinations: [
+        for (final entry in [
+          ('home', '首页'),
+          ('calendar', '课表'),
+          ('grid', '工具'),
+          ('settings', '设置'),
+        ])
+          NavigationDestination(
+            icon: DesignIcon(entry.$1, color: const Color(0xff65738b)),
+            selectedIcon: DesignIcon(entry.$1, color: primaryBlue),
+            label: entry.$2,
+          ),
+      ],
+    ),
+  );
+}

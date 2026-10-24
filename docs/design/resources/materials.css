@@ -1,0 +1,13 @@
+/* Portable material utilities. All texture files are local, standalone assets. */
+.paper-surface { position: relative; isolation: isolate; background-color: var(--paper-color, #fff); }
+.paper-surface::before { content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background-image: url("materials/paper-grain.png"), url("materials/paper-fibers.svg"); background-size: 420px 420px, 200px 200px; mix-blend-mode: multiply; opacity: var(--paper-grain-opacity, .18); pointer-events: none; }
+.paper-torn { border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; margin-bottom: 12px; }
+.paper-torn::after { content: ""; position: absolute; height: 12px; bottom: -11px; left: 0; right: 0; background: var(--paper-color, #fff); -webkit-mask: url("materials/torn-edge.svg") 0 0 / 100% 100% no-repeat; mask: url("materials/torn-edge.svg") 0 0 / 100% 100% no-repeat; pointer-events: none; }
+.paper-ruled { background-image: repeating-linear-gradient(transparent 0 27px, #8da9df26 27px 28px); background-position: 0 10px; }
+.paper-grid { background-image: linear-gradient(#95afe51a 1px, transparent 1px), linear-gradient(90deg, #95afe51a 1px, transparent 1px); background-size: 20px 20px; }
+.with-tape { position: relative; }
+.with-tape::after { content: ""; position: absolute; width: var(--tape-width, 76px); height: 25px; left: calc(50% - var(--tape-width, 76px) / 2); top: -11px; background: url("materials/washi-tape.svg") center / 100% 100% no-repeat; transform: rotate(-5deg); pointer-events: none; }
+.sticker { object-fit: contain; filter: drop-shadow(var(--shadow-sticker)); flex-shrink: 0; user-select: none; }
+.sticker-tilt { transform: rotate(-7deg); }
+.texture-off .paper-surface::before { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) { .sticker-bob { animation: sticker-bob 5s ease-in-out infinite; } @keyframes sticker-bob { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-4px); } } }
