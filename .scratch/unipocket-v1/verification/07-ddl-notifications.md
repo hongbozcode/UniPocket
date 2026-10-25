@@ -18,11 +18,11 @@
 | --- | --- |
 | `flutter doctor -v` | 既有 Flutter 3.47.7 / Dart 3.13.5、Android SDK 36 和 JDK 可用，无需安装。Chrome 缺失不影响 Android 与 Web 构建。 |
 | `flutter analyze --no-pub` | 通过。 |
-| `flutter test --no-pub` | 70 条通过，含任务 1–6 回归、新增 4 条真实 SQLite 提醒行为测试及 4 组界面测试。 |
+| `flutter test --no-pub` | 最终审查修改后 70 条全部通过，含任务 1–6 回归、新增 4 条真实 SQLite 提醒行为测试及 4 组界面测试。 |
 | 真实 SQLite 与受控外部边界 | 默认提前一天、文件重开、编辑替换、完成／撤销、关闭、删除、提醒时间已过和截止边界、通知禁用、系统调用失败后仍保存、失败重试及无效配置拒绝写入。 |
 | 数据库升级与校园时间 | 从既有 schema 5 升级，原任务、课程和完成状态保留；纽约夏令时结束日的提醒转换使用独立预期时刻。已有 schema 1–4 升级测试继续通过。 |
 | 布局与可达性 | 320／393 宽度 × 1／2 倍文字，上下安全区域、长标题、提醒开关、提前分钟数、保存和设置入口通过，无溢出。原任务表单测试随新增内容改为滚动后访问备注。 |
-| 提示生命周期 | 保存结果由返回后的所属页面展示；进入表单前移除遗留提示，避免遮挡删除。任务页完成／撤销提示仍随所属页面关闭。 |
+| 提示生命周期 | 保存结果由返回后的所属页面展示；进入表单前移除遗留提示，避免遮挡删除。任务页完成／撤销提示仍随所属页面关闭。审查后提取共享反馈组件，相关 11 条界面回归再次通过。 |
 | Android 构建 | 正式 `lib/main.dart` 调试 APK 构建通过；原生 Kotlin 通道及通知接收器也由 Android 集成测试编译执行。 |
 | Web 构建 | `flutter build web --no-pub --no-web-resources-cdn` 通过；未新增浏览器运行验收。 |
 
@@ -32,7 +32,9 @@
 - 初始进程 `16971`：通过真实表单将“论文终稿”的提前提醒改为 30 分钟，系统记录的未来闹钟同步变化；实际系统通知设置入口正常。
 - 将应用退到后台后使用 `am kill` 结束进程（不是强行停止）。测试提醒计划在校园时间 16:47，系统窗口允许延迟约 1 分 47 秒；16:49:06 查询到 `learning_reminders` 渠道中的“任务7·送达验收”，接收器进程为 `17231`。对应的系统通知记录见[送达记录](evidence/07-android-delivery.txt)。模拟器系统界面时区为 UTC，通知内的校园时间仍为 Asia/Shanghai。
 - 关闭应用通知权限后，新进程 `17389` 读取同一数据库，30 分钟配置保留；应用显示真实关闭状态，仍可保存“权限关闭仍保存”任务，DDL 未来闹钟已清除。原生系统设置的关闭状态另行采集。
+- 恢复通知权限后，新进程 `17594` 再次恢复配置及未来提醒，通过。再次将应用退到后台并结束进程，校园时间 16:53 的测试提醒于 16:54:09 查询到实际投递；[最终系统记录](evidence/07-android-delivery-final.txt)与[通知面板截图](evidence/07-android-delivered.png)相互对应，最终小图标复用项目铃铛路径。
 - 全程使用 `--keep-app-running` 保留应用数据，没有用卸载重装代替恢复；通知权限属于当前模拟设备，没有写入数据库或跨设备恢复。
+- 验收结束后通过 `ACCEPTANCE_CLEANUP=true` 清理仅本轮数据库命名空间的系统提醒，保留业务数据库；清理测试通过。已恢复原 1080×2400 / density 420，并重新构建、保留数据安装和启动正式 `lib/main.dart` 入口；系统中无遗留的本轮未来闹钟。
 
 ```powershell
 flutter drive --no-pub --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/ddl_notifications_flow_test.dart -d emulator-5554 --dart-define=ACCEPTANCE_DATABASE=unipocket_ddl_20261025_a
@@ -47,12 +49,25 @@ flutter drive --no-pub --keep-app-running --driver=test_driver/integration_test.
 - [任务提醒表单](evidence/07-android-editor-restored.png)：单项配置、校园提醒时刻及当前设备通知状态。
 - [设置提醒卡](evidence/07-android-settings.png)：真实开启状态、默认时间、系统设置与刷新入口。
 - [通知关闭反馈](evidence/07-android-permission-blocked.png)、[真实系统设置](evidence/07-android-system-settings.png)与[系统关闭状态](evidence/07-android-system-blocked.png)。
+- [后台进程结束后实际送达](evidence/07-android-delivered.png)：系统栏使用模拟器 UTC 时间，通知正文明确显示校园时间。
 
 均为实际 Flutter Android 或 Android 系统运行证据。采集参数 1179×2556 / density 480（393 逻辑宽）；结束后恢复原 1080×2400 / density 420。复用项目 `bell.svg`，系统通知小图标是同一路径的白色 Android Vector 版本，没有新增第三方素材。
 
 ## 两轴代码审查
 
-固定基线：`0797ca4b833efb86ca55ea54961fbf53a0152698`（开始实现前的当前 HEAD）。实现提交后按 `code-review` 技能进行 Standards 与 Spec 两个独立子代理审查，结果将在完成后补充。
+固定基线：`0797ca4b833efb86ca55ea54961fbf53a0152698`（开始实现前的当前 HEAD）。初审实现提交：`af546bb`。按 `code-review` 技能由两个独立子代理只读审查。
+
+### Standards
+
+未发现文档规范硬性违反。实现沿用共同应用入口和真实 SQLite，时钟与通知仅在外部边界替换；复用现有视觉资源，并明确记录模拟器与真机验收边界。未新增依赖或未使用的平台框架。
+
+初审 1 项 P3 判断性建议：完成／撤销反馈在首页和任务页重复。已在任务 UI 模块提取 `TaskCompletionFeedback`，两个页面继续独立管理提示生命周期；审查代理增量复核通过，建议已关闭，无新问题。验收清理分支仅影响本轮命名空间。
+
+### Spec
+
+未发现可证实的需求缺失、范围扩张或实现错误。默认时间、单项配置、生命周期更新、过期不补发、数据提交与通知状态分离、权限与设置入口、按范围替换、持久化迁移及校园时区行为符合需求；真机待验收符合用户本次确认的边界。审查代理未重复运行 Flutter 或设备测试。
+
+最终：Standards 0 项硬性违反、0 项未关闭建议；Spec 0 项发现，无阻断问题。
 
 ## 明确边界
 

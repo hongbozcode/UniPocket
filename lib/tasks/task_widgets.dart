@@ -8,6 +8,26 @@ import 'model.dart';
 
 const taskDanger = Color(0xffb32643);
 
+class TaskCompletionFeedback extends StatelessWidget {
+  const TaskCompletionFeedback({
+    required this.completed,
+    required this.reminderStatus,
+    super.key,
+  });
+  final bool completed;
+  final String reminderStatus;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(completed ? '任务已完成' : '已撤销完成'),
+      Text(reminderStatus, style: const TextStyle(fontSize: 12)),
+    ],
+  );
+}
+
 class TaskCard extends StatelessWidget {
   const TaskCard({
     required this.task,

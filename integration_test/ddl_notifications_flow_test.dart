@@ -22,6 +22,13 @@ const delivery = bool.fromEnvironment('ACCEPTANCE_DELIVERY');
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   tzdata.initializeTimeZones();
+  if (const bool.fromEnvironment('ACCEPTANCE_CLEANUP')) {
+    testWidgets('仅清理本轮验收命名空间的系统提醒', (tester) async {
+      await const AndroidNotifications(namespace: databaseName)
+          .replace('ddl', []);
+    });
+    return;
+  }
   testWidgets('Android DDL 提醒配置、真实权限及新进程恢复', (tester) async {
     final store = PlannerStore.open(name: databaseName);
     final planner = SemesterPlanner(
@@ -54,7 +61,9 @@ void main() {
         find.byKey(const ValueKey('task-reminder-lead')),
       );
       FocusManager.instance.primaryFocus?.unfocus();
-      await tester.ensureVisible(find.byKey(const ValueKey('task-reminder-enabled')));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('task-reminder-enabled')),
+      );
       await capture(
         restore ? '07-android-editor-restored' : '07-android-editor',
       );

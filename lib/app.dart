@@ -240,19 +240,12 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(target ? '任务已完成' : '已撤销完成'),
-                Text(
-                  widget.planner.taskReminderStatus(
-                    _state!.tasks.singleWhere((t) => t.id == task.id),
-                    _state!.campusTimeZone,
-                  ),
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+            content: TaskCompletionFeedback(
+              completed: target,
+              reminderStatus: widget.planner.taskReminderStatus(
+                _state!.tasks.singleWhere((t) => t.id == task.id),
+                _state!.campusTimeZone,
+              ),
             ),
             action: SnackBarAction(
               label: '撤销',
