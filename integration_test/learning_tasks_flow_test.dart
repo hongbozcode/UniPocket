@@ -83,6 +83,7 @@ void main() {
           find.byKey(const ValueKey('task-title')),
           '独立论文初稿',
         );
+        await tapVisible(tester, find.byKey(const ValueKey('task-notes')));
         await tester.enterText(
           find.byKey(const ValueKey('task-notes')),
           '完成文献综述与参考文献',

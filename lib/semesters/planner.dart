@@ -5,13 +5,91 @@ import '../timetable/model.dart';
 import '../timetable/course_change.dart';
 import '../tasks/model.dart';
 import '../events/model.dart';
+import '../reminders/notifications.dart';
 import 'model.dart';
 
 /// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
 class SemesterPlanner {
-  SemesterPlanner(this._store);
+  SemesterPlanner(
+    this._store, {
+    this.notifications = const UnsupportedNotifications(),
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now;
   final PlannerStore _store;
+  final LocalNotifications notifications;
+  final DateTime Function() _clock;
+  NotificationAccess notificationAccess = NotificationAccess.unavailable;
+  bool reminderSyncFailed = false;
+  Future<void>? _notificationQueue;
+
+  /// Serializes platform reconciliation and always reads committed SQLite data.
+  /// Platform failure never turns a successful data save into a reported failure.
+  Future<void> refreshReminders() {
+    if (notifications is UnsupportedNotifications) {
+      notificationAccess = NotificationAccess.unsupported;
+      return Future.value();
+    }
+    Future<void> reconcile() async {
+      try {
+        final state = await load();
+        notificationAccess = await notifications.status();
+        final reminders = <LocalReminder>[];
+        if (notificationAccess == NotificationAccess.enabled) {
+          for (final task in state.tasks) {
+            final at = taskReminderAt(task, state.campusTimeZone);
+            if (!task.isCompleted &&
+                at != null &&
+                at.isAfter(_clock().toUtc())) {
+              reminders.add(
+                LocalReminder(
+                  key: 'task:${task.id}',
+                  at: at,
+                  title: task.title,
+                  body:
+                      '学习任务即将截止 · ${task.dueDate.month}月${task.dueDate.day}日 '
+                      '${PeriodTime.format(task.dueMinutes)} · ${state.campusTimeZone}',
+                ),
+              );
+            }
+          }
+        }
+        await notifications.replace('ddl', reminders);
+        reminderSyncFailed = false;
+      } catch (_) {
+        reminderSyncFailed = true;
+        notificationAccess = NotificationAccess.unavailable;
+      }
+    }
+
+    final next = _notificationQueue?.then((_) => reconcile()) ?? reconcile();
+    _notificationQueue = next;
+    return next;
+  }
+
+  String taskReminderStatus(LearningTask task, String zone) {
+    if (reminderSyncFailed) return '提醒更新失败，请重试';
+    if (task.isCompleted) return '任务已完成，提醒已取消';
+    if (task.reminderMinutesBefore == null) return '此项提醒已关闭';
+    final at = taskReminderAt(task, zone)!;
+    if (!at.isAfter(_clock().toUtc())) return '提醒时间已过，不会补发';
+    return switch (notificationAccess) {
+      NotificationAccess.enabled => '未来提醒已安排，送达时间受系统影响',
+      NotificationAccess.blocked => '设备通知已关闭，提醒未启用',
+      NotificationAccess.unsupported => '当前平台不支持本地通知',
+      NotificationAccess.unavailable => '无法读取设备通知状态，请重试',
+    };
+  }
+
+  Future<void> requestNotificationPermission() async {
+    try {
+      await notifications.requestPermission();
+      await refreshReminders();
+    } catch (_) {
+      notificationAccess = NotificationAccess.unavailable;
+      reminderSyncFailed = true;
+    }
+  }
 
   Future<PlannerState> load() => _store.readState();
 
@@ -223,20 +301,28 @@ class SemesterPlanner {
 
   Future<void> deleteEvent(int id) => _store.deleteEvent(id);
 
-  Future<void> setTaskCompleted(int id, bool completed) =>
-      _store.setTaskCompleted(id, completed);
+  Future<void> setTaskCompleted(int id, bool completed) async {
+    await _store.setTaskCompleted(id, completed);
+    await refreshReminders();
+  }
 
-  Future<void> deleteTask(int id) => _store.deleteTask(id);
+  Future<void> deleteTask(int id) async {
+    await _store.deleteTask(id);
+    await refreshReminders();
+  }
 
-  Future<int> saveTask(LearningTaskDraft draft, {int? id}) =>
-      _store.transaction(() async {
-        draft.validate();
-        if (draft.courseId != null &&
-            !(await load()).courses.any((c) => c.id == draft.courseId)) {
-          throw const InputProblem('关联课程不存在，请重新选择。');
-        }
-        return _store.saveTask(draft, id: id);
-      });
+  Future<int> saveTask(LearningTaskDraft draft, {int? id}) async {
+    final saved = await _store.transaction(() async {
+      draft.validate();
+      if (draft.courseId != null &&
+          !(await load()).courses.any((c) => c.id == draft.courseId)) {
+        throw const InputProblem('关联课程不存在，请重新选择。');
+      }
+      return _store.saveTask(draft, id: id);
+    });
+    await refreshReminders();
+    return saved;
+  }
 
   Future<int> saveCourse(CourseDraft draft, {bool allowConflicts = false}) =>
       _store.transaction(() async {
@@ -300,5 +386,19 @@ class SemesterPlanner {
       throw const InputProblem('请选择有效的 IANA 校园时区，例如 Asia/Shanghai。');
     }
     await _store.writeTimeZone(zone);
+    await refreshReminders();
   }
+}
+
+DateTime? taskReminderAt(LearningTaskDraft task, String zone) {
+  if (task.reminderMinutesBefore == null) return null;
+  final date = task.dueDate;
+  return tz.TZDateTime(
+    tz.getLocation(zone),
+    date.year,
+    date.month,
+    date.day,
+    task.dueMinutes ~/ 60,
+    task.dueMinutes % 60,
+  ).toUtc().subtract(Duration(minutes: task.reminderMinutesBefore!));
 }

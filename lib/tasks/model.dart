@@ -8,6 +8,7 @@ class LearningTaskDraft {
     this.dueMinutes = 1439,
     this.notes = '',
     this.courseId,
+    this.reminderMinutesBefore = 1440,
   }) : dueDate = DateTime.utc(dueDate.year, dueDate.month, dueDate.day);
 
   final String title;
@@ -16,10 +17,17 @@ class LearningTaskDraft {
   final String notes;
   final int? courseId;
 
+  /// Null disables the single reminder; zero means at the deadline.
+  final int? reminderMinutesBefore;
+
   void validate() {
     if (title.trim().isEmpty) throw const InputProblem('请输入任务标题。');
     if (dueMinutes < 0 || dueMinutes >= 1440) {
       throw const InputProblem('请选择当天内的有效截止时间。');
+    }
+    if (reminderMinutesBefore != null &&
+        (reminderMinutesBefore! < 0 || reminderMinutesBefore! > 525600)) {
+      throw const InputProblem('提醒提前时间须为 0 至 525600 分钟。');
     }
   }
 }
@@ -35,6 +43,7 @@ class LearningTask extends LearningTaskDraft {
     required super.notes,
     required super.courseId,
     required this.isCompleted,
+    super.reminderMinutesBefore,
   });
 
   final int id;

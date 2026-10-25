@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../semesters/model.dart';
 import '../semesters/planner.dart';
 import '../ui/design.dart';
+import '../reminders/notification_card.dart';
 import 'model.dart';
 
 class TaskEditor extends StatefulWidget {
@@ -34,6 +35,11 @@ class _TaskEditorState extends State<TaskEditor> {
       );
   late int _minutes = widget.task?.dueMinutes ?? 1439;
   late int? _courseId = widget.task?.courseId;
+  late bool _reminderEnabled =
+      widget.task == null || widget.task!.reminderMinutesBefore != null;
+  late final _reminderLead = TextEditingController(
+    text: (widget.task?.reminderMinutesBefore ?? 1440).toString(),
+  );
   var _busy = false;
   String? _error;
 
@@ -41,6 +47,7 @@ class _TaskEditorState extends State<TaskEditor> {
   void dispose() {
     _title.dispose();
     _notes.dispose();
+    _reminderLead.dispose();
     super.dispose();
   }
 
@@ -50,17 +57,30 @@ class _TaskEditorState extends State<TaskEditor> {
       _error = null;
     });
     try {
-      await widget.planner.saveTask(
+      final lead = int.tryParse(_reminderLead.text.trim());
+      if (_reminderEnabled && lead == null) {
+        throw const InputProblem('请输入有效的提醒提前分钟数。');
+      }
+      final id = await widget.planner.saveTask(
         LearningTaskDraft(
           title: _title.text,
           dueDate: _date,
           dueMinutes: _minutes,
           notes: _notes.text,
           courseId: _courseId,
+          reminderMinutesBefore: _reminderEnabled ? lead : null,
         ),
         id: widget.task?.id,
       );
-      if (mounted) Navigator.pop(context, true);
+      final saved = (await widget.planner.load()).tasks.singleWhere(
+        (t) => t.id == id,
+      );
+      if (mounted) {
+        Navigator.pop(
+          context,
+          '任务已保存到本机。${widget.planner.taskReminderStatus(saved, widget.state.campusTimeZone)}',
+        );
+      }
     } on InputProblem catch (error) {
       if (mounted) setState(() => _error = error.message);
     } catch (_) {
@@ -95,7 +115,14 @@ class _TaskEditorState extends State<TaskEditor> {
     });
     try {
       await widget.planner.deleteTask(widget.task!.id);
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        Navigator.pop(
+          context,
+          widget.planner.reminderSyncFailed
+              ? '任务已删除。提醒更新失败，请重试。'
+              : '任务已删除，未来提醒已取消',
+        );
+      }
     } catch (_) {
       if (mounted) setState(() => _error = '删除失败，原记录仍在，请重试。');
     } finally {
@@ -197,6 +224,52 @@ class _TaskEditorState extends State<TaskEditor> {
                 ),
               ),
               const SizedBox(height: 20),
+              SurfaceCard(
+                color: lavenderSoft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SwitchListTile(
+                      key: const ValueKey('task-reminder-enabled'),
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        '此项 DDL 提醒',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: const Text('每项一个提醒'),
+                      value: _reminderEnabled,
+                      onChanged: (value) =>
+                          setState(() => _reminderEnabled = value),
+                    ),
+                    if (_reminderEnabled) ...[
+                      const SizedBox(height: 8),
+                      TextField(
+                        key: const ValueKey('task-reminder-lead'),
+                        controller: _reminderLead,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: '提前分钟数',
+                          helperText: '默认 1440 分钟（1 天）；0 为截止时提醒。',
+                          helperMaxLines: 3,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _reminderPreview(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xff52617a),
+                        ),
+                      ),
+                    ] else
+                      const Text('此项提醒已关闭，任务仍会保存。'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              NotificationCard(planner: widget.planner),
+              const SizedBox(height: 20),
               DropdownButtonFormField<int>(
                 key: const ValueKey('task-course'),
                 initialValue: _courseId ?? -1,
@@ -252,4 +325,20 @@ class _TaskEditorState extends State<TaskEditor> {
       ),
     ),
   );
+
+  String _reminderPreview() {
+    final lead = int.tryParse(_reminderLead.text.trim());
+    if (lead == null || lead < 0 || lead > 525600) return '请输入 0 至 525600 分钟。';
+    if (widget.task?.isCompleted == true) return '任务已完成，提醒不会启用。';
+    final draft = LearningTaskDraft(
+      title: _title.text,
+      dueDate: _date,
+      dueMinutes: _minutes,
+      reminderMinutesBefore: lead,
+    );
+    final at = taskReminderAt(draft, widget.state.campusTimeZone)!;
+    final campusAt = widget.state.campusTime(at);
+    if (!at.isAfter(widget.campusNow.toUtc())) return '提醒时间已过，不会补发。';
+    return '提醒时间：${dateText(campusAt)} ${PeriodTime.format(campusAt.hour * 60 + campusAt.minute)} · ${widget.state.campusTimeZone}';
+  }
 }

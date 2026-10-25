@@ -1,0 +1,12 @@
+
+    Notification List:
+>     NotificationRecord(0x0a991cbd: pkg=com.hongbozcode.unipocket user=UserHandle{0} id=0 tag=unipocket_ddl_20261025_a/ddl/task:2 importance=3 key=0|com.hongbozcode.unipocket|0|unipocket_ddl_20261025_a/ddl/task:2|10219: Notification(channel=learning_reminders shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=AUTO_CANCEL color=0x00000000 vis=PRIVATE))
+        uid=10219 userId=0
+        opPkg=com.hongbozcode.unipocket
+        icon=Icon(typ=RESOURCE pkg=com.hongbozcode.unipocket id=0x7f060006)
+              extras={
+>                 android.title=String (任务7·送达验收)
+                  android.reduced.images=Boolean (true)
+                  android.template=String (android.app.Notification$BigTextStyle)
+                  android.text=String (学习任务即将截止 · 10月25日 16:47 · Asia/Shanghai)
+

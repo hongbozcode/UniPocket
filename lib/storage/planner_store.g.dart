@@ -1856,6 +1856,17 @@ class $LearningTaskRecordsTable extends LearningTaskRecords
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _reminderMinutesBeforeMeta =
+      const VerificationMeta('reminderMinutesBefore');
+  @override
+  late final GeneratedColumn<int> reminderMinutesBefore = GeneratedColumn<int>(
+    'reminder_minutes_before',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1440),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1865,6 +1876,7 @@ class $LearningTaskRecordsTable extends LearningTaskRecords
     notes,
     courseId,
     isCompleted,
+    reminderMinutesBefore,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1928,6 +1940,15 @@ class $LearningTaskRecordsTable extends LearningTaskRecords
         ),
       );
     }
+    if (data.containsKey('reminder_minutes_before')) {
+      context.handle(
+        _reminderMinutesBeforeMeta,
+        reminderMinutesBefore.isAcceptableOrUnknown(
+          data['reminder_minutes_before']!,
+          _reminderMinutesBeforeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1965,6 +1986,10 @@ class $LearningTaskRecordsTable extends LearningTaskRecords
         DriftSqlType.bool,
         data['${effectivePrefix}is_completed'],
       )!,
+      reminderMinutesBefore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_minutes_before'],
+      ),
     );
   }
 
@@ -1983,6 +2008,7 @@ class StoredLearningTask extends DataClass
   final String notes;
   final int? courseId;
   final bool isCompleted;
+  final int? reminderMinutesBefore;
   const StoredLearningTask({
     required this.id,
     required this.title,
@@ -1991,6 +2017,7 @@ class StoredLearningTask extends DataClass
     required this.notes,
     this.courseId,
     required this.isCompleted,
+    this.reminderMinutesBefore,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2004,6 +2031,9 @@ class StoredLearningTask extends DataClass
       map['course_id'] = Variable<int>(courseId);
     }
     map['is_completed'] = Variable<bool>(isCompleted);
+    if (!nullToAbsent || reminderMinutesBefore != null) {
+      map['reminder_minutes_before'] = Variable<int>(reminderMinutesBefore);
+    }
     return map;
   }
 
@@ -2018,6 +2048,9 @@ class StoredLearningTask extends DataClass
           ? const Value.absent()
           : Value(courseId),
       isCompleted: Value(isCompleted),
+      reminderMinutesBefore: reminderMinutesBefore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderMinutesBefore),
     );
   }
 
@@ -2034,6 +2067,9 @@ class StoredLearningTask extends DataClass
       notes: serializer.fromJson<String>(json['notes']),
       courseId: serializer.fromJson<int?>(json['courseId']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      reminderMinutesBefore: serializer.fromJson<int?>(
+        json['reminderMinutesBefore'],
+      ),
     );
   }
   @override
@@ -2047,6 +2083,7 @@ class StoredLearningTask extends DataClass
       'notes': serializer.toJson<String>(notes),
       'courseId': serializer.toJson<int?>(courseId),
       'isCompleted': serializer.toJson<bool>(isCompleted),
+      'reminderMinutesBefore': serializer.toJson<int?>(reminderMinutesBefore),
     };
   }
 
@@ -2058,6 +2095,7 @@ class StoredLearningTask extends DataClass
     String? notes,
     Value<int?> courseId = const Value.absent(),
     bool? isCompleted,
+    Value<int?> reminderMinutesBefore = const Value.absent(),
   }) => StoredLearningTask(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -2066,6 +2104,9 @@ class StoredLearningTask extends DataClass
     notes: notes ?? this.notes,
     courseId: courseId.present ? courseId.value : this.courseId,
     isCompleted: isCompleted ?? this.isCompleted,
+    reminderMinutesBefore: reminderMinutesBefore.present
+        ? reminderMinutesBefore.value
+        : this.reminderMinutesBefore,
   );
   StoredLearningTask copyWithCompanion(LearningTaskRecordsCompanion data) {
     return StoredLearningTask(
@@ -2080,6 +2121,9 @@ class StoredLearningTask extends DataClass
       isCompleted: data.isCompleted.present
           ? data.isCompleted.value
           : this.isCompleted,
+      reminderMinutesBefore: data.reminderMinutesBefore.present
+          ? data.reminderMinutesBefore.value
+          : this.reminderMinutesBefore,
     );
   }
 
@@ -2092,14 +2136,23 @@ class StoredLearningTask extends DataClass
           ..write('dueMinutes: $dueMinutes, ')
           ..write('notes: $notes, ')
           ..write('courseId: $courseId, ')
-          ..write('isCompleted: $isCompleted')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('reminderMinutesBefore: $reminderMinutesBefore')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, dueDate, dueMinutes, notes, courseId, isCompleted);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    dueDate,
+    dueMinutes,
+    notes,
+    courseId,
+    isCompleted,
+    reminderMinutesBefore,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2110,7 +2163,8 @@ class StoredLearningTask extends DataClass
           other.dueMinutes == this.dueMinutes &&
           other.notes == this.notes &&
           other.courseId == this.courseId &&
-          other.isCompleted == this.isCompleted);
+          other.isCompleted == this.isCompleted &&
+          other.reminderMinutesBefore == this.reminderMinutesBefore);
 }
 
 class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
@@ -2121,6 +2175,7 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
   final Value<String> notes;
   final Value<int?> courseId;
   final Value<bool> isCompleted;
+  final Value<int?> reminderMinutesBefore;
   const LearningTaskRecordsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -2129,6 +2184,7 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
     this.notes = const Value.absent(),
     this.courseId = const Value.absent(),
     this.isCompleted = const Value.absent(),
+    this.reminderMinutesBefore = const Value.absent(),
   });
   LearningTaskRecordsCompanion.insert({
     this.id = const Value.absent(),
@@ -2138,6 +2194,7 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
     required String notes,
     this.courseId = const Value.absent(),
     this.isCompleted = const Value.absent(),
+    this.reminderMinutesBefore = const Value.absent(),
   }) : title = Value(title),
        dueDate = Value(dueDate),
        dueMinutes = Value(dueMinutes),
@@ -2150,6 +2207,7 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
     Expression<String>? notes,
     Expression<int>? courseId,
     Expression<bool>? isCompleted,
+    Expression<int>? reminderMinutesBefore,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2159,6 +2217,8 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
       if (notes != null) 'notes': notes,
       if (courseId != null) 'course_id': courseId,
       if (isCompleted != null) 'is_completed': isCompleted,
+      if (reminderMinutesBefore != null)
+        'reminder_minutes_before': reminderMinutesBefore,
     });
   }
 
@@ -2170,6 +2230,7 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
     Value<String>? notes,
     Value<int?>? courseId,
     Value<bool>? isCompleted,
+    Value<int?>? reminderMinutesBefore,
   }) {
     return LearningTaskRecordsCompanion(
       id: id ?? this.id,
@@ -2179,6 +2240,8 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
       notes: notes ?? this.notes,
       courseId: courseId ?? this.courseId,
       isCompleted: isCompleted ?? this.isCompleted,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
     );
   }
 
@@ -2206,6 +2269,11 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
     if (isCompleted.present) {
       map['is_completed'] = Variable<bool>(isCompleted.value);
     }
+    if (reminderMinutesBefore.present) {
+      map['reminder_minutes_before'] = Variable<int>(
+        reminderMinutesBefore.value,
+      );
+    }
     return map;
   }
 
@@ -2218,7 +2286,8 @@ class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
           ..write('dueMinutes: $dueMinutes, ')
           ..write('notes: $notes, ')
           ..write('courseId: $courseId, ')
-          ..write('isCompleted: $isCompleted')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('reminderMinutesBefore: $reminderMinutesBefore')
           ..write(')'))
         .toString();
   }
@@ -5730,6 +5799,7 @@ typedef $$LearningTaskRecordsTableCreateCompanionBuilder =
       required String notes,
       Value<int?> courseId,
       Value<bool> isCompleted,
+      Value<int?> reminderMinutesBefore,
     });
 typedef $$LearningTaskRecordsTableUpdateCompanionBuilder =
     LearningTaskRecordsCompanion Function({
@@ -5740,6 +5810,7 @@ typedef $$LearningTaskRecordsTableUpdateCompanionBuilder =
       Value<String> notes,
       Value<int?> courseId,
       Value<bool> isCompleted,
+      Value<int?> reminderMinutesBefore,
     });
 
 final class $$LearningTaskRecordsTableReferences
@@ -5813,6 +5884,11 @@ class $$LearningTaskRecordsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$CourseRecordsTableFilterComposer get courseId {
     final $$CourseRecordsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -5876,6 +5952,11 @@ class $$LearningTaskRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CourseRecordsTableOrderingComposer get courseId {
     final $$CourseRecordsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5928,6 +6009,11 @@ class $$LearningTaskRecordsTableAnnotationComposer
 
   GeneratedColumn<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
     builder: (column) => column,
   );
 
@@ -5998,6 +6084,7 @@ class $$LearningTaskRecordsTableTableManager
                 Value<String> notes = const Value.absent(),
                 Value<int?> courseId = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
+                Value<int?> reminderMinutesBefore = const Value.absent(),
               }) => LearningTaskRecordsCompanion(
                 id: id,
                 title: title,
@@ -6006,6 +6093,7 @@ class $$LearningTaskRecordsTableTableManager
                 notes: notes,
                 courseId: courseId,
                 isCompleted: isCompleted,
+                reminderMinutesBefore: reminderMinutesBefore,
               ),
           createCompanionCallback:
               ({
@@ -6016,6 +6104,7 @@ class $$LearningTaskRecordsTableTableManager
                 required String notes,
                 Value<int?> courseId = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
+                Value<int?> reminderMinutesBefore = const Value.absent(),
               }) => LearningTaskRecordsCompanion.insert(
                 id: id,
                 title: title,
@@ -6024,6 +6113,7 @@ class $$LearningTaskRecordsTableTableManager
                 notes: notes,
                 courseId: courseId,
                 isCompleted: isCompleted,
+                reminderMinutesBefore: reminderMinutesBefore,
               ),
           withReferenceMapper: (p0) => p0
               .map(

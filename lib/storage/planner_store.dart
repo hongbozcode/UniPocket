@@ -76,6 +76,8 @@ class LearningTaskRecords extends Table {
     onDelete: KeyAction.setNull,
   )();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  IntColumn get reminderMinutesBefore =>
+      integer().nullable().withDefault(const Constant(1440))();
 }
 
 @DataClassName('StoredCountdownEvent')
@@ -140,7 +142,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -158,6 +160,12 @@ class PlannerStore extends _$PlannerStore {
       if (from < 4) await m.createTable(countdownEventRecords);
       if (from < 5) await m.createTable(classExceptionRecords);
       if (from < 6) await m.createTable(independentLessonRecords);
+      if (from >= 3 && from < 7) {
+        await m.addColumn(
+          learningTaskRecords,
+          learningTaskRecords.reminderMinutesBefore,
+        );
+      }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -225,6 +233,7 @@ class PlannerStore extends _$PlannerStore {
             notes: task.notes,
             courseId: task.courseId,
             isCompleted: task.isCompleted,
+            reminderMinutesBefore: task.reminderMinutesBefore,
           ),
       ],
       courses: [
@@ -478,6 +487,7 @@ class PlannerStore extends _$PlannerStore {
       dueMinutes: Value(draft.dueMinutes),
       notes: Value(draft.notes.trim()),
       courseId: Value(draft.courseId),
+      reminderMinutesBefore: Value(draft.reminderMinutesBefore),
     );
     if (id == null) return into(learningTaskRecords).insert(values);
     final count = await (update(

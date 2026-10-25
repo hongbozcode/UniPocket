@@ -20,6 +20,7 @@ import 'events/model.dart';
 import 'events/event_editor.dart';
 import 'events/event_widgets.dart';
 import 'events/events_page.dart';
+import 'reminders/notification_card.dart';
 
 class UniPocketApp extends StatelessWidget {
   const UniPocketApp({required this.planner, this.clock, super.key});
@@ -78,6 +79,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   Future<void> _load() async {
     try {
       final state = await widget.planner.load();
+      await widget.planner.refreshReminders();
       if (mounted) {
         setState(() {
           _state = state;
@@ -123,8 +125,9 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   }
 
   Future<void> _task([LearningTask? task]) async {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     final state = _state!;
-    final saved = await Navigator.push<bool>(
+    final saved = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => TaskEditor(
@@ -135,10 +138,18 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ),
       ),
     );
-    if (saved == true) await _load();
+    if (saved != null) {
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(saved)));
+      }
+    }
   }
 
   Future<void> _tasks() async {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     await Navigator.push<void>(
       context,
       MaterialPageRoute(
@@ -229,7 +240,20 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(target ? '任务已完成' : '已撤销完成'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(target ? '任务已完成' : '已撤销完成'),
+                Text(
+                  widget.planner.taskReminderStatus(
+                    _state!.tasks.singleWhere((t) => t.id == task.id),
+                    _state!.campusTimeZone,
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
             action: SnackBarAction(
               label: '撤销',
               onPressed: () => _toggleTask(task, !target),
@@ -593,6 +617,14 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ),
       ),
       const SizedBox(height: 24),
+      Text(
+        '提醒',
+        style: Theme.of(context).textTheme.titleMedium
+            ?.copyWith(fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 12),
+      NotificationCard(planner: widget.planner),
+      const SizedBox(height: 24),
       SurfaceCard(
         color: const Color(0xffe6f5ed),
         child: Column(
@@ -609,7 +641,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
               const Text('网页数据保存在当前浏览器的此站点中。清除站点数据或结束隐私浏览可能会丢失记录。'),
             ],
             const SizedBox(height: 10),
-            const Text('备份恢复与系统提醒将在后续版本开放。'),
+            const Text('备份恢复将在后续版本开放。课程与倒计时提醒尚未接入。'),
           ],
         ),
       ),

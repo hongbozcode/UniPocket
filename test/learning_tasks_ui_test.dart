@@ -186,6 +186,7 @@ void main() {
           find.byKey(const ValueKey('task-title')),
           '阅读笔记',
         );
+        await tapVisible(tester, find.byKey(const ValueKey('task-notes')));
         await tester.enterText(find.byKey(const ValueKey('task-notes')), '第三章');
         await tapVisible(tester, find.text('保存任务'));
         await waitFor(tester, find.text('阅读笔记'));

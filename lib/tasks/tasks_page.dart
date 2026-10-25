@@ -53,6 +53,7 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
   Future<void> _load() async {
     try {
       final state = await widget.planner.load();
+      await widget.planner.refreshReminders();
       if (mounted) {
         setState(() {
           _state = state;
@@ -65,8 +66,9 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
   }
 
   Future<void> _edit([LearningTask? task]) async {
+    _messenger.currentState?.removeCurrentSnackBar();
     final state = _state!;
-    final saved = await Navigator.push<bool>(
+    final saved = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => TaskEditor(
@@ -77,7 +79,13 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
         ),
       ),
     );
-    if (saved == true) await _load();
+    if (saved != null) {
+      await _load();
+      if (mounted) {
+        _messenger.currentState!.hideCurrentSnackBar();
+        _messenger.currentState!.showSnackBar(SnackBar(content: Text(saved)));
+      }
+    }
   }
 
   Future<void> _toggle(LearningTask task, [bool? completed]) async {
@@ -91,7 +99,20 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
         _messenger.currentState!.hideCurrentSnackBar();
         _messenger.currentState!.showSnackBar(
           SnackBar(
-            content: Text(target ? '任务已完成' : '已撤销完成'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(target ? '任务已完成' : '已撤销完成'),
+                Text(
+                  widget.planner.taskReminderStatus(
+                    _state!.tasks.singleWhere((t) => t.id == task.id),
+                    _state!.campusTimeZone,
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
             action: SnackBarAction(
               label: '撤销',
               onPressed: () => _toggle(task, !target),
