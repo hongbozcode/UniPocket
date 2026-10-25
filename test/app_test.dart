@@ -9,6 +9,8 @@ import 'package:unipocket/semesters/model.dart';
 import 'package:unipocket/semesters/planner.dart';
 import 'package:unipocket/storage/planner_store.dart';
 
+import 'support/widget_actions.dart';
+
 void main() {
   setUpAll(tzdata.initializeTimeZones);
 
@@ -23,6 +25,7 @@ void main() {
       });
       await tester.pumpWidget(UniPocketApp(planner: SemesterPlanner(store)));
       await tester.pumpAndSettle();
+      await waitFor(tester, find.text('创建学期'));
       expect(find.text('首页'), findsOneWidget);
       expect(find.text('课表'), findsOneWidget);
       expect(find.text('工具'), findsOneWidget);
@@ -46,12 +49,14 @@ void main() {
       );
       await tester.tap(save);
       await tester.pumpAndSettle();
+      await waitFor(tester, find.text('学期已保存到本机'));
       expect(find.text('2026 秋季学期'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
       await store.close();
       store = PlannerStore(NativeDatabase(file));
       await tester.pumpWidget(UniPocketApp(planner: SemesterPlanner(store)));
       await tester.pumpAndSettle();
+      await waitFor(tester, find.text('2026 秋季学期'));
       expect(find.text('2026 秋季学期'), findsOneWidget);
       expect(find.textContaining('Asia/Shanghai'), findsWidgets);
       await tester.pumpWidget(const SizedBox.shrink());

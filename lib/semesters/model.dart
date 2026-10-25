@@ -1,5 +1,7 @@
 import 'package:timezone/timezone.dart' as tz;
 
+import '../timetable/model.dart';
+
 class PeriodTime {
   const PeriodTime(this.startMinutes, this.endMinutes);
 
@@ -78,11 +80,20 @@ class PlannerState {
     required List<Semester> semesters,
     required this.currentSemesterId,
     required this.campusTimeZone,
-  }) : semesters = List.unmodifiable(semesters);
+    List<Course> courses = const [],
+  }) : semesters = List.unmodifiable(semesters),
+       courses = List.unmodifiable(courses);
 
   final List<Semester> semesters;
   final int? currentSemesterId;
   final String campusTimeZone;
+  final List<Course> courses;
+
+  Timetable? get timetable =>
+      currentSemester == null ? null : Timetable(currentSemester!, courses);
+
+  List<ClassOccurrence> today(DateTime instant) =>
+      timetable?.onDate(campusTime(instant)) ?? [];
 
   Semester? get currentSemester {
     for (final semester in semesters) {

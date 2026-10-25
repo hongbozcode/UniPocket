@@ -9,10 +9,14 @@ import 'semesters/planner.dart';
 import 'semesters/semester_editor.dart';
 import 'semesters/semester_pages.dart';
 import 'ui/design.dart';
+import 'timetable/model.dart';
+import 'timetable/course_editor.dart';
+import 'timetable/timetable_page.dart';
 
 class UniPocketApp extends StatelessWidget {
-  const UniPocketApp({required this.planner, super.key});
+  const UniPocketApp({required this.planner, this.clock, super.key});
   final SemesterPlanner planner;
+  final DateTime Function()? clock;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -22,13 +26,14 @@ class UniPocketApp extends StatelessWidget {
     locale: const Locale('zh', 'CN'),
     supportedLocales: const [Locale('zh', 'CN'), Locale('en')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    home: _AppShell(planner: planner),
+    home: _AppShell(planner: planner, clock: clock ?? DateTime.now),
   );
 }
 
 class _AppShell extends StatefulWidget {
-  const _AppShell({required this.planner});
+  const _AppShell({required this.planner, required this.clock});
   final SemesterPlanner planner;
+  final DateTime Function() clock;
   @override
   State<_AppShell> createState() => _AppShellState();
 }
@@ -83,7 +88,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
       MaterialPageRoute(
         builder: (_) => SemesterEditor(
           planner: widget.planner,
-          campusNow: state.campusTime(DateTime.now().toUtc()),
+          campusNow: state.campusTime(widget.clock().toUtc()),
           campusTimeZone: state.campusTimeZone,
           currentSemesterId: state.currentSemesterId,
           semester: semester,
@@ -107,6 +112,30 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
       ),
     );
     await _load();
+  }
+
+  Future<void> _course([Course? course]) async {
+    final state = _state!;
+    final semester = state.currentSemester;
+    if (semester == null) return;
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CourseEditor(
+          planner: widget.planner,
+          semester: semester,
+          campusTimeZone: state.campusTimeZone,
+          course: course,
+        ),
+      ),
+    );
+    if (saved == true) {
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('课程已保存到本机')));
+      }
+    }
   }
 
   Future<void> _timeZone() async {
@@ -151,40 +180,9 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
     ),
   );
 
-  Widget _semesterCard(Semester semester) => SurfaceCard(
-    color: lavenderSoft,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('当前学期', style: TextStyle(color: primaryBlue)),
-        const SizedBox(height: 8),
-        Text(
-          semester.name,
-          style: Theme.of(context).textTheme.titleLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '第 1 周周一 · ${dateText(semester.firstMonday)}\n共 ${semester.totalWeeks} 个教学周',
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: [
-            FilledButton(
-              onPressed: () => _edit(semester),
-              child: const Text('编辑学期与节次'),
-            ),
-            TextButton(onPressed: _manage, child: const Text('管理全部学期')),
-          ],
-        ),
-      ],
-    ),
-  );
-
   Widget _home() {
-    final now = _state!.campusTime(DateTime.now().toUtc());
+    final now = _state!.campusTime(widget.clock().toUtc());
+    final today = _state!.today(widget.clock().toUtc());
     return PageContent(
       children: [
         const Row(
@@ -207,8 +205,51 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ),
         if (_state!.currentSemester == null)
           _startCard()
-        else
-          _semesterCard(_state!.currentSemester!),
+        else ...[
+          Text(
+            _state!.currentSemester!.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text('第 1 周周一 · ${dateText(_state!.currentSemester!.firstMonday)}'),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: () => _course(),
+                icon: const Icon(Icons.add),
+                label: const Text('添加课程'),
+              ),
+              TextButton(
+                onPressed: () => setState(() => _page = 1),
+                child: const Text('查看课表'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            '今日课程',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          if (today.isEmpty)
+            SurfaceCard(
+              child: Text(
+                _state!.timetable!.courses.isEmpty
+                    ? '还没有录入课程，点击“添加课程”开始。'
+                    : '今天没有课程，可以从容安排时间。',
+              ),
+            ),
+          for (final occurrence in today)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: OccurrenceCard(
+                occurrence,
+                onTap: () => _course(occurrence.course),
+              ),
+            ),
+        ],
         const SizedBox(height: 20),
         const SurfaceCard(
           child: Column(
@@ -219,7 +260,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              Text('当前版本支持学期、节次和校园时区配置。课程、学习任务与倒计时将在后续版本开放。'),
+              Text('当前版本支持手动录课、今日课程、周课表与学期配置。学习任务与倒计时将在后续版本开放。'),
             ],
           ),
         ),
@@ -227,18 +268,24 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
     );
   }
 
-  Widget _timetable() => PageContent(
-    children: [
-      PageHeading('我的课表', '校园时间 · ${_state!.campusTimeZone}', art: 'book'),
-      if (_state!.currentSemester == null)
-        _startCard()
-      else ...[
-        _semesterCard(_state!.currentSemester!),
-        const SizedBox(height: 20),
-        const SurfaceCard(child: Text('学期配置已就绪。课程录入与课表查看将在后续版本开放。')),
-      ],
-    ],
-  );
+  Widget _timetable() => _state!.currentSemester != null
+      ? TimetablePage(
+          state: _state!,
+          campusNow: _state!.campusTime(widget.clock().toUtc()),
+          onAdd: () => _course(),
+          onEdit: _course,
+          onManage: _manage,
+        )
+      : PageContent(
+          children: [
+            PageHeading(
+              '我的课表',
+              '校园时间 · ${_state!.campusTimeZone}',
+              art: 'book',
+            ),
+            _startCard(),
+          ],
+        );
 
   Widget _tools() => const PageContent(
     children: [

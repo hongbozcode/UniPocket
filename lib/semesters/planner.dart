@@ -1,9 +1,10 @@
 import 'package:timezone/timezone.dart' as tz;
 
 import '../storage/planner_store.dart';
+import '../timetable/model.dart';
 import 'model.dart';
 
-/// The application boundary for semester configuration. The same operations
+/// The application boundary for semesters and timetables. The same operations
 /// drive the UI and tests that close and reopen the real local database.
 class SemesterPlanner {
   SemesterPlanner(this._store);
@@ -11,13 +12,53 @@ class SemesterPlanner {
 
   Future<PlannerState> load() => _store.readState();
 
+  Future<int> saveCourse(CourseDraft draft, {bool allowConflicts = false}) =>
+      _store.transaction(() async {
+        final state = await load();
+        final semester = state.semesters
+            .where((s) => s.id == draft.semesterId)
+            .firstOrNull;
+        if (semester == null) throw const InputProblem('学期不存在，请返回后重试。');
+        draft.validate(semester);
+        final conflicts = courseConflicts(draft, semester, state.courses);
+        if (conflicts.isNotEmpty && !allowConflicts) {
+          throw CourseConflict(conflicts);
+        }
+        return _store.saveCourse(draft);
+      });
+
   Future<int> saveSemester(
     SemesterDraft draft, {
     int? id,
     bool makeCurrent = false,
-  }) async {
+  }) => _store.transaction(() async {
     draft.validate();
+    if (id != null) {
+      final state = await load();
+      for (final course in state.courses.where((c) => c.semesterId == id)) {
+        try {
+          course.validate(draft);
+        } on InputProblem {
+          throw InputProblem('此修改会使“${course.name}”的已有上课安排失效，请保留其节次与教学周。');
+        }
+      }
+    }
     return _store.save(draft, id: id, makeCurrent: makeCurrent);
+  });
+
+  Future<void> updateCourseDetails(
+    int id, {
+    required String name,
+    required String teacher,
+    required int colorIndex,
+  }) async {
+    validateCourseDetails(name, colorIndex);
+    await _store.updateCourseDetails(
+      id,
+      name: name,
+      teacher: teacher,
+      colorIndex: colorIndex,
+    );
   }
 
   Future<void> setCurrentSemester(int id) => _store.selectCurrent(id);

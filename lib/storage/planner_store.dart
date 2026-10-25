@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../semesters/model.dart';
+import '../timetable/model.dart';
 
 part 'planner_store.g.dart';
 
@@ -37,7 +40,35 @@ class SettingsRecords extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [SemesterRecords, PeriodRecords, SettingsRecords])
+@DataClassName('StoredCourse')
+class CourseRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get semesterId => integer().references(SemesterRecords, #id)();
+  TextColumn get name => text()();
+  TextColumn get teacher => text()();
+  IntColumn get colorIndex => integer()();
+}
+
+@DataClassName('StoredSchedule')
+class ScheduleRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get courseId => integer().references(CourseRecords, #id)();
+  IntColumn get weekday => integer()();
+  IntColumn get startPeriod => integer()();
+  IntColumn get endPeriod => integer()();
+  TextColumn get location => text()();
+  TextColumn get weeks => text()();
+}
+
+@DriftDatabase(
+  tables: [
+    SemesterRecords,
+    PeriodRecords,
+    SettingsRecords,
+    CourseRecords,
+    ScheduleRecords,
+  ],
+)
 class PlannerStore extends _$PlannerStore {
   PlannerStore(super.executor);
 
@@ -52,7 +83,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +91,12 @@ class PlannerStore extends _$PlannerStore {
       await m.createAll();
       await into(settingsRecords)
           .insert(const SettingsRecordsCompanion(id: Value(1)));
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(courseRecords);
+        await m.createTable(scheduleRecords);
+      }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -75,7 +112,35 @@ class PlannerStore extends _$PlannerStore {
               (p) => OrderingTerm.asc(p.number),
             ]))
             .get();
+    final courses = await select(courseRecords).get();
+    final schedules = await (select(
+      scheduleRecords,
+    )..orderBy([(s) => OrderingTerm.asc(s.id)])).get();
     return PlannerState(
+      courses: [
+        for (final course in courses)
+          Course(
+            id: course.id,
+            semesterId: course.semesterId,
+            name: course.name,
+            teacher: course.teacher,
+            colorIndex: course.colorIndex,
+            schedules: [
+              for (final schedule in schedules)
+                if (schedule.courseId == course.id)
+                  ClassSchedule(
+                    id: schedule.id,
+                    weekday: schedule.weekday,
+                    startPeriod: schedule.startPeriod,
+                    endPeriod: schedule.endPeriod,
+                    location: schedule.location,
+                    weeks: (jsonDecode(schedule.weeks) as List)
+                        .cast<int>()
+                        .toSet(),
+                  ),
+            ],
+          ),
+      ],
       semesters: [
         for (final row in rows)
           Semester(
@@ -153,8 +218,49 @@ class PlannerStore extends _$PlannerStore {
     );
   });
 
+  Future<int> saveCourse(CourseDraft draft) => transaction(() async {
+    final id = await into(courseRecords).insert(
+      CourseRecordsCompanion.insert(
+        semesterId: draft.semesterId,
+        name: draft.name.trim(),
+        teacher: draft.teacher.trim(),
+        colorIndex: draft.colorIndex,
+      ),
+    );
+    for (final schedule in draft.schedules) {
+      await into(scheduleRecords).insert(
+        ScheduleRecordsCompanion.insert(
+          courseId: id,
+          weekday: schedule.weekday,
+          startPeriod: schedule.startPeriod,
+          endPeriod: schedule.endPeriod,
+          location: schedule.location.trim(),
+          weeks: jsonEncode(schedule.weeks.toList()..sort()),
+        ),
+      );
+    }
+    return id;
+  });
+
   Future<void> writeTimeZone(String zone) =>
       (update(settingsRecords)..where((s) => s.id.equals(1))).write(
         SettingsRecordsCompanion(campusTimeZone: Value(zone)),
       );
+
+  Future<void> updateCourseDetails(
+    int id, {
+    required String name,
+    required String teacher,
+    required int colorIndex,
+  }) async {
+    final count = await (update(courseRecords)..where((c) => c.id.equals(id)))
+        .write(
+          CourseRecordsCompanion(
+            name: Value(name.trim()),
+            teacher: Value(teacher.trim()),
+            colorIndex: Value(colorIndex),
+          ),
+        );
+    if (count == 0) throw const InputProblem('课程不存在，请返回后重试。');
+  }
 }
