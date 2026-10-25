@@ -35,6 +35,11 @@ flutter:
     - docs/design/resources/icons/settings.svg
     - docs/design/resources/icons/clock.svg
     - docs/design/resources/icons/globe.svg
+    - docs/design/resources/icons/plus.svg
+    - docs/design/resources/icons/left.svg
+    - docs/design/resources/icons/right.svg
+    - docs/design/resources/icons/book.svg
+    - docs/design/resources/icons/location.svg
     - docs/design/resources/illustrations/calendar.svg
     - docs/design/resources/illustrations/book.svg
     - docs/design/resources/illustrations/sun.svg

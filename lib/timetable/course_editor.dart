@@ -3,21 +3,14 @@ import 'package:flutter/material.dart';
 import '../semesters/model.dart';
 import '../semesters/planner.dart';
 import '../ui/design.dart';
+import '../ui/course_palette.dart';
 import 'model.dart';
 
-const courseColors = [
-  Color(0xffeaf2ff),
-  Color(0xfff0eaff),
-  Color(0xffe6f5ed),
-  Color(0xfffff4d2),
-  Color(0xffffecdf),
-  Color(0xfffcecf3),
-];
-const courseColorNames = ['浅蓝', '淡紫', '薄荷', '奶黄', '浅桃', '柔粉'];
-
-String scheduleText(ScheduleDraft schedule) {
+String scheduleText(ScheduleDraft schedule, Semester semester) {
   final weeks = schedule.weeks.toList()..sort();
+  final periods = semester.periods[schedule.weekday]!;
   return '${weekdayNames[schedule.weekday - 1]} · 第 ${schedule.startPeriod}–${schedule.endPeriod} 节\n'
+      '${PeriodTime.format(periods[schedule.startPeriod - 1].startMinutes)}–${PeriodTime.format(periods[schedule.endPeriod - 1].endMinutes)}\n'
       '${schedule.location.isEmpty ? '地点未填写' : schedule.location}\n第 ${weeks.join('、')} 周';
 }
 
@@ -27,12 +20,14 @@ class CourseEditor extends StatefulWidget {
     required this.semester,
     required this.campusTimeZone,
     this.course,
+    this.initialColorIndex = 0,
     super.key,
   });
   final SemesterPlanner planner;
   final Semester semester;
   final String campusTimeZone;
   final Course? course;
+  final int initialColorIndex;
 
   @override
   State<CourseEditor> createState() => _CourseEditorState();
@@ -61,7 +56,7 @@ class _CourseEditorState extends State<CourseEditor> {
   late final _teacher = TextEditingController(
     text: widget.course?.teacher ?? '',
   );
-  late int _color = widget.course?.colorIndex ?? 0;
+  late int _color = widget.course?.colorIndex ?? widget.initialColorIndex;
   final _scroll = ScrollController();
   final _schedules = <_ScheduleFields>[];
   var _saving = false;
@@ -151,6 +146,7 @@ class _CourseEditorState extends State<CourseEditor> {
   }
 
   Future<void> _save() async {
+    if (_saving) return;
     FocusScope.of(context).unfocus();
     setState(() {
       _saving = true;
@@ -367,19 +363,51 @@ class _CourseEditorState extends State<CourseEditor> {
                 decoration: const InputDecoration(labelText: '教师（可选）'),
               ),
               const SizedBox(height: 16),
-              const Text('课程识别色'),
+              const Text('课程识别色 · 本课程的所有上课安排使用同一颜色'),
+              const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  for (var color = 0; color < courseColors.length; color++)
+                  for (final color in {
+                    for (var i = 0; i < courseColorNames.length; i++) i,
+                    widget.initialColorIndex,
+                    if (widget.course != null) widget.course!.colorIndex,
+                  })
                     ChoiceChip(
-                      label: Text(courseColorNames[color]),
-                      selectedColor: courseColors[color],
+                      key: ValueKey('course-color-$color'),
+                      avatar: CircleAvatar(
+                        backgroundColor: courseAccent(color),
+                        radius: 9,
+                      ),
+                      label: Text(
+                        color < courseColorNames.length
+                            ? courseColorNames[color]
+                            : '推荐色',
+                      ),
+                      backgroundColor: courseTint(color),
+                      selectedColor: courseTint(color),
                       selected: _color == color,
                       onSelected: (_) => setState(() => _color = color),
                     ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                key: const ValueKey('course-color-preview'),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: courseTint(_color),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: courseAccent(_color)),
+                ),
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _name,
+                  builder: (_, value, child) => Text(
+                    value.text.trim().isEmpty ? '课程颜色预览' : value.text,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               if (widget.course case final course?) ...[
@@ -392,8 +420,8 @@ class _CourseEditorState extends State<CourseEditor> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: SurfaceCard(
-                      color: courseColors[_color],
-                      child: Text(scheduleText(schedule)),
+                      color: courseTint(_color),
+                      child: Text(scheduleText(schedule, widget.semester)),
                     ),
                   ),
                 const Text('此处可编辑课程名称、教师和颜色。重复安排修改与删除将在后续版本开放。'),

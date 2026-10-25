@@ -7,6 +7,47 @@ const canvasColor = Color(0xfff5f8fd);
 const inkColor = Color(0xff202b40);
 const weekdayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
+class RoundDesignButton extends StatelessWidget {
+  const RoundDesignButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.primary = false,
+    super.key,
+  });
+  final String icon;
+  final String label;
+  final VoidCallback? onPressed;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: primary ? primaryBlue : const Color(0xffedf2fb),
+      shape: BoxShape.circle,
+    ),
+    child: Material(
+      type: MaterialType.transparency,
+      shape: const CircleBorder(),
+      child: IconButton(
+        tooltip: label,
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          disabledBackgroundColor: const Color(0xfff2f4f8),
+          minimumSize: const Size(44, 44),
+        ),
+        icon: DesignIcon(
+          icon,
+          size: 22,
+          color: primary
+              ? Colors.white
+              : (onPressed == null ? const Color(0xffaeb8ca) : inkColor),
+        ),
+      ),
+    ),
+  );
+}
+
 String dateText(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
@@ -105,11 +146,21 @@ class PageHeading extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.headlineMedium
-                      ?.copyWith(fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    height: 1.25,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    height: 1.7,
+                    color: Color(0xff73819a),
+                  ),
+                ),
               ],
             ),
           ),

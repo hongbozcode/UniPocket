@@ -64,7 +64,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         if (!restoreStage) {
-          await tap(find.text('添加课程'));
+          await tap(find.byTooltip('添加课程'));
           await tester.enterText(
             find.byKey(const ValueKey('course-name')),
             '高等数学与数学分析',
@@ -100,7 +100,7 @@ void main() {
           await tap(find.byKey(const ValueKey('save-course')));
           expect(find.text('高等数学与数学分析'), findsOneWidget);
           await screenshot('02-android-today-saved');
-          await tap(find.text('添加课程'));
+          await tap(find.byTooltip('添加课程'));
           await tester.enterText(
             find.byKey(const ValueKey('course-name')),
             '保留的冲突课程',
@@ -112,6 +112,7 @@ void main() {
         }
         final state = await planner.load();
         expect(state.courses, hasLength(2));
+        expect(state.courses.map((c) => c.colorIndex).toSet(), hasLength(2));
         final math = state.courses.singleWhere((c) => c.name == '高等数学与数学分析');
         expect(math.teacher, '李老师');
         expect(math.schedules, hasLength(2));

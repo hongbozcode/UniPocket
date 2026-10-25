@@ -118,6 +118,14 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
     final state = _state!;
     final semester = state.currentSemester;
     if (semester == null) return;
+    final usedColors = state.courses
+        .where((c) => c.semesterId == semester.id)
+        .map((c) => c.colorIndex)
+        .toSet();
+    var initialColor = 0;
+    while (usedColors.contains(initialColor)) {
+      initialColor++;
+    }
     final saved = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -126,6 +134,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           semester: semester,
           campusTimeZone: state.campusTimeZone,
           course: course,
+          initialColorIndex: initialColor,
         ),
       ),
     );
@@ -183,86 +192,107 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   Widget _home() {
     final now = _state!.campusTime(widget.clock().toUtc());
     final today = _state!.today(widget.clock().toUtc());
+    final semester = _state!.currentSemester;
+    final week = _state!.timetable?.weekOf(now);
+    final weekText = semester == null
+        ? ''
+        : (week! >= 1 && week <= semester.totalWeeks
+              ? ' · 第 $week 周'
+              : ' · 学期外');
     return PageContent(
       children: [
-        const Row(
+        Row(
           children: [
-            DesignIcon('badge', size: 28),
-            SizedBox(width: 8),
-            Expanded(
+            const DesignIcon('badge', size: 24),
+            const SizedBox(width: 8),
+            const Expanded(
               child: Text(
                 'UniPocket',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
             ),
+            if (semester != null)
+              RoundDesignButton(
+                icon: 'plus',
+                label: '添加课程',
+                onPressed: () => _course(),
+                primary: true,
+              ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
         PageHeading(
-          '今天，也从容一点',
-          '${now.month}月${now.day}日 ${weekdayNames[now.weekday - 1]}\n校园时间 · ${_state!.campusTimeZone}',
+          '${now.hour < 12
+              ? '早上好'
+              : now.hour < 18
+              ? '下午好'
+              : '晚上好'}，\n今天也从容一点',
+          '${now.month}月${now.day}日 ${weekdayNames[now.weekday - 1]}$weekText\n校园时间  ${_state!.campusTimeZone}',
           art: 'sun',
         ),
-        if (_state!.currentSemester == null)
+        if (semester == null)
           _startCard()
         else ...[
-          Text(
-            _state!.currentSemester!.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text('第 1 周周一 · ${dateText(_state!.currentSemester!.firstMonday)}'),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              FilledButton.icon(
-                onPressed: () => _course(),
-                icon: const Icon(Icons.add),
-                label: const Text('添加课程'),
-              ),
-              TextButton(
-                onPressed: () => setState(() => _page = 1),
-                child: const Text('查看课表'),
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const DesignIcon('calendar', size: 20),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        '今日课程',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => setState(() => _page = 1),
+                      child: const Text(
+                        '全部 ›',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xff73819a),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                TodayCourses(
+                  occurrences: today,
+                  campusNow: now,
+                  onEdit: _course,
+                  emptyText: _state!.timetable!.courses.isEmpty
+                      ? '还没有录入课程，点击右上角添加。'
+                      : '今天没有课程，可以从容安排时间。',
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            '今日课程',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            semester.name,
+            style: const TextStyle(fontSize: 12, color: Color(0xff73819a)),
           ),
-          const SizedBox(height: 12),
-          if (today.isEmpty)
-            SurfaceCard(
-              child: Text(
-                _state!.timetable!.courses.isEmpty
-                    ? '还没有录入课程，点击“添加课程”开始。'
-                    : '今天没有课程，可以从容安排时间。',
-              ),
-            ),
-          for (final occurrence in today)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: OccurrenceCard(
-                occurrence,
-                onTap: () => _course(occurrence.course),
-              ),
-            ),
+          Text(
+            '第 1 周周一 · ${dateText(semester.firstMonday)}',
+            style: const TextStyle(fontSize: 11, color: Color(0xff73819a)),
+          ),
         ],
         const SizedBox(height: 20),
-        const SurfaceCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '学习安排，从学期开始',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text('当前版本支持手动录课、今日课程、周课表与学期配置。学习任务与倒计时将在后续版本开放。'),
-            ],
-          ),
+        const Text(
+          '学习任务与倒计时将在后续版本开放。',
+          style: TextStyle(fontSize: 12, color: Color(0xff73819a)),
         ),
       ],
     );

@@ -15,6 +15,92 @@ import 'support/widget_actions.dart';
 void main() {
   setUpAll(tzdata.initializeTimeZones);
 
+  testWidgets('六种基础色用完后，新课程仍默认分配未使用的颜色，编辑不改变已有安排颜色', (tester) async {
+    await tester.runAsync(() async {
+      final store = PlannerStore(NativeDatabase.memory());
+      final planner = SemesterPlanner(store);
+      final semester = await planner.saveSemester(semesterDraft('秋季'));
+      for (var i = 0; i < 6; i++) {
+        await planner.saveCourse(
+          CourseDraft(
+            semesterId: semester,
+            name: '已有课程 $i',
+            colorIndex: i,
+            schedules: [
+              ScheduleDraft(
+                weekday: i + 1,
+                startPeriod: 1,
+                endPeriod: 1,
+                location: '',
+                weeks: {1},
+              ),
+            ],
+          ),
+        );
+      }
+      try {
+        await tester.pumpWidget(
+          UniPocketApp(
+            planner: planner,
+            clock: () => DateTime.utc(2026, 8, 31),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tapVisible(tester, find.byTooltip('添加课程'));
+        await tester.enterText(
+          find.byKey(const ValueKey('course-name')),
+          '第七门课程',
+        );
+        expect(find.text('推荐色'), findsOneWidget);
+        await tapVisible(tester, find.byKey(const ValueKey('schedule-day-0')));
+        await tapVisible(tester, find.text('周日').last);
+        await tapVisible(tester, find.byKey(const ValueKey('save-course')));
+        await waitFor(tester, find.text('课程已保存到本机'));
+        final state = await planner.load();
+        expect(state.courses.map((c) => c.colorIndex).toSet(), hasLength(7));
+        expect(state.courses.last.colorIndex, 6);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await store.close();
+      }
+    });
+  });
+
+  for (final width in [320.0, 393.0]) {
+    testWidgets('$width 普通字号下同屏呈现周一至周日', (tester) async {
+      tester.view.physicalSize = Size(width, 852);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      await tester.runAsync(() async {
+        final store = PlannerStore(NativeDatabase.memory());
+        final planner = SemesterPlanner(store);
+        await planner.saveSemester(semesterDraft('秋季'));
+        try {
+          await tester.pumpWidget(
+            UniPocketApp(
+              planner: planner,
+              clock: () => DateTime.utc(2026, 8, 31),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tapVisible(tester, find.text('课表'));
+          for (final day in ['一', '二', '三', '四', '五', '六', '日']) {
+            final rect = tester.getRect(find.text(day));
+            expect(rect.left, greaterThanOrEqualTo(0));
+            expect(rect.right, lessThanOrEqualTo(width));
+          }
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await store.close();
+        }
+      });
+    });
+  }
+
   for (final width in [320.0, 393.0]) {
     testWidgets('$width 窄屏双倍字号下多安排与教学周选择可保存，周网格、详情和滚动可达', (tester) async {
       tester.view.physicalSize = Size(width, 900);
@@ -43,7 +129,7 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          await tap(find.text('添加课程'));
+          await tap(find.byTooltip('添加课程'));
           const name = '很长的高等数学与数学分析课程名称需要完整换行显示';
           await tester.enterText(
             find.byKey(const ValueKey('course-name')),
@@ -150,7 +236,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tap(find.text('添加课程'));
+        await tap(find.byTooltip('添加课程'));
         await tester.enterText(find.byKey(const ValueKey('course-name')), '英语');
         await tap(find.byKey(const ValueKey('save-course')));
         await waitFor(tester, find.text('上课时间冲突'));
@@ -161,7 +247,11 @@ void main() {
         await tap(find.text('仍然保存'));
         await waitFor(tester, find.text('课程已保存到本机'));
         expect((await planner.load()).courses, hasLength(2));
-        await tap(find.text('添加课程'));
+        expect(
+          (await planner.load()).courses.map((c) => c.colorIndex).toSet(),
+          hasLength(2),
+        );
+        await tap(find.byTooltip('添加课程'));
         await tester.enterText(
           find.byKey(const ValueKey('course-name')),
           '无效课程',
@@ -194,7 +284,7 @@ void main() {
         );
         await tester.pumpWidget(app());
         await tester.pumpAndSettle();
-        await tester.tap(find.text('添加课程'));
+        await tester.tap(find.byTooltip('添加课程'));
         await tester.pumpAndSettle();
         await tester.enterText(
           find.byKey(const ValueKey('course-name')),

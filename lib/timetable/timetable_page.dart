@@ -1,45 +1,218 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../semesters/model.dart';
+import '../ui/course_palette.dart';
 import '../ui/design.dart';
-import 'course_editor.dart';
 import 'model.dart';
+import 'week_grid.dart';
 
 class OccurrenceCard extends StatelessWidget {
-  const OccurrenceCard(this.occurrence, {required this.onTap, super.key});
+  const OccurrenceCard(
+    this.occurrence, {
+    required this.onTap,
+    this.featured = false,
+    this.status,
+    super.key,
+  });
   final ClassOccurrence occurrence;
   final VoidCallback onTap;
+  final bool featured;
+  final String? status;
 
   @override
-  Widget build(BuildContext context) => Card(
-    color: courseColors[occurrence.course.colorIndex],
+  Widget build(BuildContext context) => Material(
+    color: featured ? courseTint(occurrence.course.colorIndex) : Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: featured
+          ? BorderSide.none
+          : const BorderSide(color: Color(0xffe9edf5)),
+    ),
     child: InkWell(
-      borderRadius: BorderRadius.circular(24),
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              occurrence.course.name,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)} · 第 ${occurrence.schedule.startPeriod}–${occurrence.schedule.endPeriod} 节',
-            ),
-            const SizedBox(height: 4),
-            Text(occurrence.location.isEmpty ? '地点未填写' : occurrence.location),
-            if (occurrence.course.teacher.isNotEmpty)
-              Text('教师 · ${occurrence.course.teacher}'),
-          ],
+        padding: const EdgeInsets.all(12),
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final showArt =
+                featured &&
+                box.maxWidth > 250 &&
+                MediaQuery.textScalerOf(context).scale(14) < 22;
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (!featured)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: courseTint(occurrence.course.colorIndex),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DesignIcon(
+                        'book',
+                        color: courseAccent(occurrence.course.colorIndex),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (status != null) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: primaryBlue,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                status!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 7),
+                          ],
+                          Expanded(
+                            child: Text(
+                              occurrence.course.name,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const DesignIcon(
+                            'clock',
+                            size: 15,
+                            color: Color(0xff73819a),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)}${featured ? '' : ' · ${occurrence.location.isEmpty ? '地点未填写' : occurrence.location}'}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xff52617a),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (featured) ...[
+                        const SizedBox(height: 5),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const DesignIcon(
+                              'location',
+                              size: 15,
+                              color: Color(0xff73819a),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                occurrence.location.isEmpty
+                                    ? '地点未填写'
+                                    : occurrence.location,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xff52617a),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (showArt)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: SvgPicture.asset(
+                      'docs/design/resources/illustrations/book.svg',
+                      width: 64,
+                      height: 64,
+                      excludeFromSemantics: true,
+                    ),
+                  ),
+                if (!featured)
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: Color(0xff93a0b5),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     ),
   );
+}
+
+class TodayCourses extends StatelessWidget {
+  const TodayCourses({
+    required this.occurrences,
+    required this.campusNow,
+    required this.onEdit,
+    this.emptyText = '今天没有课程，可以从容安排时间。',
+    super.key,
+  });
+  final List<ClassOccurrence> occurrences;
+  final DateTime campusNow;
+  final ValueChanged<Course> onEdit;
+  final String emptyText;
+
+  @override
+  Widget build(BuildContext context) {
+    final minutes = campusNow.hour * 60 + campusNow.minute;
+    final next = occurrences.where((o) => o.endMinutes > minutes).firstOrNull;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (occurrences.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              emptyText,
+              style: const TextStyle(color: Color(0xff73819a), fontSize: 13),
+            ),
+          ),
+        for (final occurrence in occurrences)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: OccurrenceCard(
+              occurrence,
+              onTap: () => onEdit(occurrence.course),
+              featured: identical(occurrence, next),
+              status: identical(occurrence, next)
+                  ? (occurrence.startMinutes <= minutes ? '进行中' : '下一节')
+                  : null,
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 class TimetablePage extends StatefulWidget {
@@ -56,7 +229,6 @@ class TimetablePage extends StatefulWidget {
   final VoidCallback onAdd;
   final ValueChanged<Course> onEdit;
   final VoidCallback onManage;
-
   @override
   State<TimetablePage> createState() => _TimetablePageState();
 }
@@ -64,7 +236,6 @@ class TimetablePage extends StatefulWidget {
 class _TimetablePageState extends State<TimetablePage> {
   late int _week = _currentWeek;
   var _today = false;
-  final _horizontal = ScrollController();
   Timetable get _timetable => widget.state.timetable!;
   int get _actualWeek => _timetable.weekOf(widget.campusNow);
   int get _currentWeek => _actualWeek.clamp(1, _timetable.semester.totalWeeks);
@@ -78,294 +249,267 @@ class _TimetablePageState extends State<TimetablePage> {
     _week = _week.clamp(1, _timetable.semester.totalWeeks);
   }
 
-  @override
-  void dispose() {
-    _horizontal.dispose();
-    super.dispose();
-  }
-
-  Widget _grid() {
-    final occurrences = _timetable.inWeek(_week);
-    final periods = _timetable.semester.periods;
-    final count = periods.values.fold(
-      0,
-      (maximum, day) => math.max(maximum, day.length),
-    );
-    final monday = _timetable.mondayOf(_week);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _modeSwitch() => Container(
+    padding: const EdgeInsets.all(3),
+    decoration: BoxDecoration(
+      color: const Color(0xffeaf0fa),
+      borderRadius: BorderRadius.circular(24),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          '横向滑动查看七天 · 点击课程查看详情',
-          style: TextStyle(color: Color(0xff52617a)),
-        ),
-        const SizedBox(height: 12),
-        Scrollbar(
-          controller: _horizontal,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            controller: _horizontal,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Table(
-              defaultColumnWidth: const FixedColumnWidth(120),
-              columnWidths: const {0: FixedColumnWidth(64)},
-              border: TableBorder.all(
-                color: const Color(0xffdfe5f0),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              defaultVerticalAlignment: TableCellVerticalAlignment.top,
-              children: [
-                TableRow(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text('节次'),
-                    ),
-                    for (var day = 1; day <= 7; day++)
-                      Builder(
-                        builder: (_) {
-                          final date = monday.add(Duration(days: day - 1));
-                          final today =
-                              dateText(date) == dateText(widget.campusNow);
-                          return Container(
-                            color: today ? lavenderSoft : Colors.white,
-                            padding: const EdgeInsets.all(10),
-                            child: Text(
-                              '${weekdayNames[day - 1]}\n${date.month}/${date.day}${today ? '\n今天' : ''}',
-                              style: TextStyle(
-                                fontWeight: today
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                  ],
-                ),
-                for (var period = 1; period <= count; period++)
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text('第\n$period\n节'),
-                      ),
-                      for (var day = 1; day <= 7; day++)
-                        Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if ((periods[day]?.length ?? 0) >= period)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: Text(
-                                    PeriodTime.format(
-                                      periods[day]![period - 1].startMinutes,
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xff52617a),
-                                    ),
-                                  ),
-                                ),
-                              for (final occurrence in occurrences)
-                                if (occurrence.date.weekday == day &&
-                                    occurrence.schedule.startPeriod <= period &&
-                                    occurrence.schedule.endPeriod >= period)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 4),
-                                    child: Material(
-                                      color:
-                                          courseColors[occurrence
-                                              .course
-                                              .colorIndex],
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: InkWell(
-                                        onTap: () =>
-                                            widget.onEdit(occurrence.course),
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                occurrence.course.name,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              if (occurrence
-                                                      .schedule
-                                                      .startPeriod ==
-                                                  period) ...[
-                                                Text(
-                                                  '第 ${occurrence.schedule.startPeriod}–${occurrence.schedule.endPeriod} 节',
-                                                ),
-                                                Text(
-                                                  '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)}',
-                                                ),
-                                                Text(
-                                                  occurrence.location.isEmpty
-                                                      ? '地点未填写'
-                                                      : occurrence.location,
-                                                ),
-                                              ] else
-                                                const Text('续课'),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              if ((periods[day]?.length ?? 0) < period)
-                                const Text('未设节次'),
-                              const SizedBox(height: 12),
-                            ],
-                          ),
-                        ),
-                    ],
+        for (final mode in [('周课表', false), ('今日', true)])
+          Semantics(
+            selected: _today == mode.$2,
+            button: true,
+            child: Material(
+              color: _today == mode.$2
+                  ? const Color(0xffd6c1fc)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(22),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(22),
+                onTap: () => setState(() => _today = mode.$2),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
                   ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final courses = _timetable.courses;
-    final today = _timetable.onDate(widget.campusNow);
-    return PageContent(
-      children: [
-        PageHeading(
-          '我的课表',
-          '${_timetable.semester.name}\n校园时间 · ${widget.state.campusTimeZone}',
-          art: 'book',
-        ),
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: [
-            FilledButton.icon(
-              onPressed: widget.onAdd,
-              icon: const Icon(Icons.add),
-              label: const Text('添加课程'),
-            ),
-            TextButton(
-              onPressed: widget.onManage,
-              child: const Text('切换／管理学期'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          children: [
-            ChoiceChip(
-              label: const Text('周课表'),
-              selected: !_today,
-              onSelected: (_) => setState(() => _today = false),
-            ),
-            ChoiceChip(
-              label: const Text('今日'),
-              selected: _today,
-              onSelected: (_) => setState(() => _today = true),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (_today) ...[
-          Text(
-            '${dateText(widget.campusNow)} · ${weekdayNames[widget.campusNow.weekday - 1]}',
-          ),
-          const SizedBox(height: 16),
-          if (today.isEmpty) const SurfaceCard(child: Text('今天没有课程，可以从容安排时间。')),
-          for (final occurrence in today)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: OccurrenceCard(
-                occurrence,
-                onTap: () => widget.onEdit(occurrence.course),
+                  child: Text(
+                    mode.$1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: _today == mode.$2
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
               ),
             ),
-        ] else ...[
-          Wrap(
+          ),
+      ],
+    ),
+  );
+
+  Widget _semester() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      InkWell(
+        onTap: widget.onManage,
+        child: Text(
+          _timetable.semester.name,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+      const SizedBox(height: 5),
+      Text(
+        '校园时间  ${widget.state.campusTimeZone}',
+        style: const TextStyle(fontSize: 11, color: Color(0xff73819a)),
+      ),
+    ],
+  );
+
+  Widget _weeks() {
+    final previous = RoundDesignButton(
+      icon: 'left',
+      label: '上一周',
+      onPressed: _week > 1 ? () => setState(() => _week--) : null,
+    );
+    final next = RoundDesignButton(
+      icon: 'right',
+      label: '下一周',
+      onPressed: _week < _timetable.semester.totalWeeks
+          ? () => setState(() => _week++)
+          : null,
+    );
+    final label = Text(
+      '第 $_week 周',
+      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+    );
+    final back = OutlinedButton(
+      onPressed: () => setState(() => _week = _currentWeek),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 32),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        side: const BorderSide(color: Color(0xff9bb2ff)),
+      ),
+      child: const Text('回到本周', style: TextStyle(fontSize: 11)),
+    );
+    return MediaQuery.textScalerOf(context).scale(12) > 17
+        ? Wrap(
             spacing: 8,
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
+            children: [previous, label, next, back],
+          )
+        : Row(
             children: [
-              IconButton(
-                tooltip: '上一周',
-                onPressed: _week > 1 ? () => setState(() => _week--) : null,
-                icon: const Icon(Icons.chevron_left),
+              previous,
+              const SizedBox(width: 10),
+              label,
+              const SizedBox(width: 4),
+              next,
+              const Spacer(),
+              back,
+            ],
+          );
+  }
+
+  @override
+  Widget build(BuildContext context) => PageContent(
+    children: [
+      Row(
+        children: [
+          const Expanded(
+            child: Text(
+              '课表',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+          ),
+          RoundDesignButton(
+            icon: 'plus',
+            label: '添加课程',
+            onPressed: widget.onAdd,
+            primary: true,
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+      LayoutBuilder(
+        builder: (context, box) =>
+            box.maxWidth > 330 &&
+                MediaQuery.textScalerOf(context).scale(12) < 17
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _semester()),
+                  const SizedBox(width: 10),
+                  _modeSwitch(),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _semester(),
+                  const SizedBox(height: 12),
+                  _modeSwitch(),
+                ],
               ),
-              Text(
-                '第 $_week 周',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+      ),
+      const SizedBox(height: 16),
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_today) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+                child: Text(
+                  '${dateText(widget.campusNow)} · ${weekdayNames[widget.campusNow.weekday - 1]}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xff73819a),
+                  ),
                 ),
               ),
-              IconButton(
-                tooltip: '下一周',
-                onPressed: _week < _timetable.semester.totalWeeks
-                    ? () => setState(() => _week++)
-                    : null,
-                icon: const Icon(Icons.chevron_right),
+              TodayCourses(
+                occurrences: _timetable.onDate(widget.campusNow),
+                campusNow: widget.campusNow,
+                onEdit: widget.onEdit,
               ),
-              TextButton(
-                onPressed: () => setState(() => _week = _currentWeek),
-                child: const Text('回到本周'),
+            ] else ...[
+              _weeks(),
+              if (_actualWeek < 1 ||
+                  _actualWeek > _timetable.semester.totalWeeks)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    '今天不在本学期内；回到本周将显示最近的教学周。',
+                    style: TextStyle(fontSize: 12, color: Color(0xff73819a)),
+                  ),
+                ),
+              const SizedBox(height: 12),
+              if (_timetable.inWeek(_week).isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    '本周暂无课程，可添加课程或查看其他教学周。',
+                    style: TextStyle(fontSize: 12, color: Color(0xff73819a)),
+                  ),
+                ),
+              WeekGrid(
+                timetable: _timetable,
+                week: _week,
+                today: widget.campusNow,
+                onEdit: widget.onEdit,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (final index
+                      in _timetable.courses.map((c) => c.colorIndex).toSet())
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: courseTint(index),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  const Text(
+                    '课程颜色区分 · 点击课程查看详情',
+                    style: TextStyle(fontSize: 10, color: Color(0xff73819a)),
+                  ),
+                ],
               ),
             ],
-          ),
-          Text(
-            '${dateText(_timetable.mondayOf(_week))} — ${dateText(_timetable.mondayOf(_week).add(const Duration(days: 6)))}',
-          ),
-          if (_actualWeek < 1 || _actualWeek > _timetable.semester.totalWeeks)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text('今天不在本学期内；回到本周将显示最近的教学周。'),
-            ),
-          const SizedBox(height: 16),
-          if (_timetable.inWeek(_week).isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: SurfaceCard(child: Text('本周暂无课程，可添加课程或查看其他教学周。')),
-            ),
-          _grid(),
-        ],
-        const SizedBox(height: 24),
-        const Text(
-          '本学期课程',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ],
         ),
-        const SizedBox(height: 12),
-        if (courses.isEmpty)
-          const SurfaceCard(child: Text('还没有录入课程，点击“添加课程”开始。')),
-        for (final course in courses)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Card(
-              color: courseColors[course.colorIndex],
-              child: ListTile(
-                title: Text(course.name),
-                subtitle: Text(
-                  '${course.teacher.isEmpty ? '教师未填写' : course.teacher}\n${course.schedules.length} 个上课安排',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => widget.onEdit(course),
-              ),
+      ),
+      const SizedBox(height: 16),
+      ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+        shape: const Border(),
+        collapsedShape: const Border(),
+        title: const Text(
+          '本学期课程',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        children: [
+          if (_timetable.courses.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('还没有录入课程，点击右上角添加。'),
             ),
-          ),
-      ],
-    );
-  }
+          for (final course in _timetable.courses)
+            ListTile(
+              leading: Container(
+                width: 12,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: courseTint(course.colorIndex),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              title: Text(course.name),
+              subtitle: Text(
+                '${course.teacher.isEmpty ? '教师未填写' : course.teacher} · ${course.schedules.length} 个上课安排',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => widget.onEdit(course),
+            ),
+        ],
+      ),
+      TextButton(onPressed: widget.onManage, child: const Text('切换／管理学期')),
+    ],
+  );
 }

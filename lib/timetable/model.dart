@@ -69,7 +69,7 @@ class CourseDraft {
 
 void validateCourseDetails(String name, int colorIndex) {
   if (name.trim().isEmpty) throw const InputProblem('请输入课程名称。');
-  if (colorIndex < 0 || colorIndex > 5) {
+  if (colorIndex < 0) {
     throw const InputProblem('请选择有效的课程颜色。');
   }
 }
