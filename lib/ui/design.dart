@@ -165,14 +165,16 @@ class DesignIcon extends StatelessWidget {
 }
 
 class PageContent extends StatelessWidget {
-  const PageContent({required this.children, super.key});
+  const PageContent({required this.children, this.controller, super.key});
   final List<Widget> children;
+  final ScrollController? controller;
 
   @override
   Widget build(BuildContext context) => Center(
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 760),
       child: ListView(
+        controller: controller,
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         children: children,
       ),

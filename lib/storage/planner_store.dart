@@ -89,6 +89,8 @@ class CountdownEventRecords extends Table {
   TextColumn get targetDate => text()();
   TextColumn get kind => text()();
   BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
+  IntColumn get reminderMinutes =>
+      integer().nullable().withDefault(const Constant(540))();
 }
 
 @DataClassName('StoredClassException')
@@ -144,7 +146,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -170,6 +172,12 @@ class PlannerStore extends _$PlannerStore {
       }
       if (from >= 2 && from < 8) {
         await m.addColumn(courseRecords, courseRecords.reminderMinutesBefore);
+      }
+      if (from >= 4 && from < 9) {
+        await m.addColumn(
+          countdownEventRecords,
+          countdownEventRecords.reminderMinutes,
+        );
       }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
@@ -226,6 +234,7 @@ class PlannerStore extends _$PlannerStore {
             targetDate: DateTime.parse(event.targetDate),
             kind: EventKind.values.byName(event.kind),
             isPinned: event.isPinned,
+            reminderMinutes: event.reminderMinutes,
           ),
       ],
       tasks: [
@@ -479,6 +488,7 @@ class PlannerStore extends _$PlannerStore {
       targetDate: Value(draft.targetDate.toIso8601String()),
       kind: Value(draft.kind.name),
       isPinned: Value(draft.isPinned),
+      reminderMinutes: Value(draft.reminderMinutes),
     );
     if (id == null) return into(countdownEventRecords).insert(values);
     final count = await (update(

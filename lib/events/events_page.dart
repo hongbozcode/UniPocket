@@ -63,7 +63,8 @@ class _EventsPageState extends State<EventsPage> with WidgetsBindingObserver {
 
   Future<void> _edit([CountdownEvent? event]) async {
     if (_busy || !mounted) return;
-    final saved = await Navigator.push<bool>(
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    final saved = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => EventEditor(
@@ -74,11 +75,19 @@ class _EventsPageState extends State<EventsPage> with WidgetsBindingObserver {
         ),
       ),
     );
-    if (saved == true) await _load();
+    if (saved != null) {
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(saved)));
+      }
+    }
   }
 
   Future<void> _action(CountdownEvent event, EventAction action) async {
     if (_busy || !mounted) return;
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     if (action == EventAction.edit) {
       await _edit(event);
       return;
@@ -99,6 +108,18 @@ class _EventsPageState extends State<EventsPage> with WidgetsBindingObserver {
         await widget.planner.deleteEvent(event.id);
       }
       await _load();
+      if (action == EventAction.delete && mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.planner.reminderSyncFailed
+                  ? '事件已删除。提醒取消失败，请在设置中重试。'
+                  : '事件已删除，未来提醒已取消',
+            ),
+          ),
+        );
+      }
     } catch (_) {
       if (mounted) setState(() => _error = '修改失败，原记录保持不变，请重试。');
     } finally {

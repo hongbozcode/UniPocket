@@ -59,7 +59,7 @@ class _TaskEditorState extends State<TaskEditor> {
     try {
       final lead = int.tryParse(_reminderLead.text.trim());
       if (_reminderEnabled && lead == null) {
-        throw const InputProblem('请输入有效的提醒提前分钟数。');
+        throw const InputProblem('请输入想提前多久提醒，单位为分钟。');
       }
       final id = await widget.planner.saveTask(
         LearningTaskDraft(
@@ -233,10 +233,10 @@ class _TaskEditorState extends State<TaskEditor> {
                       key: const ValueKey('task-reminder-enabled'),
                       contentPadding: EdgeInsets.zero,
                       title: const Text(
-                        '此项 DDL 提醒',
+                        '截止前提醒我',
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      subtitle: const Text('每项一个提醒'),
+                      subtitle: const Text('在截止前提醒一次，给自己留点准备时间'),
                       value: _reminderEnabled,
                       onChanged: (value) =>
                           setState(() => _reminderEnabled = value),
@@ -248,11 +248,32 @@ class _TaskEditorState extends State<TaskEditor> {
                         controller: _reminderLead,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          labelText: '提前分钟数',
-                          helperText: '默认 1440 分钟（1 天）；0 为截止时提醒。',
+                          labelText: '提前多久提醒（分钟）',
+                          helperText: '可直接选下方常用时间，也可输入分钟数；填 0 表示截止时提醒。',
                           helperMaxLines: 3,
                         ),
                         onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          for (final option in const {
+                            1440: '提前 1 天',
+                            60: '提前 1 小时',
+                            0: '截止时',
+                          }.entries)
+                            ChoiceChip(
+                              label: Text(option.value),
+                              selected:
+                                  int.tryParse(_reminderLead.text.trim()) ==
+                                  option.key,
+                              onSelected: (_) => setState(
+                                () => _reminderLead.text = '${option.key}',
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Text(

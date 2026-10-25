@@ -13,7 +13,7 @@ class LocalReminder {
   final String body;
 }
 
-/// Operating-system boundary shared by DDL and future learning reminders.
+/// Operating-system boundary shared by course, task, and event reminders.
 /// Replacing one scope must leave other scopes untouched.
 abstract interface class LocalNotifications {
   Future<NotificationAccess> status();

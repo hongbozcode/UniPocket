@@ -90,7 +90,7 @@ void main() {
         await tapVisible(tester, find.byKey(const ValueKey('event-date')));
         await tapVisible(tester, find.text('24'));
         await tapVisible(tester, find.text('确定'));
-        await tapVisible(tester, find.byType(SwitchListTile));
+        await tapVisible(tester, find.text('置顶事件'));
         await capture('04-android-editor');
         await tapVisible(tester, find.text('保存事件'));
         await waitFor(tester, find.text('毕业旅行'));

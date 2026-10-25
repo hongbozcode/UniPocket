@@ -7,6 +7,7 @@ import '../tasks/model.dart';
 import '../events/model.dart';
 import '../reminders/notifications.dart';
 import '../reminders/course_reminders.dart';
+import '../reminders/event_reminders.dart';
 import 'model.dart';
 
 /// The application boundary for local learning data. The same operations
@@ -61,6 +62,9 @@ class SemesterPlanner {
           'course': notificationAccess == NotificationAccess.enabled
               ? futureCourseReminders(state, _clock())
               : <LocalReminder>[],
+          'event': notificationAccess == NotificationAccess.enabled
+              ? futureEventReminders(state, _clock())
+              : <LocalReminder>[],
         };
         for (final entry in scopes.entries) {
           try {
@@ -88,6 +92,21 @@ class SemesterPlanner {
     if (task.reminderMinutesBefore == null) return '此项提醒已关闭';
     final at = taskReminderAt(task, zone)!;
     if (!at.isAfter(_clock().toUtc())) return '提醒时间已过，不会补发';
+    return reminderAvailability;
+  }
+
+  String eventReminderStatus(
+    CountdownEventDraft event,
+    String zone, {
+    bool preview = false,
+  }) {
+    if (reminderSyncFailed) return '提醒更新失败，请重试';
+    final at = eventReminderAt(event, zone);
+    if (at == null) return '此项提醒已关闭';
+    if (!at.isAfter(_clock().toUtc())) return '提醒时间已过，不会补发';
+    if (preview && notificationAccess == NotificationAccess.enabled) {
+      return '通知已开启，保存后将按此时间提醒你。';
+    }
     return reminderAvailability;
   }
 
@@ -324,13 +343,13 @@ class SemesterPlanner {
 
   Future<int> saveEvent(CountdownEventDraft draft, {int? id}) async {
     draft.validate();
-    return _store.saveEvent(draft, id: id);
+    return _refreshAfter(_store.saveEvent(draft, id: id));
   }
 
   Future<void> setEventPinned(int id, bool pinned) =>
       _store.setEventPinned(id, pinned);
 
-  Future<void> deleteEvent(int id) => _store.deleteEvent(id);
+  Future<void> deleteEvent(int id) => _refreshAfter(_store.deleteEvent(id));
 
   Future<void> setTaskCompleted(int id, bool completed) async {
     await _store.setTaskCompleted(id, completed);

@@ -473,7 +473,7 @@ class _CourseEditorState extends State<CourseEditor> {
   int? _readReminder() {
     if (!_reminderEnabled) return null;
     final minutes = int.tryParse(_reminderLead.text.trim());
-    if (minutes == null) throw const InputProblem('请输入提醒提前分钟数。');
+    if (minutes == null) throw const InputProblem('请输入想提前多久提醒，单位为分钟。');
     validateCourseReminder(minutes);
     return minutes;
   }
@@ -536,7 +536,7 @@ class _CourseEditorState extends State<CourseEditor> {
             controller: _reminderLead,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: '提前分钟数',
+              labelText: '上课前多久提醒（分钟）',
               helperText: '默认 10 分钟；0 表示上课时提醒',
               helperMaxLines: 3,
             ),

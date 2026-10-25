@@ -109,7 +109,7 @@ void main() {
             await waitFor(tester, find.text('进行中  8'));
             expect(tester.takeException(), isNull);
             await tapVisible(tester, find.text('第 7 项倒计时事件的很长标题应完整展示并能编辑'));
-            await tapVisible(tester, find.byType(SwitchListTile));
+            await tapVisible(tester, find.text('置顶事件'));
             await tapVisible(tester, find.text('保存事件'));
             await waitFor(tester, find.byType(EventsPage));
             expect((await planner.load()).events[7].isPinned, isTrue);

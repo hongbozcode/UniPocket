@@ -160,7 +160,8 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   }
 
   Future<void> _event([CountdownEvent? event]) async {
-    final saved = await Navigator.push<bool>(
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    final saved = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (_) => EventEditor(
@@ -171,7 +172,14 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ),
       ),
     );
-    if (saved == true) await _load();
+    if (saved != null) {
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(saved)));
+      }
+    }
   }
 
   Future<void> _events() async {
@@ -634,7 +642,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
               const Text('网页数据保存在当前浏览器的此站点中。清除站点数据或结束隐私浏览可能会丢失记录。'),
             ],
             const SizedBox(height: 10),
-            const Text('备份恢复将在后续版本开放。倒计时提醒尚未接入。'),
+            const Text('备份恢复将在后续版本开放。'),
           ],
         ),
       ),

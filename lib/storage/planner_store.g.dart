@@ -2424,8 +2424,27 @@ class $CountdownEventRecordsTable extends CountdownEventRecords
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _reminderMinutesMeta = const VerificationMeta(
+    'reminderMinutes',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, title, targetDate, kind, isPinned];
+  late final GeneratedColumn<int> reminderMinutes = GeneratedColumn<int>(
+    'reminder_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(540),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    targetDate,
+    kind,
+    isPinned,
+    reminderMinutes,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2471,6 +2490,15 @@ class $CountdownEventRecordsTable extends CountdownEventRecords
         isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
       );
     }
+    if (data.containsKey('reminder_minutes')) {
+      context.handle(
+        _reminderMinutesMeta,
+        reminderMinutes.isAcceptableOrUnknown(
+          data['reminder_minutes']!,
+          _reminderMinutesMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2500,6 +2528,10 @@ class $CountdownEventRecordsTable extends CountdownEventRecords
         DriftSqlType.bool,
         data['${effectivePrefix}is_pinned'],
       )!,
+      reminderMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_minutes'],
+      ),
     );
   }
 
@@ -2516,12 +2548,14 @@ class StoredCountdownEvent extends DataClass
   final String targetDate;
   final String kind;
   final bool isPinned;
+  final int? reminderMinutes;
   const StoredCountdownEvent({
     required this.id,
     required this.title,
     required this.targetDate,
     required this.kind,
     required this.isPinned,
+    this.reminderMinutes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2531,6 +2565,9 @@ class StoredCountdownEvent extends DataClass
     map['target_date'] = Variable<String>(targetDate);
     map['kind'] = Variable<String>(kind);
     map['is_pinned'] = Variable<bool>(isPinned);
+    if (!nullToAbsent || reminderMinutes != null) {
+      map['reminder_minutes'] = Variable<int>(reminderMinutes);
+    }
     return map;
   }
 
@@ -2541,6 +2578,9 @@ class StoredCountdownEvent extends DataClass
       targetDate: Value(targetDate),
       kind: Value(kind),
       isPinned: Value(isPinned),
+      reminderMinutes: reminderMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderMinutes),
     );
   }
 
@@ -2555,6 +2595,7 @@ class StoredCountdownEvent extends DataClass
       targetDate: serializer.fromJson<String>(json['targetDate']),
       kind: serializer.fromJson<String>(json['kind']),
       isPinned: serializer.fromJson<bool>(json['isPinned']),
+      reminderMinutes: serializer.fromJson<int?>(json['reminderMinutes']),
     );
   }
   @override
@@ -2566,6 +2607,7 @@ class StoredCountdownEvent extends DataClass
       'targetDate': serializer.toJson<String>(targetDate),
       'kind': serializer.toJson<String>(kind),
       'isPinned': serializer.toJson<bool>(isPinned),
+      'reminderMinutes': serializer.toJson<int?>(reminderMinutes),
     };
   }
 
@@ -2575,12 +2617,16 @@ class StoredCountdownEvent extends DataClass
     String? targetDate,
     String? kind,
     bool? isPinned,
+    Value<int?> reminderMinutes = const Value.absent(),
   }) => StoredCountdownEvent(
     id: id ?? this.id,
     title: title ?? this.title,
     targetDate: targetDate ?? this.targetDate,
     kind: kind ?? this.kind,
     isPinned: isPinned ?? this.isPinned,
+    reminderMinutes: reminderMinutes.present
+        ? reminderMinutes.value
+        : this.reminderMinutes,
   );
   StoredCountdownEvent copyWithCompanion(CountdownEventRecordsCompanion data) {
     return StoredCountdownEvent(
@@ -2591,6 +2637,9 @@ class StoredCountdownEvent extends DataClass
           : this.targetDate,
       kind: data.kind.present ? data.kind.value : this.kind,
       isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
+      reminderMinutes: data.reminderMinutes.present
+          ? data.reminderMinutes.value
+          : this.reminderMinutes,
     );
   }
 
@@ -2601,13 +2650,15 @@ class StoredCountdownEvent extends DataClass
           ..write('title: $title, ')
           ..write('targetDate: $targetDate, ')
           ..write('kind: $kind, ')
-          ..write('isPinned: $isPinned')
+          ..write('isPinned: $isPinned, ')
+          ..write('reminderMinutes: $reminderMinutes')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, targetDate, kind, isPinned);
+  int get hashCode =>
+      Object.hash(id, title, targetDate, kind, isPinned, reminderMinutes);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2616,7 +2667,8 @@ class StoredCountdownEvent extends DataClass
           other.title == this.title &&
           other.targetDate == this.targetDate &&
           other.kind == this.kind &&
-          other.isPinned == this.isPinned);
+          other.isPinned == this.isPinned &&
+          other.reminderMinutes == this.reminderMinutes);
 }
 
 class CountdownEventRecordsCompanion
@@ -2626,12 +2678,14 @@ class CountdownEventRecordsCompanion
   final Value<String> targetDate;
   final Value<String> kind;
   final Value<bool> isPinned;
+  final Value<int?> reminderMinutes;
   const CountdownEventRecordsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.targetDate = const Value.absent(),
     this.kind = const Value.absent(),
     this.isPinned = const Value.absent(),
+    this.reminderMinutes = const Value.absent(),
   });
   CountdownEventRecordsCompanion.insert({
     this.id = const Value.absent(),
@@ -2639,6 +2693,7 @@ class CountdownEventRecordsCompanion
     required String targetDate,
     required String kind,
     this.isPinned = const Value.absent(),
+    this.reminderMinutes = const Value.absent(),
   }) : title = Value(title),
        targetDate = Value(targetDate),
        kind = Value(kind);
@@ -2648,6 +2703,7 @@ class CountdownEventRecordsCompanion
     Expression<String>? targetDate,
     Expression<String>? kind,
     Expression<bool>? isPinned,
+    Expression<int>? reminderMinutes,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2655,6 +2711,7 @@ class CountdownEventRecordsCompanion
       if (targetDate != null) 'target_date': targetDate,
       if (kind != null) 'kind': kind,
       if (isPinned != null) 'is_pinned': isPinned,
+      if (reminderMinutes != null) 'reminder_minutes': reminderMinutes,
     });
   }
 
@@ -2664,6 +2721,7 @@ class CountdownEventRecordsCompanion
     Value<String>? targetDate,
     Value<String>? kind,
     Value<bool>? isPinned,
+    Value<int?>? reminderMinutes,
   }) {
     return CountdownEventRecordsCompanion(
       id: id ?? this.id,
@@ -2671,6 +2729,7 @@ class CountdownEventRecordsCompanion
       targetDate: targetDate ?? this.targetDate,
       kind: kind ?? this.kind,
       isPinned: isPinned ?? this.isPinned,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
     );
   }
 
@@ -2692,6 +2751,9 @@ class CountdownEventRecordsCompanion
     if (isPinned.present) {
       map['is_pinned'] = Variable<bool>(isPinned.value);
     }
+    if (reminderMinutes.present) {
+      map['reminder_minutes'] = Variable<int>(reminderMinutes.value);
+    }
     return map;
   }
 
@@ -2702,7 +2764,8 @@ class CountdownEventRecordsCompanion
           ..write('title: $title, ')
           ..write('targetDate: $targetDate, ')
           ..write('kind: $kind, ')
-          ..write('isPinned: $isPinned')
+          ..write('isPinned: $isPinned, ')
+          ..write('reminderMinutes: $reminderMinutes')
           ..write(')'))
         .toString();
   }
@@ -6278,6 +6341,7 @@ typedef $$CountdownEventRecordsTableCreateCompanionBuilder =
       required String targetDate,
       required String kind,
       Value<bool> isPinned,
+      Value<int?> reminderMinutes,
     });
 typedef $$CountdownEventRecordsTableUpdateCompanionBuilder =
     CountdownEventRecordsCompanion Function({
@@ -6286,6 +6350,7 @@ typedef $$CountdownEventRecordsTableUpdateCompanionBuilder =
       Value<String> targetDate,
       Value<String> kind,
       Value<bool> isPinned,
+      Value<int?> reminderMinutes,
     });
 
 class $$CountdownEventRecordsTableFilterComposer
@@ -6319,6 +6384,11 @@ class $$CountdownEventRecordsTableFilterComposer
 
   ColumnFilters<bool> get isPinned => $composableBuilder(
     column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6356,6 +6426,11 @@ class $$CountdownEventRecordsTableOrderingComposer
     column: $table.isPinned,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CountdownEventRecordsTableAnnotationComposer
@@ -6383,6 +6458,11 @@ class $$CountdownEventRecordsTableAnnotationComposer
 
   GeneratedColumn<bool> get isPinned =>
       $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  GeneratedColumn<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
+    builder: (column) => column,
+  );
 }
 
 class $$CountdownEventRecordsTableTableManager
@@ -6436,12 +6516,14 @@ class $$CountdownEventRecordsTableTableManager
                 Value<String> targetDate = const Value.absent(),
                 Value<String> kind = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
+                Value<int?> reminderMinutes = const Value.absent(),
               }) => CountdownEventRecordsCompanion(
                 id: id,
                 title: title,
                 targetDate: targetDate,
                 kind: kind,
                 isPinned: isPinned,
+                reminderMinutes: reminderMinutes,
               ),
           createCompanionCallback:
               ({
@@ -6450,12 +6532,14 @@ class $$CountdownEventRecordsTableTableManager
                 required String targetDate,
                 required String kind,
                 Value<bool> isPinned = const Value.absent(),
+                Value<int?> reminderMinutes = const Value.absent(),
               }) => CountdownEventRecordsCompanion.insert(
                 id: id,
                 title: title,
                 targetDate: targetDate,
                 kind: kind,
                 isPinned: isPinned,
+                reminderMinutes: reminderMinutes,
               ),
           withReferenceMapper: (p0) => p0
               .map(
