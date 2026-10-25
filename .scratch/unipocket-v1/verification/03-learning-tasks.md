@@ -16,7 +16,7 @@
 | 检查 | 实际结果与边界 |
 | --- | --- |
 | `flutter analyze` | 通过，无静态分析问题。 |
-| `flutter test` | 31 条通过，含任务 1、2 回归；新增 4 条应用行为测试及 6 条界面测试。 |
+| `flutter test` | 审查修复后 32 条通过，含任务 1、2 回归；新增 4 条应用行为测试及 7 条界面测试。 |
 | SQLite 文件重开 | 独立任务身份、标题、默认 23:59、未完成状态保留。 |
 | 应用行为 | 课程关联／解除、编辑备注和截止时间、完成／撤销、删除；空标题、越界分钟、无效课程及不存在任务不产生错误写入。 |
 | 校园截止边界 | 截止瞬间未逾期，之后 1 毫秒即逾期；上海午夜、纽约夏令时结束日、切换学期保留任务通过；逾期不自动完成。 |
@@ -24,7 +24,9 @@
 | 界面操作 | 无学期创建、snackbar 撤销、修改标题／备注、日期和时间选择器修改、选择关联课程、课程及状态筛选、删除取消／确认。 |
 | 布局与可达性 | 320／393 宽度 × 1／2 倍文字，含上下安全区域、长课程名、长任务标题、8 项任务、末项编辑与滚动保存，无溢出或不可达操作。 |
 | 停留时逾期 | 控制外部时钟跨过截止时间，刷新后出现已逾期，任务仍未完成。 |
+| 跨页面撤销 | 完成任务后返回首页，所属提示移除；重新进入已完成列表仍可撤销，数据库状态恢复，无已销毁状态回调。回归先失败后通过。 |
 | Web 构建 | `flutter build web --no-web-resources-cdn` 通过；未做浏览器运行与升级数据验收。 |
+| 正式 Android 构建 | `flutter build apk --debug --target=lib/main.dart` 通过；已保留应用数据安装并打开正式入口。 |
 
 TDD 先确认任务保存与界面入口测试失败，再实现对应纵向流程。沿用首版规格中已确认的应用行为层与真实数据库测试边界，不模拟内部存储。
 
@@ -32,14 +34,14 @@ TDD 先确认任务保存与界面入口测试失败，再实现对应纵向流�
 
 - 设备：现有 Android 16 / API 36 模拟器 `emulator-5554`；Flutter 3.47.7 / Dart 3.13.5。SDK、JDK 和依赖可用，无需补装；Chrome 缺失不影响 Android 验证。
 - 入口：`integration_test/learning_tasks_flow_test.dart`。三项源图示例任务与课程由应用业务入口写入专用数据库；第四项独立任务通过真实表单创建、编辑、完成、撤销并再次完成。
-- 最终两阶段数据库为 `unipocket_tasks_20261025_c`，第一阶段进程 9280，第二阶段进程 9457；之间仅结束应用进程，保留数据。两阶段均通过，使用 `--keep-app-running` 避免测试结束卸载。
+- 两阶段使用 `--keep-app-running`，之间仅结束应用进程并保留数据。布局对照阶段数据库 `unipocket_tasks_20261025_c`，进程 9280 → 9457，两阶段通过；审查修复后以 `unipocket_tasks_20261025_d` 再验收，进程 9879 → 10102，两阶段通过，并验证完成后返回首页的提示生命周期。
 - 新进程恢复课程关联、任务、备注、23:59 和完成状态；随后撤销完成、取消／确认删除，从课表再次进入列表，均通过。正式 `main.dart` 不含预置数据。
 - 固定外部时钟 `2026-10-23T04:00:00Z`，校园时间为 10 月 23 日 12:00，用于匹配源图分组。截图日期是测试数据，不是拍摄日期。
 
 ```powershell
-flutter drive --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/learning_tasks_flow_test.dart -d emulator-5554 --dart-define=ACCEPTANCE_DATABASE=unipocket_tasks_20261025_c
+flutter drive --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/learning_tasks_flow_test.dart -d emulator-5554 --dart-define=ACCEPTANCE_DATABASE=unipocket_tasks_20261025_d
 adb -s emulator-5554 shell am force-stop com.hongbozcode.unipocket
-flutter drive --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/learning_tasks_flow_test.dart -d emulator-5554 --dart-define=ACCEPTANCE_DATABASE=unipocket_tasks_20261025_c --dart-define=ACCEPTANCE_RESTORE=true
+flutter drive --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/learning_tasks_flow_test.dart -d emulator-5554 --dart-define=ACCEPTANCE_DATABASE=unipocket_tasks_20261025_d --dart-define=ACCEPTANCE_RESTORE=true
 ```
 
 重复验收时使用新的数据库名，两阶段保持同名。
@@ -57,7 +59,19 @@ flutter drive --keep-app-running --driver=test_driver/integration_test.dart --ta
 
 ## 两轴代码审查
 
-基线为任务开始时 `10a7ff536ac116eea6af733dfc34e64700249e4a`。规范轴与规格轴在实现提交后分别审查，结果待补充。
+基线为任务开始时 `10a7ff536ac116eea6af733dfc34e64700249e4a`，初审实现提交 `d86a197`。两个独立子代理分别审查。
+
+### Standards
+
+未发现文档标准硬性违反；领域术语、真实 SQLite、迁移保留数据、资源复用与验收边界符合项目约定。
+
+1 项 P3 判断性维护建议：`lib/app.dart` 与 `lib/tasks/tasks_page.dart` 的完成／撤销交互有重复。两个页面当前分别持有加载、busy、错误与提示生命周期，保留局部处理；后续共同调整交互时可在任务 UI 模块提取共享行为，不为此增加通用业务层。该建议非阻断。
+
+### Spec
+
+初审 1 项 P2，已修复并由规格审查代理增量复核通过：任务页原使用全局提示，返回首页后点击遗留“撤销”可能调用已销毁状态。现使用页面专属 `ScaffoldMessenger`，关闭时移除所属提示，并检查 `mounted`；新增真实数据库界面回归与 Android 导航检查。
+
+最终：Standards 0 项硬性违反、1 项 P3 维护建议；Spec 未关闭 0 项，无新增发现。
 
 ## 明确边界
 

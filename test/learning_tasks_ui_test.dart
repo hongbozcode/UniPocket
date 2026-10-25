@@ -16,6 +16,42 @@ import 'support/semester_fixture.dart';
 void main() {
   setUpAll(tzdata.initializeTimeZones);
 
+  testWidgets('完成后离开任务页移除所属撤销提示，重新进入仍可撤销且不调用已销毁状态', (tester) async {
+    await tester.runAsync(() async {
+      final store = PlannerStore(NativeDatabase.memory());
+      final planner = SemesterPlanner(store);
+      await planner.saveTask(
+        LearningTaskDraft(title: '跨页撤销', dueDate: DateTime(2026, 10, 25)),
+      );
+      try {
+        await tester.pumpWidget(
+          UniPocketApp(
+            planner: planner,
+            clock: () => DateTime.utc(2026, 10, 25, 4),
+          ),
+        );
+        await waitFor(tester, find.text('查看全部任务'));
+        await tapVisible(tester, find.text('查看全部任务'));
+        await waitFor(tester, find.text('跨页撤销'));
+        await tapVisible(tester, find.byTooltip('完成：跨页撤销'));
+        await waitFor(tester, find.text('任务已完成'));
+        await tapVisible(tester, find.byTooltip('返回'));
+        await waitFor(tester, find.text('首页'));
+        expect(find.text('撤销'), findsNothing);
+        expect(tester.takeException(), isNull);
+        await tapVisible(tester, find.text('查看全部任务'));
+        await waitFor(tester, find.text('已完成  1'));
+        await tapVisible(tester, find.text('已完成  1'));
+        await tapVisible(tester, find.byTooltip('撤销完成：跨页撤销'));
+        await waitFor(tester, find.text('已撤销完成'));
+        expect((await planner.load()).tasks.single.isCompleted, isFalse);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await store.close();
+      }
+    });
+  });
+
   for (final width in [320.0, 393.0]) {
     for (final scale in [1.0, 2.0]) {
       testWidgets('$width 宽度、$scale 倍文字下完整列表、长标题、筛选及表单可滚动访问', (tester) async {

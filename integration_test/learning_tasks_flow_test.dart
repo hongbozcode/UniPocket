@@ -118,6 +118,10 @@ void main() {
       if (!restore) {
         await tapVisible(tester, find.text('独立论文终稿'));
         await capture('03-android-editor');
+        await tapVisible(tester, find.byTooltip('返回'));
+        await tapVisible(tester, find.byTooltip('返回'));
+        await waitFor(tester, find.text('首页'));
+        expect(find.text('撤销'), findsNothing);
       } else {
         await tapVisible(tester, find.byTooltip('撤销完成：独立论文终稿'));
         await waitFor(tester, find.text('已撤销完成'));

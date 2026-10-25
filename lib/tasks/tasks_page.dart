@@ -26,6 +26,7 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
   bool _busy = false;
   String? _error;
   Timer? _refresh;
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -80,15 +81,15 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
   }
 
   Future<void> _toggle(LearningTask task, [bool? completed]) async {
-    if (_busy) return;
+    if (!mounted || _busy) return;
     final target = completed ?? !task.isCompleted;
     setState(() => _busy = true);
     try {
       await widget.planner.setTaskCompleted(task.id, target);
       await _load();
       if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
+        _messenger.currentState!.hideCurrentSnackBar();
+        _messenger.currentState!.showSnackBar(
           SnackBar(
             content: Text(target ? '任务已完成' : '已撤销完成'),
             action: SnackBarAction(
@@ -239,129 +240,132 @@ class _TasksPageState extends State<TasksPage> with WidgetsBindingObserver {
             courseId: _courseId,
             independentOnly: _independent,
           );
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (_busy) const LinearProgressIndicator(),
-            Expanded(
-              child: state == null && _error == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : PageContent(
-                      children: [
-                        Row(
-                          children: [
-                            RoundDesignButton(
-                              icon: 'back',
-                              label: '返回',
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            const Expanded(
-                              child: Text(
-                                '学习任务',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
+    return ScaffoldMessenger(
+      key: _messenger,
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              if (_busy) const LinearProgressIndicator(),
+              Expanded(
+                child: state == null && _error == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : PageContent(
+                        children: [
+                          Row(
+                            children: [
+                              RoundDesignButton(
+                                icon: 'back',
+                                label: '返回',
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                              const Expanded(
+                                child: Text(
+                                  '学习任务',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
-                            ),
-                            RoundDesignButton(
-                              icon: 'plus',
-                              label: '创建任务',
-                              onPressed: state == null || _busy
-                                  ? null
-                                  : () => _edit(),
-                              primary: true,
+                              RoundDesignButton(
+                                icon: 'plus',
+                                label: '创建任务',
+                                onPressed: state == null || _busy
+                                    ? null
+                                    : () => _edit(),
+                                primary: true,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          if (_error != null) ...[
+                            ProblemBanner(_error!),
+                            TextButton(
+                              onPressed: _load,
+                              child: const Text('重新读取'),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 20),
-                        if (_error != null) ...[
-                          ProblemBanner(_error!),
-                          TextButton(
-                            onPressed: _load,
-                            child: const Text('重新读取'),
-                          ),
-                        ],
-                        if (state != null) ...[
-                          PageHeading(
-                            '每一个小目标，\n都值得完成',
-                            '校园时间  ${state.campusTimeZone}',
-                            art: 'pencil',
-                            bottomSpacing: 14,
-                          ),
-                          _filters(),
-                          if (tasks.isEmpty)
-                            SurfaceCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    state.tasks.isEmpty
-                                        ? '还没有学习任务'
-                                        : _completed
-                                        ? '暂无已完成任务'
-                                        : '当前筛选下没有未完成任务',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
+                          if (state != null) ...[
+                            PageHeading(
+                              '每一个小目标，\n都值得完成',
+                              '校园时间  ${state.campusTimeZone}',
+                              art: 'pencil',
+                              bottomSpacing: 14,
+                            ),
+                            _filters(),
+                            if (tasks.isEmpty)
+                              SurfaceCard(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      state.tasks.isEmpty
+                                          ? '还没有学习任务'
+                                          : _completed
+                                          ? '暂无已完成任务'
+                                          : '当前筛选下没有未完成任务',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  const Text('给小目标留一个截止时间，一步一步完成。'),
-                                  const SizedBox(height: 14),
-                                  FilledButton.icon(
-                                    onPressed: () => _edit(),
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('创建任务'),
-                                  ),
-                                ],
+                                    const SizedBox(height: 10),
+                                    const Text('给小目标留一个截止时间，一步一步完成。'),
+                                    const SizedBox(height: 14),
+                                    FilledButton.icon(
+                                      onPressed: () => _edit(),
+                                      icon: const Icon(Icons.add),
+                                      label: const Text('创建任务'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            for (final group in TaskGroup.values)
+                              if (tasks.any((t) => t.groupAt(now!) == group))
+                                TaskSection(
+                                  group: group,
+                                  children: [
+                                    for (final task in tasks.where(
+                                      (t) => t.groupAt(now!) == group,
+                                    ))
+                                      TaskCard(
+                                        task: task,
+                                        campusNow: now!,
+                                        course: state.courses
+                                            .where((c) => c.id == task.courseId)
+                                            .firstOrNull,
+                                        onEdit: () => _edit(task),
+                                        onToggle: _busy
+                                            ? null
+                                            : () => _toggle(task),
+                                      ),
+                                  ],
+                                ),
+                            const SizedBox(height: 14),
+                            Center(
+                              child: SvgPicture.asset(
+                                'docs/design/resources/illustrations/book.svg',
+                                width: 145,
+                                height: 110,
+                                excludeFromSemantics: true,
                               ),
                             ),
-                          for (final group in TaskGroup.values)
-                            if (tasks.any((t) => t.groupAt(now!) == group))
-                              TaskSection(
-                                group: group,
-                                children: [
-                                  for (final task in tasks.where(
-                                    (t) => t.groupAt(now!) == group,
-                                  ))
-                                    TaskCard(
-                                      task: task,
-                                      campusNow: now!,
-                                      course: state.courses
-                                          .where((c) => c.id == task.courseId)
-                                          .firstOrNull,
-                                      onEdit: () => _edit(task),
-                                      onToggle: _busy
-                                          ? null
-                                          : () => _toggle(task),
-                                    ),
-                                ],
+                            const SizedBox(height: 8),
+                            const Text(
+                              '完成后可撤销',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xff73819a),
                               ),
-                          const SizedBox(height: 14),
-                          Center(
-                            child: SvgPicture.asset(
-                              'docs/design/resources/illustrations/book.svg',
-                              width: 145,
-                              height: 110,
-                              excludeFromSemantics: true,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            '完成后可撤销',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xff73819a),
-                            ),
-                          ),
+                          ],
                         ],
-                      ],
-                    ),
-            ),
-          ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
