@@ -24,7 +24,7 @@
 - [产品讨论记录](.scratch/product-design/discussion.md)：当时的讨论与决定，不替代现行规格。
 - [设计生成记录与截图索引](docs/design/resources/README.md)：提示词、页面截图及检查证据。
 
-当前仓库已实现任务 1、2、3 的 Flutter Android/Web 工程，支持离线学期、每日节次、校园时区、手动录课、今日／周课表及学习任务管理；其他任务尚未交付，学校 XLSX 格式适配等待真实样例。实现验证记录见[任务 1 检查记录](.scratch/unipocket-v1/verification/01-bootstrap-semester.md)、[任务 2 检查记录](.scratch/unipocket-v1/verification/02-manual-timetable.md)与[任务 3 检查记录](.scratch/unipocket-v1/verification/03-learning-tasks.md)。
+当前仓库已实现任务 1、2、3、4 的 Flutter Android/Web 工程，支持离线学期、每日节次、校园时区、手动录课、今日／周课表、学习任务及倒计时事件管理；其他任务尚未交付，学校 XLSX 格式适配等待真实样例。实现验证记录见[任务 1 检查记录](.scratch/unipocket-v1/verification/01-bootstrap-semester.md)、[任务 2 检查记录](.scratch/unipocket-v1/verification/02-manual-timetable.md)、[任务 3 检查记录](.scratch/unipocket-v1/verification/03-learning-tasks.md)与[任务 4 检查记录](.scratch/unipocket-v1/verification/04-countdown-events.md)。
 
 设计手册、效果图、HTML 样板截图和六项随机工具的[独立动效演示](docs/design/motion.html)仍是设计参考。原完整应用样板源码未纳入仓库；独立演示源码维护在 `docs/design/motion-demo.js` 和 `motion-demo.css`。
 
@@ -47,7 +47,7 @@ flutter build apk --debug
 flutter build web --no-web-resources-cdn
 ```
 
-Drift 管理 SQLite；学期、课程与学习任务业务操作集中在 `lib/semesters/planner.dart`，课次计算与录课／课表界面位于 `lib/timetable/`，任务模型、列表及表单位于 `lib/tasks/`，数据库与事务封装在 `lib/storage/`。测试使用真实 SQLite，关键界面测试会关闭并重新打开文件数据库。Web 的 SQLite 文件随应用分发；网页数据属于当前浏览器站点，不能代替 Android 持久化验收。
+Drift 管理 SQLite；学期、课程、学习任务与倒计时事件业务操作集中在 `lib/semesters/planner.dart`，课次计算与录课／课表界面位于 `lib/timetable/`，任务模型、列表及表单位于 `lib/tasks/`，倒计时模型、列表及表单位于 `lib/events/`，数据库与事务封装在 `lib/storage/`。测试使用真实 SQLite，关键界面测试会关闭并重新打开文件数据库。Web 的 SQLite 文件随应用分发；网页数据属于当前浏览器站点，不能代替 Android 持久化验收。
 
 Android 进程重启验收分为创建与恢复两个阶段，使用同一个专用测试数据库名（每轮验收更换名字）。必须使用 `--keep-app-running`：当前 Flutter 驱动默认在结束后卸载应用，不能用卸载重装代替进程恢复验证。两个阶段之间仅结束应用进程，保留应用数据。
 
