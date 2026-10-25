@@ -156,28 +156,7 @@ class SemesterPlanner {
       if (choices.length != keys.length || !keys.every(choices.containsKey)) {
         throw const InputProblem('请为每一项失去关联的例外选择保留为独立补课或删除。');
       }
-      final candidate = Course(
-        id: impact.course.id,
-        semesterId: impact.draft.semesterId,
-        name: impact.draft.name,
-        teacher: impact.draft.teacher,
-        colorIndex: impact.draft.colorIndex,
-        reminderMinutesBefore: impact.draft.reminderMinutesBefore,
-        schedules: [
-          for (var i = 0; i < impact.draft.schedules.length; i++)
-            if (impact.draft.schedules[i] case final ClassSchedule saved)
-              saved
-            else
-              ClassSchedule(
-                id: -i - 1,
-                weekday: impact.draft.schedules[i].weekday,
-                startPeriod: impact.draft.schedules[i].startPeriod,
-                endPeriod: impact.draft.schedules[i].endPeriod,
-                location: impact.draft.schedules[i].location,
-                weeks: impact.draft.schedules[i].weeks,
-              ),
-        ],
-      );
+      final candidate = Course.fromDraft(impact.course.id, impact.draft);
       final originalIds = impact.course.schedules
           .cast<ClassSchedule>()
           .map((s) => s.id)

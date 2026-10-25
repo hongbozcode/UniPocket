@@ -6,8 +6,13 @@ import 'notifications.dart';
 
 /// The lavender reminder group from the settings reference, with real OS state.
 class NotificationCard extends StatefulWidget {
-  const NotificationCard({required this.planner, super.key});
+  const NotificationCard({
+    required this.planner,
+    this.onStatusChanged,
+    super.key,
+  });
   final SemesterPlanner planner;
+  final VoidCallback? onStatusChanged;
 
   @override
   State<NotificationCard> createState() => _NotificationCardState();
@@ -52,7 +57,10 @@ class _NotificationCardState extends State<NotificationCard>
     } catch (_) {
       if (mounted) _error = '无法打开系统设置，请从手机设置中管理 UniPocket 通知。';
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        widget.onStatusChanged?.call();
+      }
     }
   }
 

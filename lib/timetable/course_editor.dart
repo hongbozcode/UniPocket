@@ -484,28 +484,7 @@ class _CourseEditorState extends State<CourseEditor> {
     try {
       final draft = _draft();
       draft.validate(widget.semester);
-      final course = Course(
-        id: widget.course?.id ?? -1,
-        semesterId: draft.semesterId,
-        name: draft.name,
-        teacher: draft.teacher,
-        colorIndex: draft.colorIndex,
-        reminderMinutesBefore: draft.reminderMinutesBefore,
-        schedules: [
-          for (var i = 0; i < draft.schedules.length; i++)
-            if (draft.schedules[i] case final ClassSchedule saved)
-              saved
-            else
-              ClassSchedule(
-                id: -i - 1,
-                weekday: draft.schedules[i].weekday,
-                startPeriod: draft.schedules[i].startPeriod,
-                endPeriod: draft.schedules[i].endPeriod,
-                location: draft.schedules[i].location,
-                weeks: draft.schedules[i].weeks,
-              ),
-        ],
-      );
+      final course = Course.fromDraft(widget.course?.id ?? -1, draft);
       final preview = PlannerState(
         semesters: state.semesters,
         currentSemesterId: state.currentSemesterId,
@@ -817,7 +796,12 @@ class _CourseEditorState extends State<CourseEditor> {
               const SizedBox(height: 24),
               _reminderCard(),
               const SizedBox(height: 16),
-              NotificationCard(planner: widget.planner),
+              NotificationCard(
+                planner: widget.planner,
+                onStatusChanged: () {
+                  if (mounted) setState(() {});
+                },
+              ),
               const SizedBox(height: 24),
               FilledButton(
                 key: const ValueKey('save-course'),

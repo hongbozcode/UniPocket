@@ -28,8 +28,17 @@ void main() {
   testWidgets('Android 课程提醒配置、变更撤销、进程恢复与实际调度', (tester) async {
     const notifications = AndroidNotifications(namespace: databaseName);
     if (phase == 'cleanup') {
-      await notifications.replace('course', []);
-      await notifications.replace('ddl', []);
+      for (final namespace in {
+        databaseName,
+        const String.fromEnvironment(
+          'ACCEPTANCE_EXTRA_CLEANUP',
+          defaultValue: databaseName,
+        ),
+      }) {
+        final boundary = AndroidNotifications(namespace: namespace);
+        await boundary.replace('course', []);
+        await boundary.replace('ddl', []);
+      }
       return;
     }
     final store = PlannerStore.open(name: databaseName);
@@ -85,6 +94,28 @@ void main() {
         expect(course.reminderMinutesBefore, phase == 'restore' ? 30 : 0);
       }
       if (phase == 'switch') {
+        // Re-enable a future lesson so this phase actually exercises cancellation.
+        final schedule = course.schedules.single as ClassSchedule;
+        final semester = state.semesters.singleWhere(
+          (s) => s.id == course.semesterId,
+        );
+        final original = semester.firstMonday.add(
+          Duration(days: schedule.weekday - 1 + 14),
+        );
+        await planner.saveClassException(
+          ClassExceptionDraft(
+            scheduleId: schedule.id,
+            originalDate: original,
+            targetDate: original,
+            startMinutes: 480,
+            endMinutes: 525,
+            location: '切换前待撤销',
+          ),
+        );
+        expect(
+          futureCourseReminders(await planner.load(), DateTime.now()),
+          hasLength(1),
+        );
         final other = await planner.saveSemester(
           SemesterDraft(
             name: '无课程的新学期',

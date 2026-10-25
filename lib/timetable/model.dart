@@ -145,6 +145,30 @@ List<String> courseConflicts(
 }
 
 class Course extends CourseDraft {
+  /// Preserve saved schedule identities; drafts use distinct temporary IDs.
+  factory Course.fromDraft(int id, CourseDraft draft) => Course(
+    id: id,
+    semesterId: draft.semesterId,
+    name: draft.name,
+    teacher: draft.teacher,
+    colorIndex: draft.colorIndex,
+    reminderMinutesBefore: draft.reminderMinutesBefore,
+    schedules: [
+      for (var i = 0; i < draft.schedules.length; i++)
+        if (draft.schedules[i] case final ClassSchedule saved)
+          saved
+        else
+          ClassSchedule(
+            id: -i - 1,
+            weekday: draft.schedules[i].weekday,
+            startPeriod: draft.schedules[i].startPeriod,
+            endPeriod: draft.schedules[i].endPeriod,
+            location: draft.schedules[i].location,
+            weeks: draft.schedules[i].weeks,
+          ),
+    ],
+  );
+
   Course({
     required this.id,
     required super.semesterId,
