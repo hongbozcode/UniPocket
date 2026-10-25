@@ -202,12 +202,16 @@ class ClassExceptionDraft {
   (int, DateTime) get key => (scheduleId, originalDate);
 
   void validate() {
-    if (targetDate.year < 1900 || targetDate.year > 2200) {
-      throw const InputProblem('请选择 1900–2200 年内的日期。');
-    }
-    if (startMinutes < 0 || endMinutes >= 1440 || startMinutes >= endMinutes) {
-      throw const InputProblem('结束时间须晚于开始时间，且须在同一天内。');
-    }
+    validateLessonTime(targetDate, startMinutes, endMinutes);
+  }
+}
+
+void validateLessonTime(DateTime date, int startMinutes, int endMinutes) {
+  if (date.year < 1900 || date.year > 2200) {
+    throw const InputProblem('请选择 1900–2200 年内的日期。');
+  }
+  if (startMinutes < 0 || endMinutes >= 1440 || startMinutes >= endMinutes) {
+    throw const InputProblem('结束时间须晚于开始时间，且须在同一天内。');
   }
 }
 
@@ -227,6 +231,8 @@ class IndependentLesson {
   final int startMinutes;
   final int endMinutes;
   final String location;
+
+  void validate() => validateLessonTime(date, startMinutes, endMinutes);
 
   ClassOccurrence occurrence(Course course) => ClassOccurrence(
     course: course,

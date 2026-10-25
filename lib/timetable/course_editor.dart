@@ -297,16 +297,7 @@ class _CourseEditorState extends State<CourseEditor> {
           );
         }
       } else {
-        final draft = CourseDraft(
-          semesterId: widget.semester.id,
-          name: _name.text,
-          teacher: _teacher.text,
-          colorIndex: _color,
-          schedules: [
-            for (var i = 0; i < _schedules.length; i++)
-              _readSchedule(_schedules[i], i + 1),
-          ],
-        );
+        final draft = _draft();
         try {
           await widget.planner.saveCourse(draft);
         } on CourseConflict catch (conflict) {

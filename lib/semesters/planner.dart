@@ -126,14 +126,7 @@ class SemesterPlanner {
     IndependentLesson lesson, {
     bool allowConflicts = false,
   }) => _store.transaction(() async {
-    ClassExceptionDraft(
-      scheduleId: 0,
-      originalDate: lesson.date,
-      targetDate: lesson.date,
-      startMinutes: lesson.startMinutes,
-      endMinutes: lesson.endMinutes,
-      location: lesson.location,
-    ).validate();
+    lesson.validate();
     final state = await load();
     if (!state.independentLessons.any(
       (l) => l.id == lesson.id && l.courseId == lesson.courseId,

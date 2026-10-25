@@ -261,6 +261,10 @@ void main() {
       planner.saveIndependentLesson(moved(500)),
       throwsA(isA<CourseConflict>()),
     );
+    await expectLater(
+      planner.saveIndependentLesson(moved(1430)),
+      throwsA(isA<InputProblem>()),
+    );
     expect((await planner.load()).independentLessons.single.location, '补课');
     await planner.saveIndependentLesson(moved(660, day: 13));
     state = await planner.load();
