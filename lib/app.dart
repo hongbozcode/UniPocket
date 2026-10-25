@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +22,18 @@ import 'events/event_editor.dart';
 import 'events/event_widgets.dart';
 import 'events/events_page.dart';
 import 'reminders/notification_card.dart';
+import 'random_tools/tools_page.dart';
 
 class UniPocketApp extends StatelessWidget {
-  const UniPocketApp({required this.planner, this.clock, super.key});
+  const UniPocketApp({
+    required this.planner,
+    this.clock,
+    this.random,
+    super.key,
+  });
   final SemesterPlanner planner;
   final DateTime Function()? clock;
+  final Random? random;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -35,14 +43,19 @@ class UniPocketApp extends StatelessWidget {
     locale: const Locale('zh', 'CN'),
     supportedLocales: const [Locale('zh', 'CN'), Locale('en')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    home: _AppShell(planner: planner, clock: clock ?? DateTime.now),
+    home: _AppShell(
+      planner: planner,
+      clock: clock ?? DateTime.now,
+      random: random,
+    ),
   );
 }
 
 class _AppShell extends StatefulWidget {
-  const _AppShell({required this.planner, required this.clock});
+  const _AppShell({required this.planner, required this.clock, this.random});
   final SemesterPlanner planner;
   final DateTime Function() clock;
+  final Random? random;
   @override
   State<_AppShell> createState() => _AppShellState();
 }
@@ -558,12 +571,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           ],
         );
 
-  Widget _tools() => const PageContent(
-    children: [
-      PageHeading('给日常一点小帮手', '工具陆续准备中', art: 'book'),
-      SurfaceCard(child: Text('当前尚无已上线工具。随机工具上线后会出现在这里。')),
-    ],
-  );
+  Widget _tools() => ToolsPage(random: widget.random);
 
   Widget _settings() => PageContent(
     children: [

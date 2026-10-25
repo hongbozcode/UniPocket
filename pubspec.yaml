@@ -28,6 +28,14 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - docs/design/resources/icons/shuffle.svg
+    - docs/design/resources/illustrations/badge.svg
+    - docs/design/resources/illustrations/die.svg
+    - docs/design/resources/illustrations/coin.svg
+    - docs/design/resources/illustrations/coin-head.svg
+    - docs/design/resources/illustrations/coin-tail.svg
+    - docs/design/resources/illustrations/spark-yellow.svg
+    - docs/design/resources/illustrations/spark-lavender.svg
     - docs/design/resources/icons/bell.svg
     - docs/design/resources/icons/pin.svg
     - docs/design/resources/icons/more.svg
