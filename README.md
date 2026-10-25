@@ -24,7 +24,7 @@
 - [产品讨论记录](.scratch/product-design/discussion.md)：当时的讨论与决定，不替代现行规格。
 - [设计生成记录与截图索引](docs/design/resources/README.md)：提示词、页面截图及检查证据。
 
-当前仓库已实现任务 1、2、3、4 的 Flutter Android/Web 工程，支持离线学期、每日节次、校园时区、手动录课、今日／周课表、学习任务及倒计时事件管理；其他任务尚未交付，学校 XLSX 格式适配等待真实样例。实现验证记录见[任务 1 检查记录](.scratch/unipocket-v1/verification/01-bootstrap-semester.md)、[任务 2 检查记录](.scratch/unipocket-v1/verification/02-manual-timetable.md)、[任务 3 检查记录](.scratch/unipocket-v1/verification/03-learning-tasks.md)与[任务 4 检查记录](.scratch/unipocket-v1/verification/04-countdown-events.md)。
+当前仓库已实现任务 1–5 的 Flutter Android/Web 工程，支持离线学期、每日节次、校园时区、手动录课、今日／周课表、学习任务、倒计时事件及单次调停课管理；其他任务尚未交付，学校 XLSX 格式适配等待真实样例。实现验证记录见[任务 1 检查记录](.scratch/unipocket-v1/verification/01-bootstrap-semester.md)、[任务 2 检查记录](.scratch/unipocket-v1/verification/02-manual-timetable.md)、[任务 3 检查记录](.scratch/unipocket-v1/verification/03-learning-tasks.md)、[任务 4 检查记录](.scratch/unipocket-v1/verification/04-countdown-events.md)与[任务 5 检查记录](.scratch/unipocket-v1/verification/05-class-exceptions.md)。
 
 设计手册、效果图、HTML 样板截图和六项随机工具的[独立动效演示](docs/design/motion.html)仍是设计参考。原完整应用样板源码未纳入仓库；独立演示源码维护在 `docs/design/motion-demo.js` 和 `motion-demo.css`。
 
