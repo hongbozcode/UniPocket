@@ -2,15 +2,31 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../storage/planner_store.dart';
 import '../timetable/model.dart';
+import '../tasks/model.dart';
 import 'model.dart';
 
-/// The application boundary for semesters and timetables. The same operations
+/// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
 class SemesterPlanner {
   SemesterPlanner(this._store);
   final PlannerStore _store;
 
   Future<PlannerState> load() => _store.readState();
+
+  Future<void> setTaskCompleted(int id, bool completed) =>
+      _store.setTaskCompleted(id, completed);
+
+  Future<void> deleteTask(int id) => _store.deleteTask(id);
+
+  Future<int> saveTask(LearningTaskDraft draft, {int? id}) =>
+      _store.transaction(() async {
+        draft.validate();
+        if (draft.courseId != null &&
+            !(await load()).courses.any((c) => c.id == draft.courseId)) {
+          throw const InputProblem('关联课程不存在，请重新选择。');
+        }
+        return _store.saveTask(draft, id: id);
+      });
 
   Future<int> saveCourse(CourseDraft draft, {bool allowConflicts = false}) =>
       _store.transaction(() async {

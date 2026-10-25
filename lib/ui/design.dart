@@ -185,15 +185,17 @@ class PageHeading extends StatelessWidget {
     this.title,
     this.subtitle, {
     this.art = 'calendar',
+    this.bottomSpacing = 24,
     super.key,
   });
   final String title;
   final String subtitle;
   final String art;
+  final double bottomSpacing;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 24),
+    padding: EdgeInsets.only(bottom: bottomSpacing),
     child: LayoutBuilder(
       builder: (context, constraints) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,

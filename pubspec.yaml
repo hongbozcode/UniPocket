@@ -28,6 +28,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - docs/design/resources/icons/task.svg
+    - docs/design/resources/icons/back.svg
+    - docs/design/resources/icons/check.svg
+    - docs/design/resources/icons/warning.svg
+    - docs/design/resources/illustrations/pencil.svg
     - docs/design/resources/icons/badge.svg
     - docs/design/resources/icons/home.svg
     - docs/design/resources/icons/calendar.svg

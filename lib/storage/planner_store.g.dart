@@ -1768,6 +1768,462 @@ class ScheduleRecordsCompanion extends UpdateCompanion<StoredSchedule> {
   }
 }
 
+class $LearningTaskRecordsTable extends LearningTaskRecords
+    with TableInfo<$LearningTaskRecordsTable, StoredLearningTask> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LearningTaskRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
+  @override
+  late final GeneratedColumn<String> dueDate = GeneratedColumn<String>(
+    'due_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueMinutesMeta = const VerificationMeta(
+    'dueMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> dueMinutes = GeneratedColumn<int>(
+    'due_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _courseIdMeta = const VerificationMeta(
+    'courseId',
+  );
+  @override
+  late final GeneratedColumn<int> courseId = GeneratedColumn<int>(
+    'course_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES course_records (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    dueDate,
+    dueMinutes,
+    notes,
+    courseId,
+    isCompleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'learning_task_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredLearningTask> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueDateMeta);
+    }
+    if (data.containsKey('due_minutes')) {
+      context.handle(
+        _dueMinutesMeta,
+        dueMinutes.isAcceptableOrUnknown(data['due_minutes']!, _dueMinutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueMinutesMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_notesMeta);
+    }
+    if (data.containsKey('course_id')) {
+      context.handle(
+        _courseIdMeta,
+        courseId.isAcceptableOrUnknown(data['course_id']!, _courseIdMeta),
+      );
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+        _isCompletedMeta,
+        isCompleted.isAcceptableOrUnknown(
+          data['is_completed']!,
+          _isCompletedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredLearningTask map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredLearningTask(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}due_date'],
+      )!,
+      dueMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_minutes'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      )!,
+      courseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}course_id'],
+      ),
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
+      )!,
+    );
+  }
+
+  @override
+  $LearningTaskRecordsTable createAlias(String alias) {
+    return $LearningTaskRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredLearningTask extends DataClass
+    implements Insertable<StoredLearningTask> {
+  final int id;
+  final String title;
+  final String dueDate;
+  final int dueMinutes;
+  final String notes;
+  final int? courseId;
+  final bool isCompleted;
+  const StoredLearningTask({
+    required this.id,
+    required this.title,
+    required this.dueDate,
+    required this.dueMinutes,
+    required this.notes,
+    this.courseId,
+    required this.isCompleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    map['due_date'] = Variable<String>(dueDate);
+    map['due_minutes'] = Variable<int>(dueMinutes);
+    map['notes'] = Variable<String>(notes);
+    if (!nullToAbsent || courseId != null) {
+      map['course_id'] = Variable<int>(courseId);
+    }
+    map['is_completed'] = Variable<bool>(isCompleted);
+    return map;
+  }
+
+  LearningTaskRecordsCompanion toCompanion(bool nullToAbsent) {
+    return LearningTaskRecordsCompanion(
+      id: Value(id),
+      title: Value(title),
+      dueDate: Value(dueDate),
+      dueMinutes: Value(dueMinutes),
+      notes: Value(notes),
+      courseId: courseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(courseId),
+      isCompleted: Value(isCompleted),
+    );
+  }
+
+  factory StoredLearningTask.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredLearningTask(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      dueDate: serializer.fromJson<String>(json['dueDate']),
+      dueMinutes: serializer.fromJson<int>(json['dueMinutes']),
+      notes: serializer.fromJson<String>(json['notes']),
+      courseId: serializer.fromJson<int?>(json['courseId']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'dueDate': serializer.toJson<String>(dueDate),
+      'dueMinutes': serializer.toJson<int>(dueMinutes),
+      'notes': serializer.toJson<String>(notes),
+      'courseId': serializer.toJson<int?>(courseId),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+    };
+  }
+
+  StoredLearningTask copyWith({
+    int? id,
+    String? title,
+    String? dueDate,
+    int? dueMinutes,
+    String? notes,
+    Value<int?> courseId = const Value.absent(),
+    bool? isCompleted,
+  }) => StoredLearningTask(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    dueDate: dueDate ?? this.dueDate,
+    dueMinutes: dueMinutes ?? this.dueMinutes,
+    notes: notes ?? this.notes,
+    courseId: courseId.present ? courseId.value : this.courseId,
+    isCompleted: isCompleted ?? this.isCompleted,
+  );
+  StoredLearningTask copyWithCompanion(LearningTaskRecordsCompanion data) {
+    return StoredLearningTask(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      dueMinutes: data.dueMinutes.present
+          ? data.dueMinutes.value
+          : this.dueMinutes,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      courseId: data.courseId.present ? data.courseId.value : this.courseId,
+      isCompleted: data.isCompleted.present
+          ? data.isCompleted.value
+          : this.isCompleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredLearningTask(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('dueMinutes: $dueMinutes, ')
+          ..write('notes: $notes, ')
+          ..write('courseId: $courseId, ')
+          ..write('isCompleted: $isCompleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, title, dueDate, dueMinutes, notes, courseId, isCompleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredLearningTask &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.dueDate == this.dueDate &&
+          other.dueMinutes == this.dueMinutes &&
+          other.notes == this.notes &&
+          other.courseId == this.courseId &&
+          other.isCompleted == this.isCompleted);
+}
+
+class LearningTaskRecordsCompanion extends UpdateCompanion<StoredLearningTask> {
+  final Value<int> id;
+  final Value<String> title;
+  final Value<String> dueDate;
+  final Value<int> dueMinutes;
+  final Value<String> notes;
+  final Value<int?> courseId;
+  final Value<bool> isCompleted;
+  const LearningTaskRecordsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.dueMinutes = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.courseId = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+  });
+  LearningTaskRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String title,
+    required String dueDate,
+    required int dueMinutes,
+    required String notes,
+    this.courseId = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+  }) : title = Value(title),
+       dueDate = Value(dueDate),
+       dueMinutes = Value(dueMinutes),
+       notes = Value(notes);
+  static Insertable<StoredLearningTask> custom({
+    Expression<int>? id,
+    Expression<String>? title,
+    Expression<String>? dueDate,
+    Expression<int>? dueMinutes,
+    Expression<String>? notes,
+    Expression<int>? courseId,
+    Expression<bool>? isCompleted,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (dueDate != null) 'due_date': dueDate,
+      if (dueMinutes != null) 'due_minutes': dueMinutes,
+      if (notes != null) 'notes': notes,
+      if (courseId != null) 'course_id': courseId,
+      if (isCompleted != null) 'is_completed': isCompleted,
+    });
+  }
+
+  LearningTaskRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? title,
+    Value<String>? dueDate,
+    Value<int>? dueMinutes,
+    Value<String>? notes,
+    Value<int?>? courseId,
+    Value<bool>? isCompleted,
+  }) {
+    return LearningTaskRecordsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      dueDate: dueDate ?? this.dueDate,
+      dueMinutes: dueMinutes ?? this.dueMinutes,
+      notes: notes ?? this.notes,
+      courseId: courseId ?? this.courseId,
+      isCompleted: isCompleted ?? this.isCompleted,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (dueDate.present) {
+      map['due_date'] = Variable<String>(dueDate.value);
+    }
+    if (dueMinutes.present) {
+      map['due_minutes'] = Variable<int>(dueMinutes.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (courseId.present) {
+      map['course_id'] = Variable<int>(courseId.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LearningTaskRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('dueMinutes: $dueMinutes, ')
+          ..write('notes: $notes, ')
+          ..write('courseId: $courseId, ')
+          ..write('isCompleted: $isCompleted')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -1782,6 +2238,8 @@ abstract class _$PlannerStore extends GeneratedDatabase {
   late final $ScheduleRecordsTable scheduleRecords = $ScheduleRecordsTable(
     this,
   );
+  late final $LearningTaskRecordsTable learningTaskRecords =
+      $LearningTaskRecordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1792,7 +2250,18 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     settingsRecords,
     courseRecords,
     scheduleRecords,
+    learningTaskRecords,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'course_records',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('learning_task_records', kind: UpdateKind.update)],
+    ),
+  ]);
 }
 
 typedef $$SemesterRecordsTableCreateCompanionBuilder =
@@ -2946,6 +3415,30 @@ final class $$CourseRecordsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $LearningTaskRecordsTable,
+    List<StoredLearningTask>
+  >
+  _learningTaskRecordsRefsTable(_$PlannerStore db) =>
+      MultiTypedResultKey.fromTable(
+        db.learningTaskRecords,
+        aliasName: 'course_records__id__learning_task_records__course_id',
+      );
+
+  $$LearningTaskRecordsTableProcessedTableManager get learningTaskRecordsRefs {
+    final manager = $$LearningTaskRecordsTableTableManager(
+      $_db,
+      $_db.learningTaskRecords,
+    ).filter((f) => f.courseId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _learningTaskRecordsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CourseRecordsTableFilterComposer
@@ -3016,6 +3509,31 @@ class $$CourseRecordsTableFilterComposer
           }) => $$ScheduleRecordsTableFilterComposer(
             $db: $db,
             $table: $db.scheduleRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> learningTaskRecordsRefs(
+    Expression<bool> Function($$LearningTaskRecordsTableFilterComposer f) f,
+  ) {
+    final $$LearningTaskRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.learningTaskRecords,
+      getReferencedColumn: (t) => t.courseId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LearningTaskRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.learningTaskRecords,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3149,6 +3667,32 @@ class $$CourseRecordsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> learningTaskRecordsRefs<T extends Object>(
+    Expression<T> Function($$LearningTaskRecordsTableAnnotationComposer a) f,
+  ) {
+    final $$LearningTaskRecordsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.learningTaskRecords,
+          getReferencedColumn: (t) => t.courseId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LearningTaskRecordsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.learningTaskRecords,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CourseRecordsTableTableManager
@@ -3164,7 +3708,11 @@ class $$CourseRecordsTableTableManager
           $$CourseRecordsTableUpdateCompanionBuilder,
           (StoredCourse, $$CourseRecordsTableReferences),
           StoredCourse,
-          PrefetchHooks Function({bool semesterId, bool scheduleRecordsRefs})
+          PrefetchHooks Function({
+            bool semesterId,
+            bool scheduleRecordsRefs,
+            bool learningTaskRecordsRefs,
+          })
         > {
   $$CourseRecordsTableTableManager(_$PlannerStore db, $CourseRecordsTable table)
     : super(
@@ -3214,11 +3762,16 @@ class $$CourseRecordsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({semesterId = false, scheduleRecordsRefs = false}) {
+              ({
+                semesterId = false,
+                scheduleRecordsRefs = false,
+                learningTaskRecordsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (scheduleRecordsRefs) db.scheduleRecords,
+                    if (learningTaskRecordsRefs) db.learningTaskRecords,
                   ],
                   addJoins:
                       <
@@ -3272,6 +3825,26 @@ class $$CourseRecordsTableTableManager
                           referencedColumn: 'course_id',
                           typedResults: items,
                         ),
+                      if (learningTaskRecordsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          StoredCourse,
+                          $CourseRecordsTable,
+                          StoredLearningTask,
+                          $LearningTaskRecordsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CourseRecordsTableReferences
+                              ._learningTaskRecordsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CourseRecordsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).learningTaskRecordsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'course_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -3292,7 +3865,11 @@ typedef $$CourseRecordsTableProcessedTableManager =
       $$CourseRecordsTableUpdateCompanionBuilder,
       (StoredCourse, $$CourseRecordsTableReferences),
       StoredCourse,
-      PrefetchHooks Function({bool semesterId, bool scheduleRecordsRefs})
+      PrefetchHooks Function({
+        bool semesterId,
+        bool scheduleRecordsRefs,
+        bool learningTaskRecordsRefs,
+      })
     >;
 typedef $$ScheduleRecordsTableCreateCompanionBuilder =
     ScheduleRecordsCompanion Function({
@@ -3651,6 +4228,377 @@ typedef $$ScheduleRecordsTableProcessedTableManager =
       StoredSchedule,
       PrefetchHooks Function({bool courseId})
     >;
+typedef $$LearningTaskRecordsTableCreateCompanionBuilder =
+    LearningTaskRecordsCompanion Function({
+      Value<int> id,
+      required String title,
+      required String dueDate,
+      required int dueMinutes,
+      required String notes,
+      Value<int?> courseId,
+      Value<bool> isCompleted,
+    });
+typedef $$LearningTaskRecordsTableUpdateCompanionBuilder =
+    LearningTaskRecordsCompanion Function({
+      Value<int> id,
+      Value<String> title,
+      Value<String> dueDate,
+      Value<int> dueMinutes,
+      Value<String> notes,
+      Value<int?> courseId,
+      Value<bool> isCompleted,
+    });
+
+final class $$LearningTaskRecordsTableReferences
+    extends
+        BaseReferences<
+          _$PlannerStore,
+          $LearningTaskRecordsTable,
+          StoredLearningTask
+        > {
+  $$LearningTaskRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CourseRecordsTable _courseIdTable(_$PlannerStore db) => db
+      .courseRecords
+      .createAlias('learning_task_records__course_id__course_records__id');
+
+  $$CourseRecordsTableProcessedTableManager? get courseId {
+    final $_column = $_itemColumn<int>('course_id');
+    if ($_column == null) return null;
+    final manager = $$CourseRecordsTableTableManager(
+      $_db,
+      $_db.courseRecords,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_courseIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LearningTaskRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $LearningTaskRecordsTable> {
+  $$LearningTaskRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueMinutes => $composableBuilder(
+    column: $table.dueMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CourseRecordsTableFilterComposer get courseId {
+    final $$CourseRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courseRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.courseRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LearningTaskRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $LearningTaskRecordsTable> {
+  $$LearningTaskRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dueMinutes => $composableBuilder(
+    column: $table.dueMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CourseRecordsTableOrderingComposer get courseId {
+    final $$CourseRecordsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courseRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseRecordsTableOrderingComposer(
+            $db: $db,
+            $table: $db.courseRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LearningTaskRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $LearningTaskRecordsTable> {
+  $$LearningTaskRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  GeneratedColumn<int> get dueMinutes => $composableBuilder(
+    column: $table.dueMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => column,
+  );
+
+  $$CourseRecordsTableAnnotationComposer get courseId {
+    final $$CourseRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courseRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.courseRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LearningTaskRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $LearningTaskRecordsTable,
+          StoredLearningTask,
+          $$LearningTaskRecordsTableFilterComposer,
+          $$LearningTaskRecordsTableOrderingComposer,
+          $$LearningTaskRecordsTableAnnotationComposer,
+          $$LearningTaskRecordsTableCreateCompanionBuilder,
+          $$LearningTaskRecordsTableUpdateCompanionBuilder,
+          (StoredLearningTask, $$LearningTaskRecordsTableReferences),
+          StoredLearningTask,
+          PrefetchHooks Function({bool courseId})
+        > {
+  $$LearningTaskRecordsTableTableManager(
+    _$PlannerStore db,
+    $LearningTaskRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LearningTaskRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LearningTaskRecordsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LearningTaskRecordsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> dueDate = const Value.absent(),
+                Value<int> dueMinutes = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<int?> courseId = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+              }) => LearningTaskRecordsCompanion(
+                id: id,
+                title: title,
+                dueDate: dueDate,
+                dueMinutes: dueMinutes,
+                notes: notes,
+                courseId: courseId,
+                isCompleted: isCompleted,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String title,
+                required String dueDate,
+                required int dueMinutes,
+                required String notes,
+                Value<int?> courseId = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+              }) => LearningTaskRecordsCompanion.insert(
+                id: id,
+                title: title,
+                dueDate: dueDate,
+                dueMinutes: dueMinutes,
+                notes: notes,
+                courseId: courseId,
+                isCompleted: isCompleted,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LearningTaskRecordsTable, StoredLearningTask>(
+                    table,
+                  ),
+                  $$LearningTaskRecordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({courseId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (courseId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.courseId,
+                        referencedTable: $$LearningTaskRecordsTableReferences
+                            ._courseIdTable(db),
+                        referencedColumn: $$LearningTaskRecordsTableReferences
+                            ._courseIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LearningTaskRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $LearningTaskRecordsTable,
+      StoredLearningTask,
+      $$LearningTaskRecordsTableFilterComposer,
+      $$LearningTaskRecordsTableOrderingComposer,
+      $$LearningTaskRecordsTableAnnotationComposer,
+      $$LearningTaskRecordsTableCreateCompanionBuilder,
+      $$LearningTaskRecordsTableUpdateCompanionBuilder,
+      (StoredLearningTask, $$LearningTaskRecordsTableReferences),
+      StoredLearningTask,
+      PrefetchHooks Function({bool courseId})
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -3665,4 +4613,6 @@ class $PlannerStoreManager {
       $$CourseRecordsTableTableManager(_db, _db.courseRecords);
   $$ScheduleRecordsTableTableManager get scheduleRecords =>
       $$ScheduleRecordsTableTableManager(_db, _db.scheduleRecords);
+  $$LearningTaskRecordsTableTableManager get learningTaskRecords =>
+      $$LearningTaskRecordsTableTableManager(_db, _db.learningTaskRecords);
 }

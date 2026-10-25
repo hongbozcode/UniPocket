@@ -5,6 +5,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 import '../semesters/model.dart';
 import '../timetable/model.dart';
+import '../tasks/model.dart';
 
 part 'planner_store.g.dart';
 
@@ -60,6 +61,21 @@ class ScheduleRecords extends Table {
   TextColumn get weeks => text()();
 }
 
+@DataClassName('StoredLearningTask')
+class LearningTaskRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text()();
+  TextColumn get dueDate => text()();
+  IntColumn get dueMinutes => integer()();
+  TextColumn get notes => text()();
+  IntColumn get courseId => integer().nullable().references(
+    CourseRecords,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -67,6 +83,7 @@ class ScheduleRecords extends Table {
     SettingsRecords,
     CourseRecords,
     ScheduleRecords,
+    LearningTaskRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -83,7 +100,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -97,6 +114,7 @@ class PlannerStore extends _$PlannerStore {
         await m.createTable(courseRecords);
         await m.createTable(scheduleRecords);
       }
+      if (from < 3) await m.createTable(learningTaskRecords);
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -113,10 +131,23 @@ class PlannerStore extends _$PlannerStore {
             ]))
             .get();
     final courses = await select(courseRecords).get();
+    final tasks = await select(learningTaskRecords).get();
     final schedules = await (select(
       scheduleRecords,
     )..orderBy([(s) => OrderingTerm.asc(s.id)])).get();
     return PlannerState(
+      tasks: [
+        for (final task in tasks)
+          LearningTask(
+            id: task.id,
+            title: task.title,
+            dueDate: DateTime.parse(task.dueDate),
+            dueMinutes: task.dueMinutes,
+            notes: task.notes,
+            courseId: task.courseId,
+            isCompleted: task.isCompleted,
+          ),
+      ],
       courses: [
         for (final course in courses)
           Course(
@@ -246,6 +277,36 @@ class PlannerStore extends _$PlannerStore {
       (update(settingsRecords)..where((s) => s.id.equals(1))).write(
         SettingsRecordsCompanion(campusTimeZone: Value(zone)),
       );
+
+  Future<int> saveTask(LearningTaskDraft draft, {int? id}) async {
+    final values = LearningTaskRecordsCompanion(
+      title: Value(draft.title.trim()),
+      dueDate: Value(draft.dueDate.toIso8601String()),
+      dueMinutes: Value(draft.dueMinutes),
+      notes: Value(draft.notes.trim()),
+      courseId: Value(draft.courseId),
+    );
+    if (id == null) return into(learningTaskRecords).insert(values);
+    final count = await (update(
+      learningTaskRecords,
+    )..where((t) => t.id.equals(id))).write(values);
+    if (count == 0) throw const InputProblem('任务不存在，请返回后重试。');
+    return id;
+  }
+
+  Future<void> setTaskCompleted(int id, bool completed) async {
+    final count =
+        await (update(learningTaskRecords)..where((t) => t.id.equals(id)))
+            .write(LearningTaskRecordsCompanion(isCompleted: Value(completed)));
+    if (count == 0) throw const InputProblem('任务不存在，请返回后重试。');
+  }
+
+  Future<void> deleteTask(int id) async {
+    final count = await (delete(
+      learningTaskRecords,
+    )..where((t) => t.id.equals(id))).go();
+    if (count == 0) throw const InputProblem('任务不存在，请返回后重试。');
+  }
 
   Future<void> updateCourseDetails(
     int id, {

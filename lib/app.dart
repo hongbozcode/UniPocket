@@ -12,6 +12,10 @@ import 'ui/design.dart';
 import 'timetable/model.dart';
 import 'timetable/course_editor.dart';
 import 'timetable/timetable_page.dart';
+import 'tasks/model.dart';
+import 'tasks/task_editor.dart';
+import 'tasks/task_widgets.dart';
+import 'tasks/tasks_page.dart';
 
 class UniPocketApp extends StatelessWidget {
   const UniPocketApp({required this.planner, this.clock, super.key});
@@ -112,6 +116,118 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
       ),
     );
     await _load();
+  }
+
+  Future<void> _task([LearningTask? task]) async {
+    final state = _state!;
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TaskEditor(
+          planner: widget.planner,
+          state: state,
+          campusNow: state.campusTime(widget.clock().toUtc()),
+          task: task,
+        ),
+      ),
+    );
+    if (saved == true) await _load();
+  }
+
+  Future<void> _tasks() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TasksPage(planner: widget.planner, clock: widget.clock),
+      ),
+    );
+    await _load();
+  }
+
+  Future<void> _toggleTask(LearningTask task, [bool? completed]) async {
+    if (_busy) return;
+    final target = completed ?? !task.isCompleted;
+    setState(() => _busy = true);
+    try {
+      await widget.planner.setTaskCompleted(task.id, target);
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(target ? '任务已完成' : '已撤销完成'),
+            action: SnackBarAction(
+              label: '撤销',
+              onPressed: () => _toggleTask(task, !target),
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = '状态保存失败，请重试。');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Widget _taskSummary(DateTime now) {
+    final tasks = selectTasks(_state!.tasks);
+    return SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const DesignIcon('task', size: 20),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  '学习任务',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+              ),
+              RoundDesignButton(
+                icon: 'plus',
+                label: '创建任务',
+                onPressed: () => _task(),
+              ),
+            ],
+          ),
+          if (tasks.isEmpty) ...[
+            const SizedBox(height: 8),
+            const Text(
+              '还没有未完成任务，记下下一个小目标吧。',
+              style: TextStyle(fontSize: 13, color: Color(0xff73819a)),
+            ),
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: () => _task(),
+              icon: const Icon(Icons.add),
+              label: const Text('创建任务'),
+            ),
+          ],
+          for (final task in tasks.take(3))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TaskCard(
+                task: task,
+                campusNow: now,
+                course: _state!.courses
+                    .where((c) => c.id == task.courseId)
+                    .firstOrNull,
+                onEdit: () => _task(task),
+                onToggle: _busy ? null : () => _toggleTask(task),
+              ),
+            ),
+          TextButton(
+            onPressed: _tasks,
+            child: Text(
+              tasks.length > 3 ? '查看全部任务（${tasks.length} 项未完成）' : '查看全部任务',
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _course([Course? course]) async {
@@ -290,10 +406,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           ),
         ],
         const SizedBox(height: 20),
-        const Text(
-          '学习任务与倒计时将在后续版本开放。',
-          style: TextStyle(fontSize: 12, color: Color(0xff73819a)),
-        ),
+        _taskSummary(now),
       ],
     );
   }
@@ -305,6 +418,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           onAdd: () => _course(),
           onEdit: _course,
           onManage: _manage,
+          onTasks: _tasks,
         )
       : PageContent(
           children: [
@@ -314,6 +428,12 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
               art: 'book',
             ),
             _startCard(),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _tasks,
+              icon: const DesignIcon('task'),
+              label: const Text('学习任务'),
+            ),
           ],
         );
 
