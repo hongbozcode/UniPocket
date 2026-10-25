@@ -51,6 +51,64 @@ class RoundDesignButton extends StatelessWidget {
 String dateText(DateTime date) =>
     '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
+class AppNavigationItem extends StatelessWidget {
+  const AppNavigationItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+  final String icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    selected: selected,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: selected ? lavenderSoft : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DesignIcon(
+                    icon,
+                    size: 22,
+                    color: selected ? primaryBlue : const Color(0xff93a0b5),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: selected ? primaryBlue : const Color(0xff73819a),
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 ThemeData appTheme() => ThemeData(
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue).copyWith(

@@ -258,7 +258,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
                     TextButton(
                       onPressed: () => setState(() => _page = 1),
                       child: const Text(
-                        '全部 ›',
+                        '全部',
                         style: TextStyle(
                           fontSize: 12,
                           color: Color(0xff73819a),
@@ -432,23 +432,33 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ],
       ),
     ),
-    bottomNavigationBar: NavigationBar(
+    bottomNavigationBar: Material(
       key: const ValueKey('main-navigation'),
-      selectedIndex: _page,
-      onDestinationSelected: (index) => setState(() => _page = index),
-      destinations: [
-        for (final entry in [
-          ('home', '首页'),
-          ('calendar', '课表'),
-          ('grid', '工具'),
-          ('settings', '设置'),
-        ])
-          NavigationDestination(
-            icon: DesignIcon(entry.$1, color: const Color(0xff65738b)),
-            selectedIcon: DesignIcon(entry.$1, color: primaryBlue),
-            label: entry.$2,
+      color: Colors.white,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+          child: Row(
+            children: [
+              for (final (index, entry) in [
+                ('home', '首页'),
+                ('calendar', '课表'),
+                ('grid', '工具'),
+                ('settings', '设置'),
+              ].indexed)
+                Expanded(
+                  child: AppNavigationItem(
+                    icon: entry.$1,
+                    label: entry.$2,
+                    selected: index == _page,
+                    onTap: () => setState(() => _page = index),
+                  ),
+                ),
+            ],
           ),
-      ],
+        ),
+      ),
     ),
   );
 }

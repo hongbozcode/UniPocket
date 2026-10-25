@@ -37,8 +37,11 @@ class _WeekGridState extends State<WeekGrid> {
   Widget _periodLabel(int start, int end) {
     final times = {
       for (final periods in widget.timetable.semester.periods.values)
-        if (periods.length >= end)
-          (periods[start - 1].startMinutes, periods[end - 1].endMinutes),
+        if (periods.length >= start)
+          (
+            periods[start - 1].startMinutes,
+            periods.length >= end ? periods[end - 1].endMinutes : null,
+          ),
     };
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +54,7 @@ class _WeekGridState extends State<WeekGrid> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        if (times.length == 1) ...[
+        if (times.length == 1 && times.single.$2 != null) ...[
           const SizedBox(height: 4),
           Text(
             PeriodTime.format(times.single.$1),
@@ -68,14 +71,14 @@ class _WeekGridState extends State<WeekGrid> {
             color: const Color(0xffb6c0d1),
           ),
           Text(
-            PeriodTime.format(times.single.$2),
+            PeriodTime.format(times.single.$2!),
             style: const TextStyle(
               fontSize: 10,
               height: 1.2,
               color: Color(0xff73819a),
             ),
           ),
-        ] else if (times.length > 1)
+        ] else if (times.isNotEmpty)
           const Text(
             '按星期',
             style: TextStyle(fontSize: 10, color: Color(0xff73819a)),

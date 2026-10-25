@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:unipocket/app.dart';
 import 'package:unipocket/semesters/planner.dart';
+import 'package:unipocket/semesters/model.dart';
 import 'package:unipocket/storage/planner_store.dart';
 import 'package:unipocket/timetable/model.dart';
 
@@ -14,6 +15,56 @@ import 'support/widget_actions.dart';
 
 void main() {
   setUpAll(tzdata.initializeTimeZones);
+
+  testWidgets('有的星期缺少一组的结束节次且时间不同时，时间轴标明按星期，详情给出实际时间', (tester) async {
+    await tester.runAsync(() async {
+      final store = PlannerStore(NativeDatabase.memory());
+      final planner = SemesterPlanner(store);
+      final semester = await planner.saveSemester(
+        SemesterDraft(
+          name: '不同星期时间',
+          firstMonday: DateTime.utc(2026, 8, 31),
+          totalWeeks: 20,
+          periods: {
+            1: [const PeriodTime(480, 525), const PeriodTime(535, 580)],
+            2: [const PeriodTime(600, 645)],
+          },
+        ),
+      );
+      await planner.saveCourse(
+        CourseDraft(
+          semesterId: semester,
+          name: '周二课程',
+          schedules: [
+            ScheduleDraft(
+              weekday: 2,
+              startPeriod: 1,
+              endPeriod: 1,
+              location: 'B302',
+              weeks: {1},
+            ),
+          ],
+        ),
+      );
+      try {
+        await tester.pumpWidget(
+          UniPocketApp(
+            planner: planner,
+            clock: () => DateTime.utc(2026, 8, 31),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tapVisible(tester, find.text('课表'));
+        expect(find.text('按星期'), findsOneWidget);
+        await tapVisible(tester, find.text('周二课程'));
+        expect(find.textContaining('10:00–10:45'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await store.close();
+      }
+    });
+  });
 
   testWidgets('六种基础色用完后，新课程仍默认分配未使用的颜色，编辑不改变已有安排颜色', (tester) async {
     await tester.runAsync(() async {
