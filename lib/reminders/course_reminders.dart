@@ -58,13 +58,17 @@ List<LocalReminder> futureCourseReminders(PlannerState state, DateTime now) => [
             : 'class:${(occurrence.schedule as ClassSchedule).id}:${occurrence.originalDate.toIso8601String()}',
         at: at,
         title: occurrence.course.name,
-        body:
-            '${occurrence.isIndependent
-                ? '独立补课'
-                : occurrence.isRescheduled
-                ? '已调课'
-                : '课程提醒'} · '
-            '${occurrence.date.year}-${occurrence.date.month}-${occurrence.date.day} ${PeriodTime.format(occurrence.startMinutes)} · '
-            '${occurrence.location.isEmpty ? '地点未填写' : occurrence.location} · ${state.campusTimeZone}',
+        body: _lessonMessage(occurrence),
       ),
 ];
+
+String _lessonMessage(ClassOccurrence occurrence) {
+  final time =
+      '${occurrence.date.month}月${occurrence.date.day}日 ${PeriodTime.format(occurrence.startMinutes)}';
+  final message = occurrence.isIndependent
+      ? '补课时间：$time'
+      : occurrence.isRescheduled
+      ? '已调至 $time'
+      : '$time 上课';
+  return '$message${occurrence.location.isEmpty ? '' : '，地点：${occurrence.location}'}。';
+}

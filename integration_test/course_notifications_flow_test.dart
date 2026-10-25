@@ -28,13 +28,11 @@ void main() {
   testWidgets('Android 课程提醒配置、变更撤销、进程恢复与实际调度', (tester) async {
     const notifications = AndroidNotifications(namespace: databaseName);
     if (phase == 'cleanup') {
-      for (final namespace in {
+      const extra = String.fromEnvironment('ACCEPTANCE_EXTRA_CLEANUP');
+      for (final namespace in [
         databaseName,
-        const String.fromEnvironment(
-          'ACCEPTANCE_EXTRA_CLEANUP',
-          defaultValue: databaseName,
-        ),
-      }) {
+        if (extra.isNotEmpty && extra != databaseName) extra,
+      ]) {
         final boundary = AndroidNotifications(namespace: namespace);
         await boundary.replace('course', []);
         await boundary.replace('ddl', []);
@@ -129,7 +127,10 @@ void main() {
         );
         expect((await planner.load()).currentSemesterId, other);
       }
-      if (phase == 'restore') {
+      if (phase == 'delivery') {
+        await planner.setCurrentSemester(course.semesterId);
+      }
+      if (phase == 'restore' || phase == 'delivery') {
         await planner.updateCourseDetails(
           course.id,
           name: course.name,
@@ -138,7 +139,7 @@ void main() {
           reminderMinutesBefore: 0,
         );
         final schedule = course.schedules.single as ClassSchedule;
-        final target = now.add(const Duration(minutes: 4));
+        final target = now.add(Duration(minutes: phase == 'delivery' ? 2 : 4));
         final start = target.hour * 60 + target.minute;
         if (start > 1400) throw StateError('送达验收请避开校园午夜前半小时');
         final semester = state.semesters.singleWhere(

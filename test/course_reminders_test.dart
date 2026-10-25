@@ -49,7 +49,7 @@ void main() {
     ]);
     expect(notifications.pending.first.body, contains('08:00'));
     expect(notifications.pending.first.body, contains('教学楼 A101'));
-    expect(notifications.pending.first.body, contains('Asia/Shanghai'));
+    expect(notifications.pending.first.body, '8月31日 08:00 上课，地点：教学楼 A101。');
     await planner.refreshReminders();
     expect(notifications.pending.map((r) => r.key).toSet(), hasLength(2));
   });

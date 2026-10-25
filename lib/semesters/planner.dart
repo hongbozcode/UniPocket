@@ -48,8 +48,8 @@ class SemesterPlanner {
                   at: at,
                   title: task.title,
                   body:
-                      '学习任务即将截止 · ${task.dueDate.month}月${task.dueDate.day}日 '
-                      '${PeriodTime.format(task.dueMinutes)} · ${state.campusTimeZone}',
+                      '${task.dueDate.month}月${task.dueDate.day}日 '
+                      '${PeriodTime.format(task.dueMinutes)} 截止，记得按时完成。',
                 ),
               );
             }

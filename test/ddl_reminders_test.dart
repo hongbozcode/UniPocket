@@ -173,6 +173,7 @@ void main() {
     expect(notifications.pending.single.key, 'task:$id');
     expect(notifications.pending.single.at, DateTime.utc(2026, 10, 27, 15, 59));
     expect(notifications.pending.single.title, '论文终稿');
+    expect(notifications.pending.single.body, '10月28日 23:59 截止，记得按时完成。');
     await store.close();
     store = PlannerStore(NativeDatabase(file));
     addTearDown(store.close);
