@@ -1,0 +1,23 @@
+[
+  {
+    "at": 1793489400000,
+    "title": "高等数学",
+    "body": "课程提醒 · 2026-11-1 08:00 · 教学楼 A101 · Asia/Shanghai",
+    "key": "class:1:2026-11-01T00:00:00.000Z",
+    "scope": "unipocket_course_20261025_b/course"
+  },
+  {
+    "at": 1794094200000,
+    "title": "高等数学",
+    "body": "课程提醒 · 2026-11-8 08:00 · 教学楼 A101 · Asia/Shanghai",
+    "key": "class:1:2026-11-08T00:00:00.000Z",
+    "scope": "unipocket_course_20261025_b/course"
+  },
+  {
+    "at": 1793462340000,
+    "title": "跨学期保留的实验报告",
+    "body": "学习任务即将截止 · 11月1日 23:59 · Asia/Shanghai",
+    "key": "task:1",
+    "scope": "unipocket_course_20261025_b/ddl"
+  }
+]

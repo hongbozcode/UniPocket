@@ -1,0 +1,102 @@
+
+      #2: PendingIntentRecord{d875ee7 com.hongbozcode.unipocket broadcastIntent}
+        uid=10219 packageName=com.hongbozcode.unipocket featureId=null type=broadcastIntent flags=0x4000000
+>       requestIntent=dat=unipocket://reminders/unipocket_course_20261025_b%2Fddl%2Ftask%3A1 xflg=0x4 cmp=com.hongbozcode.unipocket/.ReminderReceiver
+      #3: PendingIntentRecord{460082c com.hongbozcode.unipocket broadcastIntent}
+      #4: PendingIntentRecord{d34d9ff com.hongbozcode.unipocket broadcastIntent}
+        uid=10219 packageName=com.hongbozcode.unipocket featureId=null type=broadcastIntent flags=0x4000000
+>       requestIntent=dat=unipocket://reminders/unipocket_course_20261025_b%2Fcourse%2Fclass%3A1%3A2026-11-01T00%3A00%3A00.000Z xflg=0x4 cmp=com.hongbozcode.unipocket/.ReminderReceiver
+    * com.google.android.apps.wellbeing: 2 items
+
+
+
+>     RTC_WAKEUP #2: Alarm{c73cd59 type 0 origWhen 1792931520000 whenElapsed 26245198 com.hongbozcode.unipocket}
+>       tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+        type=RTC_WAKEUP origWhen=2026-10-25 12:32:00.000 window=+2m18s115ms repeatInterval=0 count=0 flags=0x20
+        policyWhenElapsed: requester=-32s113ms app_standby=-3m36s267ms device_idle=-- battery_saver=-1m46s386ms
+        whenElapsed=-32s113ms maxWhenElapsed=+1m46s2ms
+>       operation=PendingIntent{1b5bd1e: PendingIntentRecord{d34d9ff com.hongbozcode.unipocket broadcastIntent}}
+        idle-options=Bundle[{android.pendingIntent.backgroundActivityAllowed=2, android:broadcast.temporaryAppAllowlistReasonCode=-1, android:broadcast.temporaryAppAllowlistDuration=10000, android:broadcast.temporaryAppAllowlistReason=, and
+roid:broadcast.temporaryAppAllowlistType=1, android:broadcast.flags=8}]
+      ELAPSED #3: Alarm{ef79bc8 type 3 origWhen 26305198 whenElapsed 26305198 android}
+        tag=*alarm*:TIME_TICK
+        type=ELAPSED origWhen=+27s887ms window=0 exactAllowReason=allow-listed repeatInterval=0 count=0 flags=0x9
+>     RTC_WAKEUP #34: Alarm{fea94da type 0 origWhen 1793462340000 whenElapsed 557065197 com.hongbozcode.unipocket}
+>       tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+        type=RTC_WAKEUP origWhen=2026-10-31 15:59:00.000 window=+1h0m0s0ms repeatInterval=0 count=0 flags=0x20
+        policyWhenElapsed: requester=+6d3h26m27s886ms app_standby=-3m50s713ms device_idle=-- battery_saver=-1m46s386ms
+        whenElapsed=+6d3h26m27s886ms maxWhenElapsed=+6d4h26m27s886ms
+>       operation=PendingIntent{ad7fd0b: PendingIntentRecord{e9247e8 com.hongbozcode.unipocket broadcastIntent}}
+        idle-options=Bundle[{android.pendingIntent.backgroundActivityAllowed=2, android:broadcast.temporaryAppAllowlistReasonCode=-1, android:broadcast.temporaryAppAllowlistDuration=10000, android:broadcast.temporaryAppAllowlistReason=, and
+roid:broadcast.temporaryAppAllowlistType=1, android:broadcast.flags=8}]
+>     RTC_WAKEUP #35: Alarm{ba17e01 type 0 origWhen 1793462340000 whenElapsed 557065197 com.hongbozcode.unipocket}
+>       tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+        type=RTC_WAKEUP origWhen=2026-10-31 15:59:00.000 window=+1h0m0s0ms repeatInterval=0 count=0 flags=0x20
+        policyWhenElapsed: requester=+6d3h26m27s886ms app_standby=-3m36s271ms device_idle=-- battery_saver=-1m46s386ms
+        whenElapsed=+6d3h26m27s886ms maxWhenElapsed=+6d4h26m27s886ms
+>       operation=PendingIntent{ded24a6: PendingIntentRecord{d875ee7 com.hongbozcode.unipocket broadcastIntent}}
+        idle-options=Bundle[{android.pendingIntent.backgroundActivityAllowed=2, android:broadcast.temporaryAppAllowlistReasonCode=-1, android:broadcast.temporaryAppAllowlistDuration=10000, android:broadcast.temporaryAppAllowlistReason=, and
+roid:broadcast.temporaryAppAllowlistType=1, android:broadcast.flags=8}]
+>     RTC_WAKEUP #36: Alarm{f37fa94 type 0 origWhen 1793490600000 whenElapsed 585325197 com.hongbozcode.unipocket}
+>       tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+        type=RTC_WAKEUP origWhen=2026-10-31 23:50:00.000 window=+1h0m0s0ms repeatInterval=0 count=0 flags=0x20
+        policyWhenElapsed: requester=+6d11h17m27s886ms app_standby=-3m50s725ms device_idle=-- battery_saver=-1m46s386ms
+        whenElapsed=+6d11h17m27s886ms maxWhenElapsed=+6d12h17m27s886ms
+>       operation=PendingIntent{ba6f93d: PendingIntentRecord{836e532 com.hongbozcode.unipocket broadcastIntent}}
+        idle-options=Bundle[{android.pendingIntent.backgroundActivityAllowed=2, android:broadcast.temporaryAppAllowlistReasonCode=-1, android:broadcast.temporaryAppAllowlistDuration=10000, android:broadcast.temporaryAppAllowlistReason=, and
+roid:broadcast.temporaryAppAllowlistType=1, android:broadcast.flags=8}]
+      RTC #37: Alarm{fe10283 type 1 origWhen 1793530800000 whenElapsed 625525198 com.google.android.apps.wellbeing}
+        tag=*alarm*:com.google.android.apps.wellbeing.focusmode.growth.SCHEDULED_GROWTH_NOTIFICATION
+        type=RTC origWhen=2026-11-01 11:00:00.000 window=+1h0m0s0ms repeatInterval=0 count=0 flags=0x0
+>     RTC_WAKEUP #38: Alarm{8ea227e type 0 origWhen 1794095400000 whenElapsed 1190125198 com.hongbozcode.unipocket}
+>       tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+        type=RTC_WAKEUP origWhen=2026-11-07 23:50:00.000 window=+1h0m0s0ms repeatInterval=0 count=0 flags=0x20
+        policyWhenElapsed: requester=+13d11h17m27s887ms app_standby=-3m50s715ms device_idle=-- battery_saver=-1m46s386ms
+        whenElapsed=+13d11h17m27s887ms maxWhenElapsed=+13d12h17m27s887ms
+>       operation=PendingIntent{da743df: PendingIntentRecord{460082c com.hongbozcode.unipocket broadcastIntent}}
+        idle-options=Bundle[{android.pendingIntent.backgroundActivityAllowed=2, android:broadcast.temporaryAppAllowlistReasonCode=-1, android:broadcast.temporaryAppAllowlistDuration=10000, android:broadcast.temporaryAppAllowlistReason=, and
+roid:broadcast.temporaryAppAllowlistType=1, android:broadcast.flags=8}]
+      ELAPSED_WAKEUP #39: Alarm{5193339 type 2 origWhen 315360024037 whenElapsed 315360024037 com.google.android.gms}
+        tag=*walarm*:com.google.android.gms/com.google.android.location.internal.GoogleLocationManagerService
+        type=ELAPSED_WAKEUP origWhen=+3649d16h42m26s726ms window=+1h0m0s0ms repeatInterval=0 count=0 flags=0x0
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+13d11h27m27s886ms app_standby=-3m43s768ms device_idle=-- battery_saver=-3m43s768ms
+        #2: Reason=alarm_cancelled elapsed=-3m43s780ms rtc=2026-10-25 12:28:48.333
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+6d11h27m27s886ms app_standby=-3m43s931ms device_idle=-- battery_saver=-3m43s931ms
+        #3: Reason=alarm_cancelled elapsed=-3m43s943ms rtc=2026-10-25 12:28:48.171
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+13d10h57m27s886ms app_standby=-3m50s707ms device_idle=-- battery_saver=-3m50s709ms
+        #4: Reason=alarm_cancelled elapsed=-3m43s945ms rtc=2026-10-25 12:28:48.169
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+6d10h57m27s886ms app_standby=-3m50s711ms device_idle=-- battery_saver=-3m50s711ms
+        #5: Reason=pi_cancelled elapsed=-3m54s841ms rtc=2026-10-25 12:28:37.272
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+6d10h57m27s887ms app_standby=-5m6s43ms device_idle=-- battery_saver=-3m54s933ms
+        #6: Reason=pi_cancelled elapsed=-3m54s843ms rtc=2026-10-25 12:28:37.270
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+13d11h17m27s886ms app_standby=-5m22s390ms device_idle=-- battery_saver=-3m54s940ms
+        #7: Reason=pi_cancelled elapsed=-3m54s844ms rtc=2026-10-25 12:28:37.269
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+6d3h26m27s886ms app_standby=-5m6s52ms device_idle=-- battery_saver=-3m54s932ms
+        #8: Reason=pi_cancelled elapsed=-3m54s852ms rtc=2026-10-25 12:28:37.261
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+6d11h17m27s886ms app_standby=-5m22s392ms device_idle=-- battery_saver=-3m54s933ms
+        #9: Reason=pi_cancelled elapsed=-3m54s853ms rtc=2026-10-25 12:28:37.261
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+13d10h57m27s887ms app_standby=-5m6s41ms device_idle=-- battery_saver=-3m54s939ms
+        #10: Reason=pi_cancelled elapsed=-3m54s853ms rtc=2026-10-25 12:28:37.260
+          Snapshot:
+>           type=RTC_WAKEUP tag=*walarm*:com.hongbozcode.unipocket/.ReminderReceiver
+            policyWhenElapsed: requester=+6d3h26m27s887ms app_standby=-5m22s387ms device_idle=-- battery_saver=-3m54s933ms
+
+    Top Alarms:
+      +2s59ms running, 0 wakeups, 442 alarms: 1000:android
