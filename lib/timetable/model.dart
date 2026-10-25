@@ -49,6 +49,7 @@ class CourseDraft {
     required this.name,
     this.teacher = '',
     this.colorIndex = 0,
+    this.reminderMinutesBefore = 10,
     required List<ScheduleDraft> schedules,
   }) : schedules = List.unmodifiable(schedules);
 
@@ -56,14 +57,24 @@ class CourseDraft {
   final String name;
   final String teacher;
   final int colorIndex;
+
+  /// One reminder per effective lesson; null disables this course's reminders.
+  final int? reminderMinutesBefore;
   final List<ScheduleDraft> schedules;
 
   void validate(SemesterDraft semester) {
     validateCourseDetails(name, colorIndex);
+    validateCourseReminder(reminderMinutesBefore);
     if (schedules.isEmpty) throw const InputProblem('请至少添加一个上课安排。');
     for (final schedule in schedules) {
       schedule.validate(semester);
     }
+  }
+}
+
+void validateCourseReminder(int? minutes) {
+  if (minutes != null && (minutes < 0 || minutes > 525600)) {
+    throw const InputProblem('提醒提前时间须为 0–525600 分钟。');
   }
 }
 
@@ -140,6 +151,7 @@ class Course extends CourseDraft {
     required super.name,
     required super.teacher,
     required super.colorIndex,
+    super.reminderMinutesBefore,
     required List<ClassSchedule> super.schedules,
   });
   final int id;

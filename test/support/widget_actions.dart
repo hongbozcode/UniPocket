@@ -33,6 +33,16 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
+  // Real SQLite/permission results can expand a card after the first scroll.
+  // Scroll the final layout into view before attempting the user action.
+  for (
+    var attempt = 0;
+    attempt < 3 && finder.hitTestable().evaluate().isEmpty;
+    attempt++
+  ) {
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+  }
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }

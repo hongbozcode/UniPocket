@@ -91,6 +91,7 @@ String courseRevision(
     course.name,
     course.teacher,
     course.colorIndex,
+    course.reminderMinutesBefore,
     semester.firstMonday.toIso8601String(),
     semester.totalWeeks,
     [

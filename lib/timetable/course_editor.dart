@@ -4,11 +4,16 @@ import '../semesters/model.dart';
 import '../semesters/planner.dart';
 import '../ui/design.dart';
 import '../ui/course_palette.dart';
+import '../reminders/notification_card.dart';
 import 'model.dart';
 import 'class_exception_editor.dart';
 import 'course_impact_page.dart';
 
-enum CourseEditorResult { saved, deleted }
+class CourseEditorResult {
+  const CourseEditorResult(this.courseId, {this.deleted = false});
+  final int courseId;
+  final bool deleted;
+}
 
 String scheduleText(ScheduleDraft schedule, Semester semester) {
   final weeks = schedule.weeks.toList()..sort();
@@ -77,6 +82,14 @@ class _CourseEditorState extends State<CourseEditor> {
     text: widget.course?.teacher ?? '',
   );
   late int _color = widget.course?.colorIndex ?? widget.initialColorIndex;
+  late bool _reminderEnabled =
+      widget.course == null || widget.course!.reminderMinutesBefore != null;
+  late final _reminderLead = TextEditingController(
+    text: (widget.course?.reminderMinutesBefore ?? 10).toString(),
+  );
+  late final _reminderState = widget.planner.refreshReminders().then(
+    (_) => widget.planner.load(),
+  );
   final _scroll = ScrollController();
   final _schedules = <_ScheduleFields>[];
   var _saving = false;
@@ -99,7 +112,7 @@ class _CourseEditorState extends State<CourseEditor> {
       ),
     );
     if (saved == true && mounted) {
-      Navigator.pop(context, CourseEditorResult.saved);
+      Navigator.pop(context, CourseEditorResult(widget.course!.id));
     }
   }
 
@@ -195,6 +208,7 @@ class _CourseEditorState extends State<CourseEditor> {
   void dispose() {
     _name.dispose();
     _teacher.dispose();
+    _reminderLead.dispose();
     _scroll.dispose();
     for (final fields in _schedules) {
       fields.dispose();
@@ -270,6 +284,7 @@ class _CourseEditorState extends State<CourseEditor> {
       _error = null;
     });
     try {
+      var savedId = widget.course?.id;
       if (widget.course case final course?) {
         if (_editingSchedules) {
           final impact = await widget.planner.previewCourseChange(
@@ -294,12 +309,13 @@ class _CourseEditorState extends State<CourseEditor> {
             name: _name.text,
             teacher: _teacher.text,
             colorIndex: _color,
+            reminderMinutesBefore: _readReminder(),
           );
         }
       } else {
         final draft = _draft();
         try {
-          await widget.planner.saveCourse(draft);
+          savedId = await widget.planner.saveCourse(draft);
         } on CourseConflict catch (conflict) {
           if (!mounted) return;
           final confirmed = await showDialog<bool>(
@@ -320,10 +336,13 @@ class _CourseEditorState extends State<CourseEditor> {
             ),
           );
           if (confirmed != true) return;
-          await widget.planner.saveCourse(draft, allowConflicts: true);
+          savedId = await widget.planner.saveCourse(
+            draft,
+            allowConflicts: true,
+          );
         }
       }
-      if (mounted) Navigator.pop(context, CourseEditorResult.saved);
+      if (mounted) Navigator.pop(context, CourseEditorResult(savedId!));
     } on InputProblem catch (problem) {
       if (mounted) setState(() => _error = problem.message);
     } catch (_) {
@@ -347,6 +366,7 @@ class _CourseEditorState extends State<CourseEditor> {
     name: _name.text,
     teacher: _teacher.text,
     colorIndex: _color,
+    reminderMinutesBefore: _readReminder(),
     schedules: [
       for (var i = 0; i < _schedules.length; i++)
         _readSchedule(_schedules[i], i + 1),
@@ -402,7 +422,12 @@ class _CourseEditorState extends State<CourseEditor> {
       );
       if (confirmed != true) return;
       await widget.planner.deleteCourse(impact);
-      if (mounted) Navigator.pop(context, CourseEditorResult.deleted);
+      if (mounted) {
+        Navigator.pop(
+          context,
+          CourseEditorResult(widget.course!.id, deleted: true),
+        );
+      }
     } on InputProblem catch (e) {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
@@ -445,6 +470,121 @@ class _CourseEditorState extends State<CourseEditor> {
     return schedule;
   }
 
+  int? _readReminder() {
+    if (!_reminderEnabled) return null;
+    final minutes = int.tryParse(_reminderLead.text.trim());
+    if (minutes == null) throw const InputProblem('请输入提醒提前分钟数。');
+    validateCourseReminder(minutes);
+    return minutes;
+  }
+
+  String _reminderPreview(PlannerState state) {
+    if (!_reminderEnabled) return '此课程提醒已关闭';
+    if (_editingSchedules) return '保存后按确认的有效课次重算提醒；已过提醒不会补发。';
+    try {
+      final draft = _draft();
+      draft.validate(widget.semester);
+      final course = Course(
+        id: widget.course?.id ?? -1,
+        semesterId: draft.semesterId,
+        name: draft.name,
+        teacher: draft.teacher,
+        colorIndex: draft.colorIndex,
+        reminderMinutesBefore: draft.reminderMinutesBefore,
+        schedules: [
+          for (var i = 0; i < draft.schedules.length; i++)
+            if (draft.schedules[i] case final ClassSchedule saved)
+              saved
+            else
+              ClassSchedule(
+                id: -i - 1,
+                weekday: draft.schedules[i].weekday,
+                startPeriod: draft.schedules[i].startPeriod,
+                endPeriod: draft.schedules[i].endPeriod,
+                location: draft.schedules[i].location,
+                weeks: draft.schedules[i].weeks,
+              ),
+        ],
+      );
+      final preview = PlannerState(
+        semesters: state.semesters,
+        currentSemesterId: state.currentSemesterId,
+        campusTimeZone: state.campusTimeZone,
+        courses: [
+          for (final c in state.courses)
+            if (c.id != course.id) c,
+          course,
+        ],
+        classExceptions: state.classExceptions,
+        independentLessons: state.independentLessons,
+      );
+      return '保存后：${widget.planner.courseReminderStatus(course, preview)}';
+    } on InputProblem {
+      return '完善课程与上课安排后可预览；提醒时间已过不会补发。';
+    }
+  }
+
+  Widget _reminderCard() => SurfaceCard(
+    color: lavenderSoft,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Row(
+          children: [
+            DesignIcon('bell', color: Color(0xff8b62e6)),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '课程提醒',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SwitchListTile.adaptive(
+          key: const ValueKey('course-reminder-enabled'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('上课前提醒'),
+          subtitle: const Text('每次有效上课一个提醒，调停课后自动更新'),
+          value: _reminderEnabled,
+          onChanged: (enabled) => setState(() => _reminderEnabled = enabled),
+        ),
+        if (_reminderEnabled) ...[
+          const SizedBox(height: 12),
+          TextField(
+            key: const ValueKey('course-reminder-lead'),
+            controller: _reminderLead,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: '提前分钟数',
+              helperText: '默认 10 分钟；0 表示上课时提醒',
+              helperMaxLines: 3,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+        const Divider(height: 28, color: Color(0xffdfd5f6)),
+        Text(
+          '校园时间 · ${widget.campusTimeZone}',
+          style: const TextStyle(color: Color(0xff73819a), fontSize: 12),
+        ),
+        const SizedBox(height: 8),
+        FutureBuilder<PlannerState>(
+          future: _reminderState,
+          builder: (context, snapshot) => Text(
+            snapshot.hasData
+                ? _reminderPreview(snapshot.data!)
+                : snapshot.hasError
+                ? '无法读取提醒预览，请返回后重试。'
+                : '正在读取提醒预览…',
+            style: const TextStyle(color: Color(0xff52617a), fontSize: 13),
+          ),
+        ),
+      ],
+    ),
+  );
+
   Widget _schedule(_ScheduleFields fields, int index) => SurfaceCard(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,6 +613,7 @@ class _CourseEditorState extends State<CourseEditor> {
         TextField(
           key: ValueKey('schedule-start-$index'),
           controller: fields.start,
+          onChanged: (_) => setState(() {}),
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(labelText: '起始节次'),
         ),
@@ -480,6 +621,7 @@ class _CourseEditorState extends State<CourseEditor> {
         TextField(
           key: ValueKey('schedule-end-$index'),
           controller: fields.end,
+          onChanged: (_) => setState(() {}),
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(labelText: '结束节次'),
         ),
@@ -672,6 +814,10 @@ class _CourseEditorState extends State<CourseEditor> {
                   label: const Text('添加上课安排'),
                 ),
               ],
+              const SizedBox(height: 24),
+              _reminderCard(),
+              const SizedBox(height: 16),
+              NotificationCard(planner: widget.planner),
               const SizedBox(height: 24),
               FilledButton(
                 key: const ValueKey('save-course'),

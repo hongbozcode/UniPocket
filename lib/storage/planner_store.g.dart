@@ -1015,6 +1015,17 @@ class $CourseRecordsTable extends CourseRecords
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _reminderMinutesBeforeMeta =
+      const VerificationMeta('reminderMinutesBefore');
+  @override
+  late final GeneratedColumn<int> reminderMinutesBefore = GeneratedColumn<int>(
+    'reminder_minutes_before',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1022,6 +1033,7 @@ class $CourseRecordsTable extends CourseRecords
     name,
     teacher,
     colorIndex,
+    reminderMinutesBefore,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1070,6 +1082,15 @@ class $CourseRecordsTable extends CourseRecords
     } else if (isInserting) {
       context.missing(_colorIndexMeta);
     }
+    if (data.containsKey('reminder_minutes_before')) {
+      context.handle(
+        _reminderMinutesBeforeMeta,
+        reminderMinutesBefore.isAcceptableOrUnknown(
+          data['reminder_minutes_before']!,
+          _reminderMinutesBeforeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1099,6 +1120,10 @@ class $CourseRecordsTable extends CourseRecords
         DriftSqlType.int,
         data['${effectivePrefix}color_index'],
       )!,
+      reminderMinutesBefore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_minutes_before'],
+      ),
     );
   }
 
@@ -1114,12 +1139,14 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
   final String name;
   final String teacher;
   final int colorIndex;
+  final int? reminderMinutesBefore;
   const StoredCourse({
     required this.id,
     required this.semesterId,
     required this.name,
     required this.teacher,
     required this.colorIndex,
+    this.reminderMinutesBefore,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1129,6 +1156,9 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
     map['name'] = Variable<String>(name);
     map['teacher'] = Variable<String>(teacher);
     map['color_index'] = Variable<int>(colorIndex);
+    if (!nullToAbsent || reminderMinutesBefore != null) {
+      map['reminder_minutes_before'] = Variable<int>(reminderMinutesBefore);
+    }
     return map;
   }
 
@@ -1139,6 +1169,9 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
       name: Value(name),
       teacher: Value(teacher),
       colorIndex: Value(colorIndex),
+      reminderMinutesBefore: reminderMinutesBefore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderMinutesBefore),
     );
   }
 
@@ -1153,6 +1186,9 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
       name: serializer.fromJson<String>(json['name']),
       teacher: serializer.fromJson<String>(json['teacher']),
       colorIndex: serializer.fromJson<int>(json['colorIndex']),
+      reminderMinutesBefore: serializer.fromJson<int?>(
+        json['reminderMinutesBefore'],
+      ),
     );
   }
   @override
@@ -1164,6 +1200,7 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
       'name': serializer.toJson<String>(name),
       'teacher': serializer.toJson<String>(teacher),
       'colorIndex': serializer.toJson<int>(colorIndex),
+      'reminderMinutesBefore': serializer.toJson<int?>(reminderMinutesBefore),
     };
   }
 
@@ -1173,12 +1210,16 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
     String? name,
     String? teacher,
     int? colorIndex,
+    Value<int?> reminderMinutesBefore = const Value.absent(),
   }) => StoredCourse(
     id: id ?? this.id,
     semesterId: semesterId ?? this.semesterId,
     name: name ?? this.name,
     teacher: teacher ?? this.teacher,
     colorIndex: colorIndex ?? this.colorIndex,
+    reminderMinutesBefore: reminderMinutesBefore.present
+        ? reminderMinutesBefore.value
+        : this.reminderMinutesBefore,
   );
   StoredCourse copyWithCompanion(CourseRecordsCompanion data) {
     return StoredCourse(
@@ -1191,6 +1232,9 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
       colorIndex: data.colorIndex.present
           ? data.colorIndex.value
           : this.colorIndex,
+      reminderMinutesBefore: data.reminderMinutesBefore.present
+          ? data.reminderMinutesBefore.value
+          : this.reminderMinutesBefore,
     );
   }
 
@@ -1201,13 +1245,21 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
           ..write('semesterId: $semesterId, ')
           ..write('name: $name, ')
           ..write('teacher: $teacher, ')
-          ..write('colorIndex: $colorIndex')
+          ..write('colorIndex: $colorIndex, ')
+          ..write('reminderMinutesBefore: $reminderMinutesBefore')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, semesterId, name, teacher, colorIndex);
+  int get hashCode => Object.hash(
+    id,
+    semesterId,
+    name,
+    teacher,
+    colorIndex,
+    reminderMinutesBefore,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1216,7 +1268,8 @@ class StoredCourse extends DataClass implements Insertable<StoredCourse> {
           other.semesterId == this.semesterId &&
           other.name == this.name &&
           other.teacher == this.teacher &&
-          other.colorIndex == this.colorIndex);
+          other.colorIndex == this.colorIndex &&
+          other.reminderMinutesBefore == this.reminderMinutesBefore);
 }
 
 class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
@@ -1225,12 +1278,14 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
   final Value<String> name;
   final Value<String> teacher;
   final Value<int> colorIndex;
+  final Value<int?> reminderMinutesBefore;
   const CourseRecordsCompanion({
     this.id = const Value.absent(),
     this.semesterId = const Value.absent(),
     this.name = const Value.absent(),
     this.teacher = const Value.absent(),
     this.colorIndex = const Value.absent(),
+    this.reminderMinutesBefore = const Value.absent(),
   });
   CourseRecordsCompanion.insert({
     this.id = const Value.absent(),
@@ -1238,6 +1293,7 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
     required String name,
     required String teacher,
     required int colorIndex,
+    this.reminderMinutesBefore = const Value.absent(),
   }) : semesterId = Value(semesterId),
        name = Value(name),
        teacher = Value(teacher),
@@ -1248,6 +1304,7 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
     Expression<String>? name,
     Expression<String>? teacher,
     Expression<int>? colorIndex,
+    Expression<int>? reminderMinutesBefore,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1255,6 +1312,8 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
       if (name != null) 'name': name,
       if (teacher != null) 'teacher': teacher,
       if (colorIndex != null) 'color_index': colorIndex,
+      if (reminderMinutesBefore != null)
+        'reminder_minutes_before': reminderMinutesBefore,
     });
   }
 
@@ -1264,6 +1323,7 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
     Value<String>? name,
     Value<String>? teacher,
     Value<int>? colorIndex,
+    Value<int?>? reminderMinutesBefore,
   }) {
     return CourseRecordsCompanion(
       id: id ?? this.id,
@@ -1271,6 +1331,8 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
       name: name ?? this.name,
       teacher: teacher ?? this.teacher,
       colorIndex: colorIndex ?? this.colorIndex,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
     );
   }
 
@@ -1292,6 +1354,11 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
     if (colorIndex.present) {
       map['color_index'] = Variable<int>(colorIndex.value);
     }
+    if (reminderMinutesBefore.present) {
+      map['reminder_minutes_before'] = Variable<int>(
+        reminderMinutesBefore.value,
+      );
+    }
     return map;
   }
 
@@ -1302,7 +1369,8 @@ class CourseRecordsCompanion extends UpdateCompanion<StoredCourse> {
           ..write('semesterId: $semesterId, ')
           ..write('name: $name, ')
           ..write('teacher: $teacher, ')
-          ..write('colorIndex: $colorIndex')
+          ..write('colorIndex: $colorIndex, ')
+          ..write('reminderMinutesBefore: $reminderMinutesBefore')
           ..write(')'))
         .toString();
   }
@@ -4714,6 +4782,7 @@ typedef $$CourseRecordsTableCreateCompanionBuilder =
       required String name,
       required String teacher,
       required int colorIndex,
+      Value<int?> reminderMinutesBefore,
     });
 typedef $$CourseRecordsTableUpdateCompanionBuilder =
     CourseRecordsCompanion Function({
@@ -4722,6 +4791,7 @@ typedef $$CourseRecordsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> teacher,
       Value<int> colorIndex,
+      Value<int?> reminderMinutesBefore,
     });
 
 final class $$CourseRecordsTableReferences
@@ -4846,6 +4916,11 @@ class $$CourseRecordsTableFilterComposer
 
   ColumnFilters<int> get colorIndex => $composableBuilder(
     column: $table.colorIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4979,6 +5054,11 @@ class $$CourseRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SemesterRecordsTableOrderingComposer get semesterId {
     final $$SemesterRecordsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5023,6 +5103,11 @@ class $$CourseRecordsTableAnnotationComposer
 
   GeneratedColumn<int> get colorIndex => $composableBuilder(
     column: $table.colorIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
     builder: (column) => column,
   );
 
@@ -5166,12 +5251,14 @@ class $$CourseRecordsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> teacher = const Value.absent(),
                 Value<int> colorIndex = const Value.absent(),
+                Value<int?> reminderMinutesBefore = const Value.absent(),
               }) => CourseRecordsCompanion(
                 id: id,
                 semesterId: semesterId,
                 name: name,
                 teacher: teacher,
                 colorIndex: colorIndex,
+                reminderMinutesBefore: reminderMinutesBefore,
               ),
           createCompanionCallback:
               ({
@@ -5180,12 +5267,14 @@ class $$CourseRecordsTableTableManager
                 required String name,
                 required String teacher,
                 required int colorIndex,
+                Value<int?> reminderMinutesBefore = const Value.absent(),
               }) => CourseRecordsCompanion.insert(
                 id: id,
                 semesterId: semesterId,
                 name: name,
                 teacher: teacher,
                 colorIndex: colorIndex,
+                reminderMinutesBefore: reminderMinutesBefore,
               ),
           withReferenceMapper: (p0) => p0
               .map(

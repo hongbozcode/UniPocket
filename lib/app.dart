@@ -322,7 +322,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   }
 
   Future<void> _course([Course? course, ClassOccurrence? occurrence]) async {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
     final state = _state!;
     final semester = state.currentSemester;
     if (semester == null) return;
@@ -355,9 +355,9 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              saved == CourseEditorResult.deleted
-                  ? '课程已删除，学习任务已保留'
-                  : '课程已保存到本机',
+              saved.deleted
+                  ? '课程已删除，学习任务已保留。${widget.planner.reminderSyncFailed ? '提醒撤销失败，请在设置中重试' : '课程未来提醒已撤销'}'
+                  : '课程已保存到本机。${widget.planner.courseReminderStatus(_state!.courses.singleWhere((c) => c.id == saved.courseId), _state!)}',
             ),
           ),
         );
@@ -634,7 +634,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
               const Text('网页数据保存在当前浏览器的此站点中。清除站点数据或结束隐私浏览可能会丢失记录。'),
             ],
             const SizedBox(height: 10),
-            const Text('备份恢复将在后续版本开放。课程与倒计时提醒尚未接入。'),
+            const Text('备份恢复将在后续版本开放。倒计时提醒尚未接入。'),
           ],
         ),
       ),

@@ -142,7 +142,7 @@ class _NotificationCardState extends State<NotificationCard>
           ),
           const Divider(height: 28, color: Color(0xffdfd5f6)),
           const Text(
-            'DDL 默认提前 1 天，可在具体任务中调整或关闭。',
+            '课程默认提前 10 分钟，DDL 默认提前 1 天。可在具体课程或任务中调整或关闭。',
             style: TextStyle(color: Color(0xff52617a), fontSize: 13),
           ),
           const SizedBox(height: 8),

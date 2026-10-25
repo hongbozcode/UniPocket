@@ -106,7 +106,7 @@ void main() {
         await tapVisible(tester, find.byKey(const ValueKey('schedule-day-0')));
         await tapVisible(tester, find.text('周日').last);
         await tapVisible(tester, find.byKey(const ValueKey('save-course')));
-        await waitFor(tester, find.text('课程已保存到本机'));
+        await waitFor(tester, find.textContaining('课程已保存到本机'));
         final state = await planner.load();
         expect(state.courses.map((c) => c.colorIndex).toSet(), hasLength(7));
         expect(state.courses.last.colorIndex, 6);
@@ -217,7 +217,7 @@ void main() {
           await tap(find.text('应用连续周'));
           await tap(find.byTooltip('第 3 周').last);
           await tap(find.byKey(const ValueKey('save-course')));
-          await waitFor(tester, find.text('课程已保存到本机'));
+          await waitFor(tester, find.textContaining('课程已保存到本机'));
           final course = (await planner.load()).courses.single;
           expect(course.schedules.first.weeks, {
             1,
@@ -296,7 +296,7 @@ void main() {
         await tap(find.byKey(const ValueKey('save-course')));
         await waitFor(tester, find.text('上课时间冲突'));
         await tap(find.text('仍然保存'));
-        await waitFor(tester, find.text('课程已保存到本机'));
+        await waitFor(tester, find.textContaining('课程已保存到本机'));
         expect((await planner.load()).courses, hasLength(2));
         expect(
           (await planner.load()).courses.map((c) => c.colorIndex).toSet(),
@@ -357,7 +357,7 @@ void main() {
         );
         await tester.tap(save);
         await tester.pumpAndSettle();
-        await waitFor(tester, find.text('课程已保存到本机'));
+        await waitFor(tester, find.textContaining('课程已保存到本机'));
         expect(find.text('高等数学'), findsOneWidget);
         expect(find.textContaining('08:00–09:40'), findsWidgets);
         expect(find.textContaining('数学楼 A201'), findsWidgets);
@@ -392,7 +392,7 @@ void main() {
         );
         await tester.tap(save);
         await tester.pumpAndSettle();
-        await waitFor(tester, find.text('课程已保存到本机'));
+        await waitFor(tester, find.textContaining('课程已保存到本机'));
         expect(find.text('数学分析'), findsOneWidget);
         expect((await planner.load()).courses.single.teacher, '李老师');
         expect(

@@ -50,6 +50,8 @@ class CourseRecords extends Table {
   TextColumn get name => text()();
   TextColumn get teacher => text()();
   IntColumn get colorIndex => integer()();
+  IntColumn get reminderMinutesBefore =>
+      integer().nullable().withDefault(const Constant(10))();
 }
 
 @DataClassName('StoredSchedule')
@@ -142,7 +144,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -165,6 +167,9 @@ class PlannerStore extends _$PlannerStore {
           learningTaskRecords,
           learningTaskRecords.reminderMinutesBefore,
         );
+      }
+      if (from >= 2 && from < 8) {
+        await m.addColumn(courseRecords, courseRecords.reminderMinutesBefore);
       }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
@@ -244,6 +249,7 @@ class PlannerStore extends _$PlannerStore {
             name: course.name,
             teacher: course.teacher,
             colorIndex: course.colorIndex,
+            reminderMinutesBefore: course.reminderMinutesBefore,
             schedules: [
               for (final schedule in schedules)
                 if (schedule.courseId == course.id)
@@ -344,6 +350,7 @@ class PlannerStore extends _$PlannerStore {
         name: draft.name.trim(),
         teacher: draft.teacher.trim(),
         colorIndex: draft.colorIndex,
+        reminderMinutesBefore: Value(draft.reminderMinutesBefore),
       ),
     );
     for (final schedule in draft.schedules) {
@@ -376,6 +383,7 @@ class PlannerStore extends _$PlannerStore {
       name: impact.draft.name,
       teacher: impact.draft.teacher,
       colorIndex: impact.draft.colorIndex,
+      reminderMinutesBefore: impact.draft.reminderMinutesBefore,
     );
     for (final exception in impact.orphaned) {
       if (choices[exception.key] == OrphanChoice.keepIndependent) {
@@ -530,6 +538,7 @@ class PlannerStore extends _$PlannerStore {
     required String name,
     required String teacher,
     required int colorIndex,
+    required int? reminderMinutesBefore,
   }) async {
     final count = await (update(courseRecords)..where((c) => c.id.equals(id)))
         .write(
@@ -537,6 +546,7 @@ class PlannerStore extends _$PlannerStore {
             name: Value(name.trim()),
             teacher: Value(teacher.trim()),
             colorIndex: Value(colorIndex),
+            reminderMinutesBefore: Value(reminderMinutesBefore),
           ),
         );
     if (count == 0) throw const InputProblem('课程不存在，请返回后重试。');

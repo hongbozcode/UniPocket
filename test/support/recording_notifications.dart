@@ -4,16 +4,21 @@ import 'package:unipocket/reminders/notifications.dart';
 class RecordingNotifications implements LocalNotifications {
   NotificationAccess access = NotificationAccess.enabled;
   bool fail = false;
+  String? failScope;
   bool settingsOpened = false;
-  List<LocalReminder> pending = [];
+  final Map<String, List<LocalReminder>> scopes = {};
+  List<LocalReminder> get pending =>
+      scopes.values.expand((items) => items).toList();
 
   @override
   Future<NotificationAccess> status() async => access;
 
   @override
   Future<void> replace(String scope, List<LocalReminder> reminders) async {
-    if (fail) throw StateError('OS scheduling unavailable');
-    pending = List.of(reminders);
+    if (fail || scope == failScope) {
+      throw StateError('OS scheduling unavailable');
+    }
+    scopes[scope] = List.of(reminders);
   }
 
   @override

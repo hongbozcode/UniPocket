@@ -88,6 +88,7 @@ void main() {
       name: '数学分析',
       teacher: '王老师',
       colorIndex: 4,
+      reminderMinutesBefore: 10,
     );
     var state = await planner.load();
     expect(
@@ -122,7 +123,13 @@ void main() {
       expect((await planner.load()).courses, hasLength(2));
     }
     await expectLater(
-      planner.updateCourseDetails(id, name: '', teacher: '', colorIndex: 0),
+      planner.updateCourseDetails(
+        id,
+        name: '',
+        teacher: '',
+        colorIndex: 0,
+        reminderMinutesBefore: 10,
+      ),
       throwsA(isA<InputProblem>()),
     );
     await expectLater(
@@ -131,6 +138,7 @@ void main() {
         name: '不存在',
         teacher: '',
         colorIndex: 0,
+        reminderMinutesBefore: 10,
       ),
       throwsA(isA<InputProblem>()),
     );
