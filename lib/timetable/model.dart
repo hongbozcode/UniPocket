@@ -82,33 +82,49 @@ class CourseConflict extends InputProblem {
 List<String> courseConflicts(
   CourseDraft draft,
   Semester semester,
-  List<Course> courses,
-) {
-  final conflicts = <String>[];
-  final compared = <(String, ScheduleDraft)>[
-    for (final course in courses)
-      if (course.semesterId == semester.id)
-        for (final schedule in course.schedules) (course.name, schedule),
-  ];
+  List<Course> courses, [
+  List<ClassExceptionDraft> classExceptions = const [],
+]) {
+  final timetable = Timetable(semester, courses, classExceptions);
+  final compared = <ClassOccurrence>[];
+  final conflicts = <String>{};
   for (final schedule in draft.schedules) {
     final periods = semester.periods[schedule.weekday]!;
-    for (final (name, other) in compared) {
-      if (schedule.weekday != other.weekday) continue;
-      final sharedWeeks = schedule.weeks.intersection(other.weeks).toList()
-        ..sort();
-      if (sharedWeeks.isEmpty) continue;
-      if (periods[schedule.startPeriod - 1].startMinutes <
-              periods[other.endPeriod - 1].endMinutes &&
-          periods[other.startPeriod - 1].startMinutes <
-              periods[schedule.endPeriod - 1].endMinutes) {
-        conflicts.add(
-          '$name · 周${['一', '二', '三', '四', '五', '六', '日'][schedule.weekday - 1]} · 第 ${sharedWeeks.join('、')} 周 · 第 ${other.startPeriod}–${other.endPeriod} 节',
-        );
+    for (final week in schedule.weeks) {
+      final date = timetable
+          .mondayOf(week)
+          .add(Duration(days: schedule.weekday - 1));
+      final start = periods[schedule.startPeriod - 1].startMinutes;
+      final end = periods[schedule.endPeriod - 1].endMinutes;
+      for (final other in [
+        ...timetable.onDate(date),
+        ...compared.where((o) => o.date == date),
+      ]) {
+        if (start < other.endMinutes && other.startMinutes < end) {
+          conflicts.add(
+            '${other.course.name} · ${date.year}-${date.month}-${date.day} · ${PeriodTime.format(other.startMinutes)}–${PeriodTime.format(other.endMinutes)}',
+          );
+        }
       }
+      compared.add(
+        ClassOccurrence(
+          course: Course(
+            id: -1,
+            semesterId: draft.semesterId,
+            name: '本课程的另一上课安排',
+            teacher: draft.teacher,
+            colorIndex: draft.colorIndex,
+            schedules: [],
+          ),
+          schedule: schedule,
+          date: date,
+          startMinutes: start,
+          endMinutes: end,
+        ),
+      );
     }
-    compared.add(('本课程的另一上课安排', schedule));
   }
-  return conflicts;
+  return conflicts.toList();
 }
 
 class Course extends CourseDraft {
@@ -130,24 +146,75 @@ class ClassOccurrence {
     required this.date,
     required this.startMinutes,
     required this.endMinutes,
+    this.sourceDate,
+    this.overrideLocation,
   });
   final Course course;
   final ScheduleDraft schedule;
   final DateTime date;
   final int startMinutes;
   final int endMinutes;
-  String get location => schedule.location;
+  final DateTime? sourceDate;
+  final String? overrideLocation;
+  DateTime get originalDate => sourceDate ?? date;
+  bool get isRescheduled => sourceDate != null;
+  String get location => overrideLocation ?? schedule.location;
+}
+
+/// An exception is keyed by the original schedule and campus calendar date,
+/// never by its destination. Two lessons of one schedule can share a date.
+class ClassExceptionDraft {
+  ClassExceptionDraft({
+    required this.scheduleId,
+    required DateTime originalDate,
+    required DateTime targetDate,
+    required this.startMinutes,
+    required this.endMinutes,
+    required this.location,
+    this.isCancelled = false,
+  }) : originalDate = DateTime.utc(
+         originalDate.year,
+         originalDate.month,
+         originalDate.day,
+       ),
+       targetDate = DateTime.utc(
+         targetDate.year,
+         targetDate.month,
+         targetDate.day,
+       );
+
+  final int scheduleId;
+  final DateTime originalDate;
+  final DateTime targetDate;
+  final int startMinutes;
+  final int endMinutes;
+  final String location;
+  final bool isCancelled;
+
+  void validate() {
+    if (targetDate.year < 1900 || targetDate.year > 2200) {
+      throw const InputProblem('请选择 1900–2200 年内的日期。');
+    }
+    if (startMinutes < 0 || endMinutes >= 1440 || startMinutes >= endMinutes) {
+      throw const InputProblem('结束时间须晚于开始时间，且须在同一天内。');
+    }
+  }
 }
 
 /// Dates are campus calendar dates, represented at UTC midnight so device
 /// timezone changes and daylight saving transitions cannot shift teaching weeks.
 class Timetable {
-  Timetable(this.semester, Iterable<Course> courses)
-    : courses = List.unmodifiable(
-        courses.where((c) => c.semesterId == semester.id),
-      );
+  Timetable(
+    this.semester,
+    Iterable<Course> courses, [
+    Iterable<ClassExceptionDraft> classExceptions = const [],
+  ]) : courses = List.unmodifiable(
+         courses.where((c) => c.semesterId == semester.id),
+       ),
+       classExceptions = List.unmodifiable(classExceptions);
   final Semester semester;
   final List<Course> courses;
+  final List<ClassExceptionDraft> classExceptions;
 
   int weekOf(DateTime date) {
     final day = DateTime.utc(date.year, date.month, date.day);
@@ -158,15 +225,40 @@ class Timetable {
   DateTime mondayOf(int week) =>
       semester.firstMonday.add(Duration(days: (week - 1) * 7));
 
+  Iterable<int> get _exceptionWeeks sync* {
+    final scheduleIds = courses
+        .expand((c) => c.schedules)
+        .whereType<ClassSchedule>()
+        .map((s) => s.id)
+        .toSet();
+    for (final exception in classExceptions) {
+      if (!exception.isCancelled &&
+          scheduleIds.contains(exception.scheduleId)) {
+        yield weekOf(exception.targetDate);
+      }
+    }
+  }
+
+  int get firstVisibleWeek =>
+      [1, ..._exceptionWeeks].reduce((a, b) => a < b ? a : b);
+  int get lastVisibleWeek =>
+      [semester.totalWeeks, ..._exceptionWeeks].reduce((a, b) => a > b ? a : b);
+
   List<ClassOccurrence> onDate(DateTime date) {
     final week = weekOf(date);
-    if (week < 1 || week > semester.totalWeeks) return [];
     final day = DateTime.utc(date.year, date.month, date.day);
     final periods = semester.periods[day.weekday] ?? [];
     final result = <ClassOccurrence>[
       for (final course in courses)
         for (final schedule in course.schedules)
-          if (schedule.weekday == day.weekday && schedule.weeks.contains(week))
+          if (schedule.weekday == day.weekday &&
+              schedule.weeks.contains(week) &&
+              !classExceptions.any(
+                (e) =>
+                    schedule is ClassSchedule &&
+                    e.scheduleId == schedule.id &&
+                    e.originalDate == day,
+              ))
             ClassOccurrence(
               course: course,
               schedule: schedule,
@@ -174,6 +266,22 @@ class Timetable {
               startMinutes: periods[schedule.startPeriod - 1].startMinutes,
               endMinutes: periods[schedule.endPeriod - 1].endMinutes,
             ),
+      for (final course in courses)
+        for (final schedule in course.schedules)
+          for (final exception in classExceptions)
+            if (schedule is ClassSchedule &&
+                exception.scheduleId == schedule.id &&
+                !exception.isCancelled &&
+                exception.targetDate == day)
+              ClassOccurrence(
+                course: course,
+                schedule: schedule,
+                date: day,
+                sourceDate: exception.originalDate,
+                startMinutes: exception.startMinutes,
+                endMinutes: exception.endMinutes,
+                overrideLocation: exception.location,
+              ),
     ];
     result.sort((a, b) {
       final time = a.startMinutes.compareTo(b.startMinutes);
@@ -183,7 +291,7 @@ class Timetable {
   }
 
   List<ClassOccurrence> inWeek(int week) => [
-    if (week >= 1 && week <= semester.totalWeeks)
+    if (week >= firstVisibleWeek && week <= lastVisibleWeek)
       for (var day = 0; day < 7; day++)
         ...onDate(mondayOf(week).add(Duration(days: day))),
   ];

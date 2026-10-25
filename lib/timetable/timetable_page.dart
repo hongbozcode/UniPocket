@@ -97,6 +97,17 @@ class OccurrenceCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
+                      if (occurrence.isRescheduled)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            '已调课 · 原课次 ${dateText(occurrence.originalDate)}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: primaryBlue,
+                            ),
+                          ),
+                        ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -175,12 +186,14 @@ class TodayCourses extends StatelessWidget {
     required this.occurrences,
     required this.campusNow,
     required this.onEdit,
+    this.onOccurrence,
     this.emptyText = '今天没有课程，可以从容安排时间。',
     super.key,
   });
   final List<ClassOccurrence> occurrences;
   final DateTime campusNow;
   final ValueChanged<Course> onEdit;
+  final ValueChanged<ClassOccurrence>? onOccurrence;
   final String emptyText;
 
   @override
@@ -203,7 +216,9 @@ class TodayCourses extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: OccurrenceCard(
               occurrence,
-              onTap: () => onEdit(occurrence.course),
+              onTap: () => onOccurrence != null
+                  ? onOccurrence!(occurrence)
+                  : onEdit(occurrence.course),
               featured: identical(occurrence, next),
               status: identical(occurrence, next)
                   ? (occurrence.startMinutes <= minutes ? '进行中' : '下一节')
@@ -221,6 +236,7 @@ class TimetablePage extends StatefulWidget {
     required this.campusNow,
     required this.onAdd,
     required this.onEdit,
+    this.onOccurrence,
     required this.onManage,
     this.onTasks,
     this.onEvents,
@@ -230,6 +246,7 @@ class TimetablePage extends StatefulWidget {
   final DateTime campusNow;
   final VoidCallback onAdd;
   final ValueChanged<Course> onEdit;
+  final ValueChanged<ClassOccurrence>? onOccurrence;
   final VoidCallback onManage;
   final VoidCallback? onTasks;
   final VoidCallback? onEvents;
@@ -242,7 +259,10 @@ class _TimetablePageState extends State<TimetablePage> {
   var _today = false;
   Timetable get _timetable => widget.state.timetable!;
   int get _actualWeek => _timetable.weekOf(widget.campusNow);
-  int get _currentWeek => _actualWeek.clamp(1, _timetable.semester.totalWeeks);
+  int get _currentWeek => _actualWeek.clamp(
+    _timetable.firstVisibleWeek,
+    _timetable.lastVisibleWeek,
+  );
 
   @override
   void didUpdateWidget(TimetablePage oldWidget) {
@@ -250,7 +270,10 @@ class _TimetablePageState extends State<TimetablePage> {
     if (oldWidget.state.currentSemesterId != widget.state.currentSemesterId) {
       _week = _currentWeek;
     }
-    _week = _week.clamp(1, _timetable.semester.totalWeeks);
+    _week = _week.clamp(
+      _timetable.firstVisibleWeek,
+      _timetable.lastVisibleWeek,
+    );
   }
 
   Widget _modeSwitch() => Container(
@@ -318,17 +341,21 @@ class _TimetablePageState extends State<TimetablePage> {
     final previous = RoundDesignButton(
       icon: 'left',
       label: '上一周',
-      onPressed: _week > 1 ? () => setState(() => _week--) : null,
+      onPressed: _week > _timetable.firstVisibleWeek
+          ? () => setState(() => _week--)
+          : null,
     );
     final next = RoundDesignButton(
       icon: 'right',
       label: '下一周',
-      onPressed: _week < _timetable.semester.totalWeeks
+      onPressed: _week < _timetable.lastVisibleWeek
           ? () => setState(() => _week++)
           : null,
     );
     final label = Text(
-      '第 $_week 周',
+      _week >= 1 && _week <= _timetable.semester.totalWeeks
+          ? '第 $_week 周'
+          : '${dateText(_timetable.mondayOf(_week))} · 学期外',
       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
     );
     final back = OutlinedButton(
@@ -340,7 +367,9 @@ class _TimetablePageState extends State<TimetablePage> {
       ),
       child: const Text('回到本周', style: TextStyle(fontSize: 11)),
     );
-    return MediaQuery.textScalerOf(context).scale(12) > 17
+    return MediaQuery.textScalerOf(context).scale(12) > 17 ||
+            _week < 1 ||
+            _week > _timetable.semester.totalWeeks
         ? Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -442,6 +471,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 occurrences: _timetable.onDate(widget.campusNow),
                 campusNow: widget.campusNow,
                 onEdit: widget.onEdit,
+                onOccurrence: widget.onOccurrence,
               ),
             ] else ...[
               _weeks(),
@@ -450,7 +480,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: Text(
-                    '今天不在本学期内；回到本周将显示最近的教学周。',
+                    '今天不在常规教学周内；回到本周将显示最近的可查看周，调课仍按实际日期显示。',
                     style: TextStyle(fontSize: 12, color: Color(0xff73819a)),
                   ),
                 ),
@@ -468,6 +498,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 week: _week,
                 today: widget.campusNow,
                 onEdit: widget.onEdit,
+                onOccurrence: widget.onOccurrence,
               ),
               const SizedBox(height: 12),
               Wrap(

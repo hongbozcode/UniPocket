@@ -5,6 +5,7 @@ import '../semesters/planner.dart';
 import '../ui/design.dart';
 import '../ui/course_palette.dart';
 import 'model.dart';
+import 'class_exception_editor.dart';
 
 String scheduleText(ScheduleDraft schedule, Semester semester) {
   final weeks = schedule.weeks.toList()..sort();
@@ -21,6 +22,8 @@ class CourseEditor extends StatefulWidget {
     required this.campusTimeZone,
     this.course,
     this.initialColorIndex = 0,
+    this.occurrence,
+    this.classExceptions = const [],
     super.key,
   });
   final SemesterPlanner planner;
@@ -28,6 +31,8 @@ class CourseEditor extends StatefulWidget {
   final String campusTimeZone;
   final Course? course;
   final int initialColorIndex;
+  final ClassOccurrence? occurrence;
+  final List<ClassExceptionDraft> classExceptions;
 
   @override
   State<CourseEditor> createState() => _CourseEditorState();
@@ -61,6 +66,94 @@ class _CourseEditorState extends State<CourseEditor> {
   final _schedules = <_ScheduleFields>[];
   var _saving = false;
   String? _error;
+
+  Future<void> _exception(
+    ClassOccurrence occurrence, {
+    bool cancel = false,
+  }) async {
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ClassExceptionEditor(
+          planner: widget.planner,
+          occurrence: occurrence,
+          campusTimeZone: widget.campusTimeZone,
+          cancel: cancel,
+        ),
+      ),
+    );
+    if (saved == true && mounted) Navigator.pop(context, true);
+  }
+
+  Widget _occurrenceActions(ClassOccurrence occurrence) => SurfaceCard(
+    color: lavenderSoft,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          '本次上课',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${dateText(occurrence.date)} · ${occurrence.location.isEmpty ? '地点未填写' : occurrence.location}',
+        ),
+        if (occurrence.isRescheduled)
+          Text('已调课 · 原课次 ${dateText(occurrence.originalDate)}'),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          children: [
+            TextButton(
+              onPressed: () => _exception(occurrence),
+              child: const Text('单次调课'),
+            ),
+            TextButton(
+              onPressed: () => _exception(occurrence, cancel: true),
+              child: const Text('单次停课'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  Widget _savedException(ClassExceptionDraft exception) {
+    final schedule = widget.course!.schedules.cast<ClassSchedule>().singleWhere(
+      (s) => s.id == exception.scheduleId,
+    );
+    final occurrence = ClassOccurrence(
+      course: widget.course!,
+      schedule: schedule,
+      date: exception.targetDate,
+      sourceDate: exception.originalDate,
+      startMinutes: exception.startMinutes,
+      endMinutes: exception.endMinutes,
+      overrideLocation: exception.location,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SurfaceCard(
+        color: lavenderSoft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              '${exception.isCancelled ? '已停课' : '已调课'} · 原课次 ${dateText(exception.originalDate)}',
+            ),
+            if (!exception.isCancelled)
+              Text(
+                '${dateText(exception.targetDate)} · ${PeriodTime.format(exception.startMinutes)}–${PeriodTime.format(exception.endMinutes)}\n${exception.location}',
+              ),
+            TextButton(
+              onPressed: () => _exception(occurrence),
+              child: Text(exception.isCancelled ? '重新安排这次上课' : '编辑这次调课'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -351,6 +444,10 @@ class _CourseEditorState extends State<CourseEditor> {
               Text('${widget.semester.name}\n校园时间 · ${widget.campusTimeZone}'),
               const SizedBox(height: 20),
               if (_error != null) ProblemBanner(_error!),
+              if (widget.occurrence case final occurrence?) ...[
+                _occurrenceActions(occurrence),
+                const SizedBox(height: 20),
+              ],
               TextField(
                 key: const ValueKey('course-name'),
                 controller: _name,
@@ -411,6 +508,12 @@ class _CourseEditorState extends State<CourseEditor> {
               ),
               const SizedBox(height: 24),
               if (widget.course case final course?) ...[
+                for (final exception in widget.classExceptions.where(
+                  (e) => course.schedules.any(
+                    (s) => s is ClassSchedule && s.id == e.scheduleId,
+                  ),
+                ))
+                  _savedException(exception),
                 const Text(
                   '已有上课安排',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

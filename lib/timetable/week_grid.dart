@@ -15,12 +15,14 @@ class WeekGrid extends StatefulWidget {
     required this.week,
     required this.today,
     required this.onEdit,
+    this.onOccurrence,
     super.key,
   });
   final Timetable timetable;
   final int week;
   final DateTime today;
   final ValueChanged<Course> onEdit;
+  final ValueChanged<ClassOccurrence>? onOccurrence;
 
   @override
   State<WeekGrid> createState() => _WeekGridState();
@@ -28,6 +30,24 @@ class WeekGrid extends StatefulWidget {
 
 class _WeekGridState extends State<WeekGrid> {
   final _horizontal = ScrollController();
+
+  // Only lessons matching the destination day's configured periods belong on
+  // its period axis. Free-time moves remain fully visible in a dated list.
+  (int, int)? _periods(ClassOccurrence occurrence) {
+    final periods =
+        widget.timetable.semester.periods[occurrence.date.weekday] ?? [];
+    final start = periods.indexWhere(
+      (p) => p.startMinutes == occurrence.startMinutes,
+    );
+    final end = periods.indexWhere(
+      (p) => p.endMinutes == occurrence.endMinutes,
+    );
+    return start >= 0 && end >= start ? (start + 1, end + 1) : null;
+  }
+
+  void _open(ClassOccurrence occurrence) => widget.onOccurrence != null
+      ? widget.onOccurrence!(occurrence)
+      : widget.onEdit(occurrence.course);
   @override
   void dispose() {
     _horizontal.dispose();
@@ -97,7 +117,7 @@ class _WeekGridState extends State<WeekGrid> {
               .clamp(1, 3);
       final label =
           '${occurrence.course.name}，${weekdayNames[occurrence.date.weekday - 1]}，'
-          '第 ${occurrence.schedule.startPeriod} 至 ${occurrence.schedule.endPeriod} 节，'
+          '${occurrence.isRescheduled ? '已调课，原课次 ${dateText(occurrence.originalDate)}，' : ''}'
           '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)}，${occurrence.location}';
       return Semantics(
         label: label,
@@ -108,7 +128,7 @@ class _WeekGridState extends State<WeekGrid> {
             color: courseTint(occurrence.course.colorIndex),
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
-              onTap: () => widget.onEdit(occurrence.course),
+              onTap: () => _open(occurrence),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
@@ -116,7 +136,7 @@ class _WeekGridState extends State<WeekGrid> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      occurrence.course.name,
+                      '${occurrence.isRescheduled ? '调 · ' : ''}${occurrence.course.name}',
                       maxLines: lines,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -153,7 +173,9 @@ class _WeekGridState extends State<WeekGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final occurrences = widget.timetable.inWeek(widget.week);
+    final all = widget.timetable.inWeek(widget.week);
+    final occurrences = all.where((o) => _periods(o) != null).toList();
+    final flexible = all.where((o) => _periods(o) == null).toList();
     final lanes = <ClassOccurrence, int>{};
     final laneCounts = <int, int>{};
     for (var day = 1; day <= 7; day++) {
@@ -161,14 +183,12 @@ class _WeekGridState extends State<WeekGrid> {
       for (final occurrence in occurrences.where(
         (o) => o.date.weekday == day,
       )) {
-        var lane = ends.indexWhere(
-          (end) => end < occurrence.schedule.startPeriod,
-        );
+        var lane = ends.indexWhere((end) => end <= occurrence.startMinutes);
         if (lane < 0) {
           lane = ends.length;
           ends.add(0);
         }
-        ends[lane] = occurrence.schedule.endPeriod;
+        ends[lane] = occurrence.endMinutes;
         lanes[occurrence] = lane;
       }
       laneCounts[day] = math.max(1, ends.length);
@@ -396,16 +416,15 @@ class _WeekGridState extends State<WeekGrid> {
                                 1,
                             top:
                                 headerHeight +
-                                (occurrence.schedule.startPeriod - 1) *
-                                    periodHeight +
+                                (_periods(occurrence)!.$1 - 1) * periodHeight +
                                 2,
                             width:
                                 dayWidth /
                                     laneCounts[occurrence.date.weekday]! -
                                 2,
                             height:
-                                (occurrence.schedule.endPeriod -
-                                        occurrence.schedule.startPeriod +
+                                (_periods(occurrence)!.$2 -
+                                        _periods(occurrence)!.$1 +
                                         1) *
                                     periodHeight -
                                 4,
@@ -417,6 +436,38 @@ class _WeekGridState extends State<WeekGrid> {
                 ),
               ),
             ),
+            if (flexible.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                '节次外调课',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '以下时间与每日节次不完全相同，按实际时间上课。',
+                style: TextStyle(fontSize: 12, color: Color(0xff73819a)),
+              ),
+              for (final occurrence in flexible)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Material(
+                    color: courseTint(occurrence.course.colorIndex),
+                    borderRadius: BorderRadius.circular(16),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: Text(occurrence.course.name),
+                      subtitle: Text(
+                        '${dateText(occurrence.date)} · ${weekdayNames[occurrence.date.weekday - 1]}\n'
+                        '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)} · ${occurrence.location.isEmpty ? '地点未填写' : occurrence.location}\n'
+                        '已调课 · 原课次 ${dateText(occurrence.originalDate)}',
+                      ),
+                      onTap: () => _open(occurrence),
+                    ),
+                  ),
+                ),
+            ],
           ],
         );
       },

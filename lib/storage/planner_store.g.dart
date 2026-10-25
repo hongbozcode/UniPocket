@@ -2571,6 +2571,504 @@ class CountdownEventRecordsCompanion
   }
 }
 
+class $ClassExceptionRecordsTable extends ClassExceptionRecords
+    with TableInfo<$ClassExceptionRecordsTable, StoredClassException> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClassExceptionRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _scheduleIdMeta = const VerificationMeta(
+    'scheduleId',
+  );
+  @override
+  late final GeneratedColumn<int> scheduleId = GeneratedColumn<int>(
+    'schedule_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES schedule_records (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _originalDateMeta = const VerificationMeta(
+    'originalDate',
+  );
+  @override
+  late final GeneratedColumn<String> originalDate = GeneratedColumn<String>(
+    'original_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetDateMeta = const VerificationMeta(
+    'targetDate',
+  );
+  @override
+  late final GeneratedColumn<String> targetDate = GeneratedColumn<String>(
+    'target_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startMinutesMeta = const VerificationMeta(
+    'startMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> startMinutes = GeneratedColumn<int>(
+    'start_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endMinutesMeta = const VerificationMeta(
+    'endMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> endMinutes = GeneratedColumn<int>(
+    'end_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCancelledMeta = const VerificationMeta(
+    'isCancelled',
+  );
+  @override
+  late final GeneratedColumn<bool> isCancelled = GeneratedColumn<bool>(
+    'is_cancelled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_cancelled" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    scheduleId,
+    originalDate,
+    targetDate,
+    startMinutes,
+    endMinutes,
+    location,
+    isCancelled,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'class_exception_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredClassException> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('schedule_id')) {
+      context.handle(
+        _scheduleIdMeta,
+        scheduleId.isAcceptableOrUnknown(data['schedule_id']!, _scheduleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scheduleIdMeta);
+    }
+    if (data.containsKey('original_date')) {
+      context.handle(
+        _originalDateMeta,
+        originalDate.isAcceptableOrUnknown(
+          data['original_date']!,
+          _originalDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_originalDateMeta);
+    }
+    if (data.containsKey('target_date')) {
+      context.handle(
+        _targetDateMeta,
+        targetDate.isAcceptableOrUnknown(data['target_date']!, _targetDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetDateMeta);
+    }
+    if (data.containsKey('start_minutes')) {
+      context.handle(
+        _startMinutesMeta,
+        startMinutes.isAcceptableOrUnknown(
+          data['start_minutes']!,
+          _startMinutesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startMinutesMeta);
+    }
+    if (data.containsKey('end_minutes')) {
+      context.handle(
+        _endMinutesMeta,
+        endMinutes.isAcceptableOrUnknown(data['end_minutes']!, _endMinutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endMinutesMeta);
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_locationMeta);
+    }
+    if (data.containsKey('is_cancelled')) {
+      context.handle(
+        _isCancelledMeta,
+        isCancelled.isAcceptableOrUnknown(
+          data['is_cancelled']!,
+          _isCancelledMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isCancelledMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {scheduleId, originalDate};
+  @override
+  StoredClassException map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredClassException(
+      scheduleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schedule_id'],
+      )!,
+      originalDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_date'],
+      )!,
+      targetDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_date'],
+      )!,
+      startMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_minutes'],
+      )!,
+      endMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_minutes'],
+      )!,
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      )!,
+      isCancelled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_cancelled'],
+      )!,
+    );
+  }
+
+  @override
+  $ClassExceptionRecordsTable createAlias(String alias) {
+    return $ClassExceptionRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredClassException extends DataClass
+    implements Insertable<StoredClassException> {
+  final int scheduleId;
+  final String originalDate;
+  final String targetDate;
+  final int startMinutes;
+  final int endMinutes;
+  final String location;
+  final bool isCancelled;
+  const StoredClassException({
+    required this.scheduleId,
+    required this.originalDate,
+    required this.targetDate,
+    required this.startMinutes,
+    required this.endMinutes,
+    required this.location,
+    required this.isCancelled,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['schedule_id'] = Variable<int>(scheduleId);
+    map['original_date'] = Variable<String>(originalDate);
+    map['target_date'] = Variable<String>(targetDate);
+    map['start_minutes'] = Variable<int>(startMinutes);
+    map['end_minutes'] = Variable<int>(endMinutes);
+    map['location'] = Variable<String>(location);
+    map['is_cancelled'] = Variable<bool>(isCancelled);
+    return map;
+  }
+
+  ClassExceptionRecordsCompanion toCompanion(bool nullToAbsent) {
+    return ClassExceptionRecordsCompanion(
+      scheduleId: Value(scheduleId),
+      originalDate: Value(originalDate),
+      targetDate: Value(targetDate),
+      startMinutes: Value(startMinutes),
+      endMinutes: Value(endMinutes),
+      location: Value(location),
+      isCancelled: Value(isCancelled),
+    );
+  }
+
+  factory StoredClassException.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredClassException(
+      scheduleId: serializer.fromJson<int>(json['scheduleId']),
+      originalDate: serializer.fromJson<String>(json['originalDate']),
+      targetDate: serializer.fromJson<String>(json['targetDate']),
+      startMinutes: serializer.fromJson<int>(json['startMinutes']),
+      endMinutes: serializer.fromJson<int>(json['endMinutes']),
+      location: serializer.fromJson<String>(json['location']),
+      isCancelled: serializer.fromJson<bool>(json['isCancelled']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'scheduleId': serializer.toJson<int>(scheduleId),
+      'originalDate': serializer.toJson<String>(originalDate),
+      'targetDate': serializer.toJson<String>(targetDate),
+      'startMinutes': serializer.toJson<int>(startMinutes),
+      'endMinutes': serializer.toJson<int>(endMinutes),
+      'location': serializer.toJson<String>(location),
+      'isCancelled': serializer.toJson<bool>(isCancelled),
+    };
+  }
+
+  StoredClassException copyWith({
+    int? scheduleId,
+    String? originalDate,
+    String? targetDate,
+    int? startMinutes,
+    int? endMinutes,
+    String? location,
+    bool? isCancelled,
+  }) => StoredClassException(
+    scheduleId: scheduleId ?? this.scheduleId,
+    originalDate: originalDate ?? this.originalDate,
+    targetDate: targetDate ?? this.targetDate,
+    startMinutes: startMinutes ?? this.startMinutes,
+    endMinutes: endMinutes ?? this.endMinutes,
+    location: location ?? this.location,
+    isCancelled: isCancelled ?? this.isCancelled,
+  );
+  StoredClassException copyWithCompanion(ClassExceptionRecordsCompanion data) {
+    return StoredClassException(
+      scheduleId: data.scheduleId.present
+          ? data.scheduleId.value
+          : this.scheduleId,
+      originalDate: data.originalDate.present
+          ? data.originalDate.value
+          : this.originalDate,
+      targetDate: data.targetDate.present
+          ? data.targetDate.value
+          : this.targetDate,
+      startMinutes: data.startMinutes.present
+          ? data.startMinutes.value
+          : this.startMinutes,
+      endMinutes: data.endMinutes.present
+          ? data.endMinutes.value
+          : this.endMinutes,
+      location: data.location.present ? data.location.value : this.location,
+      isCancelled: data.isCancelled.present
+          ? data.isCancelled.value
+          : this.isCancelled,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredClassException(')
+          ..write('scheduleId: $scheduleId, ')
+          ..write('originalDate: $originalDate, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('location: $location, ')
+          ..write('isCancelled: $isCancelled')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    scheduleId,
+    originalDate,
+    targetDate,
+    startMinutes,
+    endMinutes,
+    location,
+    isCancelled,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredClassException &&
+          other.scheduleId == this.scheduleId &&
+          other.originalDate == this.originalDate &&
+          other.targetDate == this.targetDate &&
+          other.startMinutes == this.startMinutes &&
+          other.endMinutes == this.endMinutes &&
+          other.location == this.location &&
+          other.isCancelled == this.isCancelled);
+}
+
+class ClassExceptionRecordsCompanion
+    extends UpdateCompanion<StoredClassException> {
+  final Value<int> scheduleId;
+  final Value<String> originalDate;
+  final Value<String> targetDate;
+  final Value<int> startMinutes;
+  final Value<int> endMinutes;
+  final Value<String> location;
+  final Value<bool> isCancelled;
+  final Value<int> rowid;
+  const ClassExceptionRecordsCompanion({
+    this.scheduleId = const Value.absent(),
+    this.originalDate = const Value.absent(),
+    this.targetDate = const Value.absent(),
+    this.startMinutes = const Value.absent(),
+    this.endMinutes = const Value.absent(),
+    this.location = const Value.absent(),
+    this.isCancelled = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ClassExceptionRecordsCompanion.insert({
+    required int scheduleId,
+    required String originalDate,
+    required String targetDate,
+    required int startMinutes,
+    required int endMinutes,
+    required String location,
+    required bool isCancelled,
+    this.rowid = const Value.absent(),
+  }) : scheduleId = Value(scheduleId),
+       originalDate = Value(originalDate),
+       targetDate = Value(targetDate),
+       startMinutes = Value(startMinutes),
+       endMinutes = Value(endMinutes),
+       location = Value(location),
+       isCancelled = Value(isCancelled);
+  static Insertable<StoredClassException> custom({
+    Expression<int>? scheduleId,
+    Expression<String>? originalDate,
+    Expression<String>? targetDate,
+    Expression<int>? startMinutes,
+    Expression<int>? endMinutes,
+    Expression<String>? location,
+    Expression<bool>? isCancelled,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (scheduleId != null) 'schedule_id': scheduleId,
+      if (originalDate != null) 'original_date': originalDate,
+      if (targetDate != null) 'target_date': targetDate,
+      if (startMinutes != null) 'start_minutes': startMinutes,
+      if (endMinutes != null) 'end_minutes': endMinutes,
+      if (location != null) 'location': location,
+      if (isCancelled != null) 'is_cancelled': isCancelled,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ClassExceptionRecordsCompanion copyWith({
+    Value<int>? scheduleId,
+    Value<String>? originalDate,
+    Value<String>? targetDate,
+    Value<int>? startMinutes,
+    Value<int>? endMinutes,
+    Value<String>? location,
+    Value<bool>? isCancelled,
+    Value<int>? rowid,
+  }) {
+    return ClassExceptionRecordsCompanion(
+      scheduleId: scheduleId ?? this.scheduleId,
+      originalDate: originalDate ?? this.originalDate,
+      targetDate: targetDate ?? this.targetDate,
+      startMinutes: startMinutes ?? this.startMinutes,
+      endMinutes: endMinutes ?? this.endMinutes,
+      location: location ?? this.location,
+      isCancelled: isCancelled ?? this.isCancelled,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (scheduleId.present) {
+      map['schedule_id'] = Variable<int>(scheduleId.value);
+    }
+    if (originalDate.present) {
+      map['original_date'] = Variable<String>(originalDate.value);
+    }
+    if (targetDate.present) {
+      map['target_date'] = Variable<String>(targetDate.value);
+    }
+    if (startMinutes.present) {
+      map['start_minutes'] = Variable<int>(startMinutes.value);
+    }
+    if (endMinutes.present) {
+      map['end_minutes'] = Variable<int>(endMinutes.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (isCancelled.present) {
+      map['is_cancelled'] = Variable<bool>(isCancelled.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClassExceptionRecordsCompanion(')
+          ..write('scheduleId: $scheduleId, ')
+          ..write('originalDate: $originalDate, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('location: $location, ')
+          ..write('isCancelled: $isCancelled, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -2589,6 +3087,8 @@ abstract class _$PlannerStore extends GeneratedDatabase {
       $LearningTaskRecordsTable(this);
   late final $CountdownEventRecordsTable countdownEventRecords =
       $CountdownEventRecordsTable(this);
+  late final $ClassExceptionRecordsTable classExceptionRecords =
+      $ClassExceptionRecordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2601,6 +3101,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     scheduleRecords,
     learningTaskRecords,
     countdownEventRecords,
+    classExceptionRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2610,6 +3111,13 @@ abstract class _$PlannerStore extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('learning_task_records', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'schedule_records',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('class_exception_records', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -4268,6 +4776,31 @@ final class $$ScheduleRecordsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<
+    $ClassExceptionRecordsTable,
+    List<StoredClassException>
+  >
+  _classExceptionRecordsRefsTable(_$PlannerStore db) =>
+      MultiTypedResultKey.fromTable(
+        db.classExceptionRecords,
+        aliasName: 'schedule_records__id__class_exception_records__schedule_id',
+      );
+
+  $$ClassExceptionRecordsTableProcessedTableManager
+  get classExceptionRecordsRefs {
+    final manager = $$ClassExceptionRecordsTableTableManager(
+      $_db,
+      $_db.classExceptionRecords,
+    ).filter((f) => f.scheduleId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _classExceptionRecordsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ScheduleRecordsTableFilterComposer
@@ -4330,6 +4863,32 @@ class $$ScheduleRecordsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> classExceptionRecordsRefs(
+    Expression<bool> Function($$ClassExceptionRecordsTableFilterComposer f) f,
+  ) {
+    final $$ClassExceptionRecordsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.classExceptionRecords,
+          getReferencedColumn: (t) => t.scheduleId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassExceptionRecordsTableFilterComposer(
+                $db: $db,
+                $table: $db.classExceptionRecords,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
   }
 }
 
@@ -4447,6 +5006,32 @@ class $$ScheduleRecordsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> classExceptionRecordsRefs<T extends Object>(
+    Expression<T> Function($$ClassExceptionRecordsTableAnnotationComposer a) f,
+  ) {
+    final $$ClassExceptionRecordsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.classExceptionRecords,
+          getReferencedColumn: (t) => t.scheduleId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ClassExceptionRecordsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.classExceptionRecords,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ScheduleRecordsTableTableManager
@@ -4462,7 +5047,10 @@ class $$ScheduleRecordsTableTableManager
           $$ScheduleRecordsTableUpdateCompanionBuilder,
           (StoredSchedule, $$ScheduleRecordsTableReferences),
           StoredSchedule,
-          PrefetchHooks Function({bool courseId})
+          PrefetchHooks Function({
+            bool courseId,
+            bool classExceptionRecordsRefs,
+          })
         > {
   $$ScheduleRecordsTableTableManager(
     _$PlannerStore db,
@@ -4521,45 +5109,69 @@ class $$ScheduleRecordsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({courseId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (courseId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.courseId,
-                        referencedTable: $$ScheduleRecordsTableReferences
-                            ._courseIdTable(db),
-                        referencedColumn: $$ScheduleRecordsTableReferences
-                            ._courseIdTable(db)
-                            .id,
-                      ) as T;
-                    }
+          prefetchHooksCallback:
+              ({courseId = false, classExceptionRecordsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (classExceptionRecordsRefs) db.classExceptionRecords,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (courseId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.courseId,
+                            referencedTable: $$ScheduleRecordsTableReferences
+                                ._courseIdTable(db),
+                            referencedColumn: $$ScheduleRecordsTableReferences
+                                ._courseIdTable(db)
+                                .id,
+                          ) as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (classExceptionRecordsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          StoredSchedule,
+                          $ScheduleRecordsTable,
+                          StoredClassException,
+                          $ClassExceptionRecordsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ScheduleRecordsTableReferences
+                              ._classExceptionRecordsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ScheduleRecordsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).classExceptionRecordsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'schedule_id',
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -4576,7 +5188,7 @@ typedef $$ScheduleRecordsTableProcessedTableManager =
       $$ScheduleRecordsTableUpdateCompanionBuilder,
       (StoredSchedule, $$ScheduleRecordsTableReferences),
       StoredSchedule,
-      PrefetchHooks Function({bool courseId})
+      PrefetchHooks Function({bool courseId, bool classExceptionRecordsRefs})
     >;
 typedef $$LearningTaskRecordsTableCreateCompanionBuilder =
     LearningTaskRecordsCompanion Function({
@@ -5176,6 +5788,394 @@ typedef $$CountdownEventRecordsTableProcessedTableManager =
       StoredCountdownEvent,
       PrefetchHooks Function()
     >;
+typedef $$ClassExceptionRecordsTableCreateCompanionBuilder =
+    ClassExceptionRecordsCompanion Function({
+      required int scheduleId,
+      required String originalDate,
+      required String targetDate,
+      required int startMinutes,
+      required int endMinutes,
+      required String location,
+      required bool isCancelled,
+      Value<int> rowid,
+    });
+typedef $$ClassExceptionRecordsTableUpdateCompanionBuilder =
+    ClassExceptionRecordsCompanion Function({
+      Value<int> scheduleId,
+      Value<String> originalDate,
+      Value<String> targetDate,
+      Value<int> startMinutes,
+      Value<int> endMinutes,
+      Value<String> location,
+      Value<bool> isCancelled,
+      Value<int> rowid,
+    });
+
+final class $$ClassExceptionRecordsTableReferences
+    extends
+        BaseReferences<
+          _$PlannerStore,
+          $ClassExceptionRecordsTable,
+          StoredClassException
+        > {
+  $$ClassExceptionRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ScheduleRecordsTable _scheduleIdTable(_$PlannerStore db) =>
+      db.scheduleRecords.createAlias(
+        'class_exception_records__schedule_id__schedule_records__id',
+      );
+
+  $$ScheduleRecordsTableProcessedTableManager get scheduleId {
+    final $_column = $_itemColumn<int>('schedule_id')!;
+
+    final manager = $$ScheduleRecordsTableTableManager(
+      $_db,
+      $_db.scheduleRecords,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_scheduleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ClassExceptionRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $ClassExceptionRecordsTable> {
+  $$ClassExceptionRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get originalDate => $composableBuilder(
+    column: $table.originalDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCancelled => $composableBuilder(
+    column: $table.isCancelled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ScheduleRecordsTableFilterComposer get scheduleId {
+    final $$ScheduleRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduleId,
+      referencedTable: $db.scheduleRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScheduleRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.scheduleRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassExceptionRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $ClassExceptionRecordsTable> {
+  $$ClassExceptionRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get originalDate => $composableBuilder(
+    column: $table.originalDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCancelled => $composableBuilder(
+    column: $table.isCancelled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ScheduleRecordsTableOrderingComposer get scheduleId {
+    final $$ScheduleRecordsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduleId,
+      referencedTable: $db.scheduleRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScheduleRecordsTableOrderingComposer(
+            $db: $db,
+            $table: $db.scheduleRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassExceptionRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $ClassExceptionRecordsTable> {
+  $$ClassExceptionRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get originalDate => $composableBuilder(
+    column: $table.originalDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCancelled => $composableBuilder(
+    column: $table.isCancelled,
+    builder: (column) => column,
+  );
+
+  $$ScheduleRecordsTableAnnotationComposer get scheduleId {
+    final $$ScheduleRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.scheduleId,
+      referencedTable: $db.scheduleRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ScheduleRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.scheduleRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassExceptionRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $ClassExceptionRecordsTable,
+          StoredClassException,
+          $$ClassExceptionRecordsTableFilterComposer,
+          $$ClassExceptionRecordsTableOrderingComposer,
+          $$ClassExceptionRecordsTableAnnotationComposer,
+          $$ClassExceptionRecordsTableCreateCompanionBuilder,
+          $$ClassExceptionRecordsTableUpdateCompanionBuilder,
+          (StoredClassException, $$ClassExceptionRecordsTableReferences),
+          StoredClassException,
+          PrefetchHooks Function({bool scheduleId})
+        > {
+  $$ClassExceptionRecordsTableTableManager(
+    _$PlannerStore db,
+    $ClassExceptionRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClassExceptionRecordsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ClassExceptionRecordsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ClassExceptionRecordsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> scheduleId = const Value.absent(),
+                Value<String> originalDate = const Value.absent(),
+                Value<String> targetDate = const Value.absent(),
+                Value<int> startMinutes = const Value.absent(),
+                Value<int> endMinutes = const Value.absent(),
+                Value<String> location = const Value.absent(),
+                Value<bool> isCancelled = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClassExceptionRecordsCompanion(
+                scheduleId: scheduleId,
+                originalDate: originalDate,
+                targetDate: targetDate,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                location: location,
+                isCancelled: isCancelled,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int scheduleId,
+                required String originalDate,
+                required String targetDate,
+                required int startMinutes,
+                required int endMinutes,
+                required String location,
+                required bool isCancelled,
+                Value<int> rowid = const Value.absent(),
+              }) => ClassExceptionRecordsCompanion.insert(
+                scheduleId: scheduleId,
+                originalDate: originalDate,
+                targetDate: targetDate,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                location: location,
+                isCancelled: isCancelled,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ClassExceptionRecordsTable,
+                    StoredClassException
+                  >(table),
+                  $$ClassExceptionRecordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({scheduleId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (scheduleId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.scheduleId,
+                        referencedTable: $$ClassExceptionRecordsTableReferences
+                            ._scheduleIdTable(db),
+                        referencedColumn: $$ClassExceptionRecordsTableReferences
+                            ._scheduleIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ClassExceptionRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $ClassExceptionRecordsTable,
+      StoredClassException,
+      $$ClassExceptionRecordsTableFilterComposer,
+      $$ClassExceptionRecordsTableOrderingComposer,
+      $$ClassExceptionRecordsTableAnnotationComposer,
+      $$ClassExceptionRecordsTableCreateCompanionBuilder,
+      $$ClassExceptionRecordsTableUpdateCompanionBuilder,
+      (StoredClassException, $$ClassExceptionRecordsTableReferences),
+      StoredClassException,
+      PrefetchHooks Function({bool scheduleId})
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -5194,4 +6194,6 @@ class $PlannerStoreManager {
       $$LearningTaskRecordsTableTableManager(_db, _db.learningTaskRecords);
   $$CountdownEventRecordsTableTableManager get countdownEventRecords =>
       $$CountdownEventRecordsTableTableManager(_db, _db.countdownEventRecords);
+  $$ClassExceptionRecordsTableTableManager get classExceptionRecords =>
+      $$ClassExceptionRecordsTableTableManager(_db, _db.classExceptionRecords);
 }

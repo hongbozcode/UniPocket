@@ -85,7 +85,9 @@ class PlannerState {
     List<Course> courses = const [],
     List<LearningTask> tasks = const [],
     List<CountdownEvent> events = const [],
+    List<ClassExceptionDraft> classExceptions = const [],
   }) : semesters = List.unmodifiable(semesters),
+       classExceptions = List.unmodifiable(classExceptions),
        tasks = List.unmodifiable(tasks),
        events = List.unmodifiable(events),
        courses = List.unmodifiable(courses);
@@ -96,9 +98,11 @@ class PlannerState {
   final List<Course> courses;
   final List<LearningTask> tasks;
   final List<CountdownEvent> events;
+  final List<ClassExceptionDraft> classExceptions;
 
-  Timetable? get timetable =>
-      currentSemester == null ? null : Timetable(currentSemester!, courses);
+  Timetable? get timetable => currentSemester == null
+      ? null
+      : Timetable(currentSemester!, courses, classExceptions);
 
   List<ClassOccurrence> today(DateTime instant) =>
       timetable?.onDate(campusTime(instant)) ?? [];

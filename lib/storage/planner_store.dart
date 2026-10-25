@@ -86,6 +86,21 @@ class CountdownEventRecords extends Table {
   BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
 }
 
+@DataClassName('StoredClassException')
+class ClassExceptionRecords extends Table {
+  IntColumn get scheduleId =>
+      integer().references(ScheduleRecords, #id, onDelete: KeyAction.cascade)();
+  TextColumn get originalDate => text()();
+  TextColumn get targetDate => text()();
+  IntColumn get startMinutes => integer()();
+  IntColumn get endMinutes => integer()();
+  TextColumn get location => text()();
+  BoolColumn get isCancelled => boolean()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {scheduleId, originalDate};
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -95,6 +110,7 @@ class CountdownEventRecords extends Table {
     ScheduleRecords,
     LearningTaskRecords,
     CountdownEventRecords,
+    ClassExceptionRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -111,7 +127,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -127,6 +143,7 @@ class PlannerStore extends _$PlannerStore {
       }
       if (from < 3) await m.createTable(learningTaskRecords);
       if (from < 4) await m.createTable(countdownEventRecords);
+      if (from < 5) await m.createTable(classExceptionRecords);
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -145,10 +162,23 @@ class PlannerStore extends _$PlannerStore {
     final courses = await select(courseRecords).get();
     final tasks = await select(learningTaskRecords).get();
     final events = await select(countdownEventRecords).get();
+    final exceptions = await select(classExceptionRecords).get();
     final schedules = await (select(
       scheduleRecords,
     )..orderBy([(s) => OrderingTerm.asc(s.id)])).get();
     return PlannerState(
+      classExceptions: [
+        for (final e in exceptions)
+          ClassExceptionDraft(
+            scheduleId: e.scheduleId,
+            originalDate: DateTime.parse(e.originalDate),
+            targetDate: DateTime.parse(e.targetDate),
+            startMinutes: e.startMinutes,
+            endMinutes: e.endMinutes,
+            location: e.location,
+            isCancelled: e.isCancelled,
+          ),
+      ],
       events: [
         for (final event in events)
           CountdownEvent(
@@ -299,6 +329,19 @@ class PlannerStore extends _$PlannerStore {
   Future<void> writeTimeZone(String zone) =>
       (update(settingsRecords)..where((s) => s.id.equals(1))).write(
         SettingsRecordsCompanion(campusTimeZone: Value(zone)),
+      );
+
+  Future<void> saveClassException(ClassExceptionDraft draft) =>
+      into(classExceptionRecords).insertOnConflictUpdate(
+        ClassExceptionRecordsCompanion.insert(
+          scheduleId: draft.scheduleId,
+          originalDate: draft.originalDate.toIso8601String(),
+          targetDate: draft.targetDate.toIso8601String(),
+          startMinutes: draft.startMinutes,
+          endMinutes: draft.endMinutes,
+          location: draft.location.trim(),
+          isCancelled: draft.isCancelled,
+        ),
       );
 
   Future<int> saveEvent(CountdownEventDraft draft, {int? id}) async {

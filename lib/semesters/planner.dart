@@ -14,6 +14,47 @@ class SemesterPlanner {
 
   Future<PlannerState> load() => _store.readState();
 
+  Future<void> saveClassException(
+    ClassExceptionDraft draft, {
+    bool allowConflicts = false,
+  }) => _store.transaction(() async {
+    draft.validate();
+    final state = await load();
+    final course = state.courses
+        .where(
+          (c) => c.schedules.any(
+            (s) => s is ClassSchedule && s.id == draft.scheduleId,
+          ),
+        )
+        .firstOrNull;
+    if (course == null) throw const InputProblem('原上课安排不存在，请返回后重试。');
+    final semester = state.semesters.singleWhere(
+      (s) => s.id == course.semesterId,
+    );
+    final original = Timetable(semester, [course])
+        .onDate(draft.originalDate)
+        .where((o) => (o.schedule as ClassSchedule).id == draft.scheduleId);
+    if (original.isEmpty) throw const InputProblem('原日期没有此上课实例，请重新选择。');
+    if (!draft.isCancelled && !allowConflicts) {
+      final conflicts = Timetable(semester, state.courses, state.classExceptions)
+          .onDate(draft.targetDate)
+          .where(
+            (o) =>
+                !((o.schedule as ClassSchedule).id == draft.scheduleId &&
+                    o.originalDate == draft.originalDate) &&
+                draft.startMinutes < o.endMinutes &&
+                o.startMinutes < draft.endMinutes,
+          )
+          .map(
+            (o) =>
+                '${o.course.name} · ${PeriodTime.format(o.startMinutes)}–${PeriodTime.format(o.endMinutes)}',
+          )
+          .toList();
+      if (conflicts.isNotEmpty) throw CourseConflict(conflicts);
+    }
+    await _store.saveClassException(draft);
+  });
+
   Future<int> saveEvent(CountdownEventDraft draft, {int? id}) async {
     draft.validate();
     return _store.saveEvent(draft, id: id);
@@ -47,7 +88,12 @@ class SemesterPlanner {
             .firstOrNull;
         if (semester == null) throw const InputProblem('学期不存在，请返回后重试。');
         draft.validate(semester);
-        final conflicts = courseConflicts(draft, semester, state.courses);
+        final conflicts = courseConflicts(
+          draft,
+          semester,
+          state.courses,
+          state.classExceptions,
+        );
         if (conflicts.isNotEmpty && !allowConflicts) {
           throw CourseConflict(conflicts);
         }

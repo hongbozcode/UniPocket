@@ -304,7 +304,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _course([Course? course]) async {
+  Future<void> _course([Course? course, ClassOccurrence? occurrence]) async {
     final state = _state!;
     final semester = state.currentSemester;
     if (semester == null) return;
@@ -325,6 +325,8 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           campusTimeZone: state.campusTimeZone,
           course: course,
           initialColorIndex: initialColor,
+          occurrence: occurrence,
+          classExceptions: state.classExceptions,
         ),
       ),
     );
@@ -462,6 +464,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
                   occurrences: today,
                   campusNow: now,
                   onEdit: _course,
+                  onOccurrence: (o) => _course(o.course, o),
                   emptyText: _state!.timetable!.courses.isEmpty
                       ? '还没有录入课程，点击右上角添加。'
                       : '今天没有课程，可以从容安排时间。',
@@ -493,6 +496,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           campusNow: _state!.campusTime(widget.clock().toUtc()),
           onAdd: () => _course(),
           onEdit: _course,
+          onOccurrence: (o) => _course(o.course, o),
           onManage: _manage,
           onTasks: _tasks,
           onEvents: _events,
