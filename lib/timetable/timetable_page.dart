@@ -97,11 +97,13 @@ class OccurrenceCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      if (occurrence.isRescheduled)
+                      if (occurrence.isRescheduled || occurrence.isIndependent)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
-                            '已调课 · 原课次 ${dateText(occurrence.originalDate)}',
+                            occurrence.isIndependent
+                                ? '独立补课'
+                                : '已调课 · 原课次 ${dateText(occurrence.originalDate)}',
                             style: const TextStyle(
                               fontSize: 11,
                               color: primaryBlue,

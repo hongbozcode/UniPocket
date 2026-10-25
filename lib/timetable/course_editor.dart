@@ -6,6 +6,9 @@ import '../ui/design.dart';
 import '../ui/course_palette.dart';
 import 'model.dart';
 import 'class_exception_editor.dart';
+import 'course_impact_page.dart';
+
+enum CourseEditorResult { saved, deleted }
 
 String scheduleText(ScheduleDraft schedule, Semester semester) {
   final weeks = schedule.weeks.toList()..sort();
@@ -24,6 +27,7 @@ class CourseEditor extends StatefulWidget {
     this.initialColorIndex = 0,
     this.occurrence,
     this.classExceptions = const [],
+    this.independentLessons = const [],
     super.key,
   });
   final SemesterPlanner planner;
@@ -33,17 +37,28 @@ class CourseEditor extends StatefulWidget {
   final int initialColorIndex;
   final ClassOccurrence? occurrence;
   final List<ClassExceptionDraft> classExceptions;
+  final List<IndependentLesson> independentLessons;
 
   @override
   State<CourseEditor> createState() => _CourseEditorState();
 }
 
 class _ScheduleFields {
-  _ScheduleFields(Semester semester)
-    : weekday = semester.periods.entries
-          .firstWhere((e) => e.value.isNotEmpty)
-          .key,
-      weeks = {for (var w = 1; w <= semester.totalWeeks; w++) w};
+  _ScheduleFields(Semester semester, {ClassSchedule? schedule})
+    : id = schedule?.id,
+      weekday =
+          schedule?.weekday ??
+          semester.periods.entries.firstWhere((e) => e.value.isNotEmpty).key,
+      weeks =
+          schedule?.weeks.toSet() ??
+          {for (var w = 1; w <= semester.totalWeeks; w++) w} {
+    if (schedule != null) {
+      start.text = '${schedule.startPeriod}';
+      end.text = '${schedule.endPeriod}';
+      location.text = schedule.location;
+    }
+  }
+  final int? id;
   int weekday;
   final start = TextEditingController(text: '1');
   final end = TextEditingController(text: '1');
@@ -65,6 +80,7 @@ class _CourseEditorState extends State<CourseEditor> {
   final _scroll = ScrollController();
   final _schedules = <_ScheduleFields>[];
   var _saving = false;
+  var _editingSchedules = false;
   String? _error;
 
   Future<void> _exception(
@@ -82,7 +98,9 @@ class _CourseEditorState extends State<CourseEditor> {
         ),
       ),
     );
-    if (saved == true && mounted) Navigator.pop(context, true);
+    if (saved == true && mounted) {
+      Navigator.pop(context, CourseEditorResult.saved);
+    }
   }
 
   Widget _occurrenceActions(ClassOccurrence occurrence) => SurfaceCard(
@@ -90,9 +108,9 @@ class _CourseEditorState extends State<CourseEditor> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          '本次上课',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        Text(
+          occurrence.isIndependent ? '独立补课' : '本次上课',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         Text(
@@ -106,11 +124,11 @@ class _CourseEditorState extends State<CourseEditor> {
           children: [
             TextButton(
               onPressed: () => _exception(occurrence),
-              child: const Text('单次调课'),
+              child: Text(occurrence.isIndependent ? '编辑独立补课' : '单次调课'),
             ),
             TextButton(
               onPressed: () => _exception(occurrence, cancel: true),
-              child: const Text('单次停课'),
+              child: Text(occurrence.isIndependent ? '取消独立补课' : '单次停课'),
             ),
           ],
         ),
@@ -164,6 +182,12 @@ class _CourseEditorState extends State<CourseEditor> {
         fields.end.text = '2';
       }
       _schedules.add(fields);
+    } else {
+      _schedules.addAll(
+        widget.course!.schedules.cast<ClassSchedule>().map(
+          (s) => _ScheduleFields(widget.semester, schedule: s),
+        ),
+      );
     }
   }
 
@@ -247,12 +271,31 @@ class _CourseEditorState extends State<CourseEditor> {
     });
     try {
       if (widget.course case final course?) {
-        await widget.planner.updateCourseDetails(
-          course.id,
-          name: _name.text,
-          teacher: _teacher.text,
-          colorIndex: _color,
-        );
+        if (_editingSchedules) {
+          final impact = await widget.planner.previewCourseChange(
+            course.id,
+            _draft(),
+          );
+          if (!mounted) return;
+          final saved = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CourseImpactPage(
+                planner: widget.planner,
+                impact: impact,
+                campusTimeZone: widget.campusTimeZone,
+              ),
+            ),
+          );
+          if (saved != true) return;
+        } else {
+          await widget.planner.updateCourseDetails(
+            course.id,
+            name: _name.text,
+            teacher: _teacher.text,
+            colorIndex: _color,
+          );
+        }
       } else {
         final draft = CourseDraft(
           semesterId: widget.semester.id,
@@ -289,7 +332,7 @@ class _CourseEditorState extends State<CourseEditor> {
           await widget.planner.saveCourse(draft, allowConflicts: true);
         }
       }
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) Navigator.pop(context, CourseEditorResult.saved);
     } on InputProblem catch (problem) {
       if (mounted) setState(() => _error = problem.message);
     } catch (_) {
@@ -308,19 +351,101 @@ class _CourseEditorState extends State<CourseEditor> {
     }
   }
 
+  CourseDraft _draft() => CourseDraft(
+    semesterId: widget.semester.id,
+    name: _name.text,
+    teacher: _teacher.text,
+    colorIndex: _color,
+    schedules: [
+      for (var i = 0; i < _schedules.length; i++)
+        _readSchedule(_schedules[i], i + 1),
+    ],
+  );
+
+  Future<void> _delete() async {
+    if (_saving) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      final impact = await widget.planner.previewCourseDeletion(
+        widget.course!.id,
+      );
+      if (!mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('确认删除课程'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('删除“${impact.course.name}”后，将清理：'),
+                const SizedBox(height: 12),
+                Text(
+                  '${impact.course.schedules.length} 个上课安排、${impact.exceptionCount} 项调停课及 ${impact.independentCount} 次独立补课。',
+                ),
+                const SizedBox(height: 12),
+                Text('${impact.taskCount} 项学习任务将解除课程关联并保留，截止时间、备注和完成状态不变。'),
+                const SizedBox(height: 12),
+                const Text('删除后不可撤销。'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xffb32643),
+              ),
+              child: const Text('确认删除'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      await widget.planner.deleteCourse(impact);
+      if (mounted) Navigator.pop(context, CourseEditorResult.deleted);
+    } on InputProblem catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = '删除失败，课程与学习任务保持不变，请重试。');
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+        if (_error != null) _scroll.jumpTo(0);
+      }
+    }
+  }
+
   ScheduleDraft _readSchedule(_ScheduleFields fields, int number) {
     final start = int.tryParse(fields.start.text.trim());
     final end = int.tryParse(fields.end.text.trim());
     if (start == null || end == null) {
       throw InputProblem('上课安排 $number：节次须为整数。');
     }
-    final schedule = ScheduleDraft(
-      weekday: fields.weekday,
-      startPeriod: start,
-      endPeriod: end,
-      location: fields.location.text,
-      weeks: fields.weeks,
-    );
+    final schedule = fields.id != null
+        ? ClassSchedule(
+            id: fields.id!,
+            weekday: fields.weekday,
+            startPeriod: start,
+            endPeriod: end,
+            location: fields.location.text,
+            weeks: fields.weeks,
+          )
+        : ScheduleDraft(
+            weekday: fields.weekday,
+            startPeriod: start,
+            endPeriod: end,
+            location: fields.location.text,
+            weeks: fields.weeks,
+          );
     try {
       schedule.validate(widget.semester);
     } on InputProblem catch (e) {
@@ -417,12 +542,13 @@ class _CourseEditorState extends State<CourseEditor> {
         ),
         if (_schedules.length > 1)
           TextButton.icon(
+            key: ValueKey('remove-schedule-$index'),
             onPressed: () {
               setState(() => _schedules.remove(fields));
               fields.dispose();
             },
             icon: const Icon(Icons.close),
-            label: const Text('移除此未保存安排'),
+            label: Text(fields.id == null ? '移除此未保存安排' : '移除此上课安排'),
           ),
       ],
     ),
@@ -444,7 +570,8 @@ class _CourseEditorState extends State<CourseEditor> {
               Text('${widget.semester.name}\n校园时间 · ${widget.campusTimeZone}'),
               const SizedBox(height: 20),
               if (_error != null) ProblemBanner(_error!),
-              if (widget.occurrence case final occurrence?) ...[
+              if (widget.occurrence case final occurrence?
+                  when !_editingSchedules) ...[
                 _occurrenceActions(occurrence),
                 const SizedBox(height: 20),
               ],
@@ -507,13 +634,21 @@ class _CourseEditorState extends State<CourseEditor> {
                 ),
               ),
               const SizedBox(height: 24),
-              if (widget.course case final course?) ...[
+              if (widget.course case final course? when !_editingSchedules) ...[
                 for (final exception in widget.classExceptions.where(
                   (e) => course.schedules.any(
                     (s) => s is ClassSchedule && s.id == e.scheduleId,
                   ),
                 ))
                   _savedException(exception),
+                for (final lesson in widget.independentLessons.where(
+                  (l) =>
+                      l.courseId == course.id &&
+                      l.id != widget.occurrence?.independentLessonId,
+                )) ...[
+                  _occurrenceActions(lesson.occurrence(course)),
+                  const SizedBox(height: 12),
+                ],
                 const Text(
                   '已有上课安排',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -527,7 +662,10 @@ class _CourseEditorState extends State<CourseEditor> {
                       child: Text(scheduleText(schedule, widget.semester)),
                     ),
                   ),
-                const Text('此处可编辑课程名称、教师和颜色。重复安排修改与删除将在后续版本开放。'),
+                OutlinedButton(
+                  onPressed: () => setState(() => _editingSchedules = true),
+                  child: const Text('修改重复安排'),
+                ),
               ] else ...[
                 for (var i = 0; i < _schedules.length; i++)
                   Padding(
@@ -549,6 +687,16 @@ class _CourseEditorState extends State<CourseEditor> {
                 onPressed: _saving ? null : _save,
                 child: Text(_saving ? '正在保存…' : '保存课程'),
               ),
+              if (widget.course != null) ...[
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: _saving ? null : _delete,
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xffb32643),
+                  ),
+                  child: const Text('删除课程'),
+                ),
+              ],
             ],
           ),
         ),

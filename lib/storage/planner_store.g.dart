@@ -3069,6 +3069,421 @@ class ClassExceptionRecordsCompanion
   }
 }
 
+class $IndependentLessonRecordsTable extends IndependentLessonRecords
+    with TableInfo<$IndependentLessonRecordsTable, StoredIndependentLesson> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IndependentLessonRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _courseIdMeta = const VerificationMeta(
+    'courseId',
+  );
+  @override
+  late final GeneratedColumn<int> courseId = GeneratedColumn<int>(
+    'course_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES course_records (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startMinutesMeta = const VerificationMeta(
+    'startMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> startMinutes = GeneratedColumn<int>(
+    'start_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endMinutesMeta = const VerificationMeta(
+    'endMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> endMinutes = GeneratedColumn<int>(
+    'end_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    courseId,
+    date,
+    startMinutes,
+    endMinutes,
+    location,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'independent_lesson_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredIndependentLesson> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('course_id')) {
+      context.handle(
+        _courseIdMeta,
+        courseId.isAcceptableOrUnknown(data['course_id']!, _courseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_courseIdMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('start_minutes')) {
+      context.handle(
+        _startMinutesMeta,
+        startMinutes.isAcceptableOrUnknown(
+          data['start_minutes']!,
+          _startMinutesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startMinutesMeta);
+    }
+    if (data.containsKey('end_minutes')) {
+      context.handle(
+        _endMinutesMeta,
+        endMinutes.isAcceptableOrUnknown(data['end_minutes']!, _endMinutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endMinutesMeta);
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_locationMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredIndependentLesson map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredIndependentLesson(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      courseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}course_id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+      startMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_minutes'],
+      )!,
+      endMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_minutes'],
+      )!,
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      )!,
+    );
+  }
+
+  @override
+  $IndependentLessonRecordsTable createAlias(String alias) {
+    return $IndependentLessonRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredIndependentLesson extends DataClass
+    implements Insertable<StoredIndependentLesson> {
+  final int id;
+  final int courseId;
+  final String date;
+  final int startMinutes;
+  final int endMinutes;
+  final String location;
+  const StoredIndependentLesson({
+    required this.id,
+    required this.courseId,
+    required this.date,
+    required this.startMinutes,
+    required this.endMinutes,
+    required this.location,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['course_id'] = Variable<int>(courseId);
+    map['date'] = Variable<String>(date);
+    map['start_minutes'] = Variable<int>(startMinutes);
+    map['end_minutes'] = Variable<int>(endMinutes);
+    map['location'] = Variable<String>(location);
+    return map;
+  }
+
+  IndependentLessonRecordsCompanion toCompanion(bool nullToAbsent) {
+    return IndependentLessonRecordsCompanion(
+      id: Value(id),
+      courseId: Value(courseId),
+      date: Value(date),
+      startMinutes: Value(startMinutes),
+      endMinutes: Value(endMinutes),
+      location: Value(location),
+    );
+  }
+
+  factory StoredIndependentLesson.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredIndependentLesson(
+      id: serializer.fromJson<int>(json['id']),
+      courseId: serializer.fromJson<int>(json['courseId']),
+      date: serializer.fromJson<String>(json['date']),
+      startMinutes: serializer.fromJson<int>(json['startMinutes']),
+      endMinutes: serializer.fromJson<int>(json['endMinutes']),
+      location: serializer.fromJson<String>(json['location']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'courseId': serializer.toJson<int>(courseId),
+      'date': serializer.toJson<String>(date),
+      'startMinutes': serializer.toJson<int>(startMinutes),
+      'endMinutes': serializer.toJson<int>(endMinutes),
+      'location': serializer.toJson<String>(location),
+    };
+  }
+
+  StoredIndependentLesson copyWith({
+    int? id,
+    int? courseId,
+    String? date,
+    int? startMinutes,
+    int? endMinutes,
+    String? location,
+  }) => StoredIndependentLesson(
+    id: id ?? this.id,
+    courseId: courseId ?? this.courseId,
+    date: date ?? this.date,
+    startMinutes: startMinutes ?? this.startMinutes,
+    endMinutes: endMinutes ?? this.endMinutes,
+    location: location ?? this.location,
+  );
+  StoredIndependentLesson copyWithCompanion(
+    IndependentLessonRecordsCompanion data,
+  ) {
+    return StoredIndependentLesson(
+      id: data.id.present ? data.id.value : this.id,
+      courseId: data.courseId.present ? data.courseId.value : this.courseId,
+      date: data.date.present ? data.date.value : this.date,
+      startMinutes: data.startMinutes.present
+          ? data.startMinutes.value
+          : this.startMinutes,
+      endMinutes: data.endMinutes.present
+          ? data.endMinutes.value
+          : this.endMinutes,
+      location: data.location.present ? data.location.value : this.location,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredIndependentLesson(')
+          ..write('id: $id, ')
+          ..write('courseId: $courseId, ')
+          ..write('date: $date, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('location: $location')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, courseId, date, startMinutes, endMinutes, location);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredIndependentLesson &&
+          other.id == this.id &&
+          other.courseId == this.courseId &&
+          other.date == this.date &&
+          other.startMinutes == this.startMinutes &&
+          other.endMinutes == this.endMinutes &&
+          other.location == this.location);
+}
+
+class IndependentLessonRecordsCompanion
+    extends UpdateCompanion<StoredIndependentLesson> {
+  final Value<int> id;
+  final Value<int> courseId;
+  final Value<String> date;
+  final Value<int> startMinutes;
+  final Value<int> endMinutes;
+  final Value<String> location;
+  const IndependentLessonRecordsCompanion({
+    this.id = const Value.absent(),
+    this.courseId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.startMinutes = const Value.absent(),
+    this.endMinutes = const Value.absent(),
+    this.location = const Value.absent(),
+  });
+  IndependentLessonRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required int courseId,
+    required String date,
+    required int startMinutes,
+    required int endMinutes,
+    required String location,
+  }) : courseId = Value(courseId),
+       date = Value(date),
+       startMinutes = Value(startMinutes),
+       endMinutes = Value(endMinutes),
+       location = Value(location);
+  static Insertable<StoredIndependentLesson> custom({
+    Expression<int>? id,
+    Expression<int>? courseId,
+    Expression<String>? date,
+    Expression<int>? startMinutes,
+    Expression<int>? endMinutes,
+    Expression<String>? location,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (courseId != null) 'course_id': courseId,
+      if (date != null) 'date': date,
+      if (startMinutes != null) 'start_minutes': startMinutes,
+      if (endMinutes != null) 'end_minutes': endMinutes,
+      if (location != null) 'location': location,
+    });
+  }
+
+  IndependentLessonRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? courseId,
+    Value<String>? date,
+    Value<int>? startMinutes,
+    Value<int>? endMinutes,
+    Value<String>? location,
+  }) {
+    return IndependentLessonRecordsCompanion(
+      id: id ?? this.id,
+      courseId: courseId ?? this.courseId,
+      date: date ?? this.date,
+      startMinutes: startMinutes ?? this.startMinutes,
+      endMinutes: endMinutes ?? this.endMinutes,
+      location: location ?? this.location,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (courseId.present) {
+      map['course_id'] = Variable<int>(courseId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (startMinutes.present) {
+      map['start_minutes'] = Variable<int>(startMinutes.value);
+    }
+    if (endMinutes.present) {
+      map['end_minutes'] = Variable<int>(endMinutes.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IndependentLessonRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('courseId: $courseId, ')
+          ..write('date: $date, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('location: $location')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -3089,6 +3504,8 @@ abstract class _$PlannerStore extends GeneratedDatabase {
       $CountdownEventRecordsTable(this);
   late final $ClassExceptionRecordsTable classExceptionRecords =
       $ClassExceptionRecordsTable(this);
+  late final $IndependentLessonRecordsTable independentLessonRecords =
+      $IndependentLessonRecordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3102,6 +3519,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     learningTaskRecords,
     countdownEventRecords,
     classExceptionRecords,
+    independentLessonRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3118,6 +3536,15 @@ abstract class _$PlannerStore extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('class_exception_records', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'course_records',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('independent_lesson_records', kind: UpdateKind.delete),
+      ],
     ),
   ]);
 }
@@ -4297,6 +4724,31 @@ final class $$CourseRecordsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $IndependentLessonRecordsTable,
+    List<StoredIndependentLesson>
+  >
+  _independentLessonRecordsRefsTable(_$PlannerStore db) =>
+      MultiTypedResultKey.fromTable(
+        db.independentLessonRecords,
+        aliasName: 'course_records__id__independent_lesson_records__course_id',
+      );
+
+  $$IndependentLessonRecordsTableProcessedTableManager
+  get independentLessonRecordsRefs {
+    final manager = $$IndependentLessonRecordsTableTableManager(
+      $_db,
+      $_db.independentLessonRecords,
+    ).filter((f) => f.courseId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _independentLessonRecordsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CourseRecordsTableFilterComposer
@@ -4398,6 +4850,33 @@ class $$CourseRecordsTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> independentLessonRecordsRefs(
+    Expression<bool> Function($$IndependentLessonRecordsTableFilterComposer f)
+    f,
+  ) {
+    final $$IndependentLessonRecordsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.independentLessonRecords,
+          getReferencedColumn: (t) => t.courseId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$IndependentLessonRecordsTableFilterComposer(
+                $db: $db,
+                $table: $db.independentLessonRecords,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -4551,6 +5030,33 @@ class $$CourseRecordsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> independentLessonRecordsRefs<T extends Object>(
+    Expression<T> Function($$IndependentLessonRecordsTableAnnotationComposer a)
+    f,
+  ) {
+    final $$IndependentLessonRecordsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.independentLessonRecords,
+          getReferencedColumn: (t) => t.courseId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$IndependentLessonRecordsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.independentLessonRecords,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CourseRecordsTableTableManager
@@ -4570,6 +5076,7 @@ class $$CourseRecordsTableTableManager
             bool semesterId,
             bool scheduleRecordsRefs,
             bool learningTaskRecordsRefs,
+            bool independentLessonRecordsRefs,
           })
         > {
   $$CourseRecordsTableTableManager(_$PlannerStore db, $CourseRecordsTable table)
@@ -4624,12 +5131,15 @@ class $$CourseRecordsTableTableManager
                 semesterId = false,
                 scheduleRecordsRefs = false,
                 learningTaskRecordsRefs = false,
+                independentLessonRecordsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (scheduleRecordsRefs) db.scheduleRecords,
                     if (learningTaskRecordsRefs) db.learningTaskRecords,
+                    if (independentLessonRecordsRefs)
+                      db.independentLessonRecords,
                   ],
                   addJoins:
                       <
@@ -4703,6 +5213,26 @@ class $$CourseRecordsTableTableManager
                           referencedColumn: 'course_id',
                           typedResults: items,
                         ),
+                      if (independentLessonRecordsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          StoredCourse,
+                          $CourseRecordsTable,
+                          StoredIndependentLesson,
+                          $IndependentLessonRecordsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CourseRecordsTableReferences
+                              ._independentLessonRecordsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CourseRecordsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).independentLessonRecordsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'course_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -4727,6 +5257,7 @@ typedef $$CourseRecordsTableProcessedTableManager =
         bool semesterId,
         bool scheduleRecordsRefs,
         bool learningTaskRecordsRefs,
+        bool independentLessonRecordsRefs,
       })
     >;
 typedef $$ScheduleRecordsTableCreateCompanionBuilder =
@@ -6176,6 +6707,364 @@ typedef $$ClassExceptionRecordsTableProcessedTableManager =
       StoredClassException,
       PrefetchHooks Function({bool scheduleId})
     >;
+typedef $$IndependentLessonRecordsTableCreateCompanionBuilder =
+    IndependentLessonRecordsCompanion Function({
+      Value<int> id,
+      required int courseId,
+      required String date,
+      required int startMinutes,
+      required int endMinutes,
+      required String location,
+    });
+typedef $$IndependentLessonRecordsTableUpdateCompanionBuilder =
+    IndependentLessonRecordsCompanion Function({
+      Value<int> id,
+      Value<int> courseId,
+      Value<String> date,
+      Value<int> startMinutes,
+      Value<int> endMinutes,
+      Value<String> location,
+    });
+
+final class $$IndependentLessonRecordsTableReferences
+    extends
+        BaseReferences<
+          _$PlannerStore,
+          $IndependentLessonRecordsTable,
+          StoredIndependentLesson
+        > {
+  $$IndependentLessonRecordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CourseRecordsTable _courseIdTable(_$PlannerStore db) => db
+      .courseRecords
+      .createAlias('independent_lesson_records__course_id__course_records__id');
+
+  $$CourseRecordsTableProcessedTableManager get courseId {
+    final $_column = $_itemColumn<int>('course_id')!;
+
+    final manager = $$CourseRecordsTableTableManager(
+      $_db,
+      $_db.courseRecords,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_courseIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$IndependentLessonRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $IndependentLessonRecordsTable> {
+  $$IndependentLessonRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CourseRecordsTableFilterComposer get courseId {
+    final $$CourseRecordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courseRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseRecordsTableFilterComposer(
+            $db: $db,
+            $table: $db.courseRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IndependentLessonRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $IndependentLessonRecordsTable> {
+  $$IndependentLessonRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CourseRecordsTableOrderingComposer get courseId {
+    final $$CourseRecordsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courseRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseRecordsTableOrderingComposer(
+            $db: $db,
+            $table: $db.courseRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IndependentLessonRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $IndependentLessonRecordsTable> {
+  $$IndependentLessonRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  $$CourseRecordsTableAnnotationComposer get courseId {
+    final $$CourseRecordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.courseId,
+      referencedTable: $db.courseRecords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CourseRecordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.courseRecords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IndependentLessonRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $IndependentLessonRecordsTable,
+          StoredIndependentLesson,
+          $$IndependentLessonRecordsTableFilterComposer,
+          $$IndependentLessonRecordsTableOrderingComposer,
+          $$IndependentLessonRecordsTableAnnotationComposer,
+          $$IndependentLessonRecordsTableCreateCompanionBuilder,
+          $$IndependentLessonRecordsTableUpdateCompanionBuilder,
+          (StoredIndependentLesson, $$IndependentLessonRecordsTableReferences),
+          StoredIndependentLesson,
+          PrefetchHooks Function({bool courseId})
+        > {
+  $$IndependentLessonRecordsTableTableManager(
+    _$PlannerStore db,
+    $IndependentLessonRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IndependentLessonRecordsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$IndependentLessonRecordsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$IndependentLessonRecordsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> courseId = const Value.absent(),
+                Value<String> date = const Value.absent(),
+                Value<int> startMinutes = const Value.absent(),
+                Value<int> endMinutes = const Value.absent(),
+                Value<String> location = const Value.absent(),
+              }) => IndependentLessonRecordsCompanion(
+                id: id,
+                courseId: courseId,
+                date: date,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                location: location,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int courseId,
+                required String date,
+                required int startMinutes,
+                required int endMinutes,
+                required String location,
+              }) => IndependentLessonRecordsCompanion.insert(
+                id: id,
+                courseId: courseId,
+                date: date,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+                location: location,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $IndependentLessonRecordsTable,
+                    StoredIndependentLesson
+                  >(table),
+                  $$IndependentLessonRecordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({courseId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (courseId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.courseId,
+                        referencedTable:
+                            $$IndependentLessonRecordsTableReferences
+                                ._courseIdTable(db),
+                        referencedColumn:
+                            $$IndependentLessonRecordsTableReferences
+                                ._courseIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$IndependentLessonRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $IndependentLessonRecordsTable,
+      StoredIndependentLesson,
+      $$IndependentLessonRecordsTableFilterComposer,
+      $$IndependentLessonRecordsTableOrderingComposer,
+      $$IndependentLessonRecordsTableAnnotationComposer,
+      $$IndependentLessonRecordsTableCreateCompanionBuilder,
+      $$IndependentLessonRecordsTableUpdateCompanionBuilder,
+      (StoredIndependentLesson, $$IndependentLessonRecordsTableReferences),
+      StoredIndependentLesson,
+      PrefetchHooks Function({bool courseId})
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -6196,4 +7085,9 @@ class $PlannerStoreManager {
       $$CountdownEventRecordsTableTableManager(_db, _db.countdownEventRecords);
   $$ClassExceptionRecordsTableTableManager get classExceptionRecords =>
       $$ClassExceptionRecordsTableTableManager(_db, _db.classExceptionRecords);
+  $$IndependentLessonRecordsTableTableManager get independentLessonRecords =>
+      $$IndependentLessonRecordsTableTableManager(
+        _db,
+        _db.independentLessonRecords,
+      );
 }

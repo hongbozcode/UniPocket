@@ -84,8 +84,14 @@ List<String> courseConflicts(
   Semester semester,
   List<Course> courses, [
   List<ClassExceptionDraft> classExceptions = const [],
+  List<IndependentLesson> independentLessons = const [],
 ]) {
-  final timetable = Timetable(semester, courses, classExceptions);
+  final timetable = Timetable(
+    semester,
+    courses,
+    classExceptions,
+    independentLessons,
+  );
   final compared = <ClassOccurrence>[];
   final conflicts = <String>{};
   for (final schedule in draft.schedules) {
@@ -148,6 +154,7 @@ class ClassOccurrence {
     required this.endMinutes,
     this.sourceDate,
     this.overrideLocation,
+    this.independentLessonId,
   });
   final Course course;
   final ScheduleDraft schedule;
@@ -156,6 +163,8 @@ class ClassOccurrence {
   final int endMinutes;
   final DateTime? sourceDate;
   final String? overrideLocation;
+  final int? independentLessonId;
+  bool get isIndependent => independentLessonId != null;
   DateTime get originalDate => sourceDate ?? date;
   bool get isRescheduled => sourceDate != null;
   String get location => overrideLocation ?? schedule.location;
@@ -190,6 +199,7 @@ class ClassExceptionDraft {
   final int endMinutes;
   final String location;
   final bool isCancelled;
+  (int, DateTime) get key => (scheduleId, originalDate);
 
   void validate() {
     if (targetDate.year < 1900 || targetDate.year > 2200) {
@@ -201,6 +211,40 @@ class ClassExceptionDraft {
   }
 }
 
+/// A dated lesson belongs to its course, but has no repeating schedule link.
+class IndependentLesson {
+  IndependentLesson({
+    required this.id,
+    required this.courseId,
+    required DateTime date,
+    required this.startMinutes,
+    required this.endMinutes,
+    required this.location,
+  }) : date = DateTime.utc(date.year, date.month, date.day);
+  final int id;
+  final int courseId;
+  final DateTime date;
+  final int startMinutes;
+  final int endMinutes;
+  final String location;
+
+  ClassOccurrence occurrence(Course course) => ClassOccurrence(
+    course: course,
+    schedule: ScheduleDraft(
+      weekday: date.weekday,
+      startPeriod: 1,
+      endPeriod: 1,
+      location: location,
+      weeks: {},
+    ),
+    date: date,
+    startMinutes: startMinutes,
+    endMinutes: endMinutes,
+    overrideLocation: location,
+    independentLessonId: id,
+  );
+}
+
 /// Dates are campus calendar dates, represented at UTC midnight so device
 /// timezone changes and daylight saving transitions cannot shift teaching weeks.
 class Timetable {
@@ -208,13 +252,16 @@ class Timetable {
     this.semester,
     Iterable<Course> courses, [
     Iterable<ClassExceptionDraft> classExceptions = const [],
+    Iterable<IndependentLesson> independentLessons = const [],
   ]) : courses = List.unmodifiable(
          courses.where((c) => c.semesterId == semester.id),
        ),
-       classExceptions = List.unmodifiable(classExceptions);
+       classExceptions = List.unmodifiable(classExceptions),
+       independentLessons = List.unmodifiable(independentLessons);
   final Semester semester;
   final List<Course> courses;
   final List<ClassExceptionDraft> classExceptions;
+  final List<IndependentLesson> independentLessons;
 
   int weekOf(DateTime date) {
     final day = DateTime.utc(date.year, date.month, date.day);
@@ -235,6 +282,11 @@ class Timetable {
       if (!exception.isCancelled &&
           scheduleIds.contains(exception.scheduleId)) {
         yield weekOf(exception.targetDate);
+      }
+    }
+    for (final lesson in independentLessons) {
+      if (courses.any((c) => c.id == lesson.courseId)) {
+        yield weekOf(lesson.date);
       }
     }
   }
@@ -282,6 +334,10 @@ class Timetable {
                 endMinutes: exception.endMinutes,
                 overrideLocation: exception.location,
               ),
+      for (final lesson in independentLessons)
+        for (final course in courses)
+          if (lesson.courseId == course.id && lesson.date == day)
+            lesson.occurrence(course),
     ];
     result.sort((a, b) {
       final time = a.startMinutes.compareTo(b.startMinutes);

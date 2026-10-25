@@ -305,6 +305,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   }
 
   Future<void> _course([Course? course, ClassOccurrence? occurrence]) async {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     final state = _state!;
     final semester = state.currentSemester;
     if (semester == null) return;
@@ -316,7 +317,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
     while (usedColors.contains(initialColor)) {
       initialColor++;
     }
-    final saved = await Navigator.push<bool>(
+    final saved = await Navigator.push<CourseEditorResult>(
       context,
       MaterialPageRoute(
         builder: (_) => CourseEditor(
@@ -327,14 +328,22 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           initialColorIndex: initialColor,
           occurrence: occurrence,
           classExceptions: state.classExceptions,
+          independentLessons: state.independentLessons,
         ),
       ),
     );
-    if (saved == true) {
+    if (saved != null) {
       await _load();
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('课程已保存到本机')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              saved == CourseEditorResult.deleted
+                  ? '课程已删除，学习任务已保留'
+                  : '课程已保存到本机',
+            ),
+          ),
+        );
       }
     }
   }

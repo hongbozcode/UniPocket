@@ -7,6 +7,7 @@ import '../semesters/model.dart';
 import '../timetable/model.dart';
 import '../tasks/model.dart';
 import '../events/model.dart';
+import '../timetable/course_change.dart';
 
 part 'planner_store.g.dart';
 
@@ -101,6 +102,17 @@ class ClassExceptionRecords extends Table {
   Set<Column<Object>> get primaryKey => {scheduleId, originalDate};
 }
 
+@DataClassName('StoredIndependentLesson')
+class IndependentLessonRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get courseId =>
+      integer().references(CourseRecords, #id, onDelete: KeyAction.cascade)();
+  TextColumn get date => text()();
+  IntColumn get startMinutes => integer()();
+  IntColumn get endMinutes => integer()();
+  TextColumn get location => text()();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -111,6 +123,7 @@ class ClassExceptionRecords extends Table {
     LearningTaskRecords,
     CountdownEventRecords,
     ClassExceptionRecords,
+    IndependentLessonRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -127,7 +140,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -144,6 +157,7 @@ class PlannerStore extends _$PlannerStore {
       if (from < 3) await m.createTable(learningTaskRecords);
       if (from < 4) await m.createTable(countdownEventRecords);
       if (from < 5) await m.createTable(classExceptionRecords);
+      if (from < 6) await m.createTable(independentLessonRecords);
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -163,10 +177,22 @@ class PlannerStore extends _$PlannerStore {
     final tasks = await select(learningTaskRecords).get();
     final events = await select(countdownEventRecords).get();
     final exceptions = await select(classExceptionRecords).get();
+    final independent = await select(independentLessonRecords).get();
     final schedules = await (select(
       scheduleRecords,
     )..orderBy([(s) => OrderingTerm.asc(s.id)])).get();
     return PlannerState(
+      independentLessons: [
+        for (final l in independent)
+          IndependentLesson(
+            id: l.id,
+            courseId: l.courseId,
+            date: DateTime.parse(l.date),
+            startMinutes: l.startMinutes,
+            endMinutes: l.endMinutes,
+            location: l.location,
+          ),
+      ],
       classExceptions: [
         for (final e in exceptions)
           ClassExceptionDraft(
@@ -330,6 +356,92 @@ class PlannerStore extends _$PlannerStore {
       (update(settingsRecords)..where((s) => s.id.equals(1))).write(
         SettingsRecordsCompanion(campusTimeZone: Value(zone)),
       );
+
+  Future<void> applyCourseChange(
+    CourseChangeImpact impact,
+    Map<(int, DateTime), OrphanChoice> choices,
+  ) async {
+    final id = impact.course.id;
+    await updateCourseDetails(
+      id,
+      name: impact.draft.name,
+      teacher: impact.draft.teacher,
+      colorIndex: impact.draft.colorIndex,
+    );
+    for (final exception in impact.orphaned) {
+      if (choices[exception.key] == OrphanChoice.keepIndependent) {
+        await into(independentLessonRecords).insert(
+          IndependentLessonRecordsCompanion.insert(
+            courseId: id,
+            date: exception.targetDate.toIso8601String(),
+            startMinutes: exception.startMinutes,
+            endMinutes: exception.endMinutes,
+            location: exception.location,
+          ),
+        );
+      }
+      await (delete(classExceptionRecords)..where(
+            (e) =>
+                e.scheduleId.equals(exception.scheduleId) &
+                e.originalDate.equals(exception.originalDate.toIso8601String()),
+          ))
+          .go();
+    }
+    final retainedIds = impact.draft.schedules
+        .whereType<ClassSchedule>()
+        .map((s) => s.id)
+        .toSet();
+    await (delete(
+      scheduleRecords,
+    )..where((s) => s.courseId.equals(id) & s.id.isNotIn(retainedIds))).go();
+    for (final schedule in impact.draft.schedules) {
+      final values = ScheduleRecordsCompanion(
+        courseId: Value(id),
+        weekday: Value(schedule.weekday),
+        startPeriod: Value(schedule.startPeriod),
+        endPeriod: Value(schedule.endPeriod),
+        location: Value(schedule.location.trim()),
+        weeks: Value(jsonEncode(schedule.weeks.toList()..sort())),
+      );
+      if (schedule is ClassSchedule) {
+        await (update(
+          scheduleRecords,
+        )..where((s) => s.id.equals(schedule.id))).write(values);
+      } else {
+        await into(scheduleRecords).insert(values);
+      }
+    }
+  }
+
+  Future<void> deleteCourse(int id) async {
+    await (delete(scheduleRecords)..where((s) => s.courseId.equals(id))).go();
+    final count = await (delete(
+      courseRecords,
+    )..where((c) => c.id.equals(id))).go();
+    if (count == 0) throw const InputProblem('课程不存在，请返回后重试。');
+  }
+
+  Future<void> saveIndependentLesson(IndependentLesson lesson) async {
+    final count =
+        await (update(
+          independentLessonRecords,
+        )..where((l) => l.id.equals(lesson.id))).write(
+          IndependentLessonRecordsCompanion(
+            date: Value(lesson.date.toIso8601String()),
+            startMinutes: Value(lesson.startMinutes),
+            endMinutes: Value(lesson.endMinutes),
+            location: Value(lesson.location.trim()),
+          ),
+        );
+    if (count == 0) throw const InputProblem('独立补课不存在，请返回后重试。');
+  }
+
+  Future<void> deleteIndependentLesson(int id) async {
+    final count = await (delete(
+      independentLessonRecords,
+    )..where((l) => l.id.equals(id))).go();
+    if (count == 0) throw const InputProblem('独立补课不存在，请返回后重试。');
+  }
 
   Future<void> saveClassException(ClassExceptionDraft draft) =>
       into(classExceptionRecords).insertOnConflictUpdate(

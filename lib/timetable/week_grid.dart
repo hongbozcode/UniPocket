@@ -118,6 +118,7 @@ class _WeekGridState extends State<WeekGrid> {
       final label =
           '${occurrence.course.name}，${weekdayNames[occurrence.date.weekday - 1]}，'
           '${occurrence.isRescheduled ? '已调课，原课次 ${dateText(occurrence.originalDate)}，' : ''}'
+          '${occurrence.isIndependent ? '独立补课，' : ''}'
           '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)}，${occurrence.location}';
       return Semantics(
         label: label,
@@ -136,7 +137,11 @@ class _WeekGridState extends State<WeekGrid> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${occurrence.isRescheduled ? '调 · ' : ''}${occurrence.course.name}',
+                      '${occurrence.isIndependent
+                          ? '补 · '
+                          : occurrence.isRescheduled
+                          ? '调 · '
+                          : ''}${occurrence.course.name}',
                       maxLines: lines,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -461,7 +466,7 @@ class _WeekGridState extends State<WeekGrid> {
                       subtitle: Text(
                         '${dateText(occurrence.date)} · ${weekdayNames[occurrence.date.weekday - 1]}\n'
                         '${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)} · ${occurrence.location.isEmpty ? '地点未填写' : occurrence.location}\n'
-                        '已调课 · 原课次 ${dateText(occurrence.originalDate)}',
+                        '${occurrence.isIndependent ? '独立补课' : '已调课 · 原课次 ${dateText(occurrence.originalDate)}'}',
                       ),
                       onTap: () => _open(occurrence),
                     ),

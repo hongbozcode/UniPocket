@@ -84,18 +84,38 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
       _error = null;
     });
     final occurrence = widget.occurrence;
-    final draft = ClassExceptionDraft(
-      scheduleId: (occurrence.schedule as ClassSchedule).id,
-      originalDate: occurrence.originalDate,
-      targetDate: _date,
-      startMinutes: _start,
-      endMinutes: _end,
-      location: _location.text,
-      isCancelled: widget.cancel,
-    );
+    Future<void> commit({bool allowConflicts = false}) {
+      if (occurrence.independentLessonId case final id?) {
+        if (widget.cancel) return widget.planner.deleteIndependentLesson(id);
+        return widget.planner.saveIndependentLesson(
+          IndependentLesson(
+            id: id,
+            courseId: occurrence.course.id,
+            date: _date,
+            startMinutes: _start,
+            endMinutes: _end,
+            location: _location.text,
+          ),
+          allowConflicts: allowConflicts,
+        );
+      }
+      return widget.planner.saveClassException(
+        ClassExceptionDraft(
+          scheduleId: (occurrence.schedule as ClassSchedule).id,
+          originalDate: occurrence.originalDate,
+          targetDate: _date,
+          startMinutes: _start,
+          endMinutes: _end,
+          location: _location.text,
+          isCancelled: widget.cancel,
+        ),
+        allowConflicts: allowConflicts,
+      );
+    }
+
     try {
       try {
-        await widget.planner.saveClassException(draft);
+        await commit();
       } on CourseConflict catch (conflict) {
         if (!mounted) return;
         final confirmed = await showDialog<bool>(
@@ -116,7 +136,7 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
           ),
         );
         if (confirmed != true) return;
-        await widget.planner.saveClassException(draft, allowConflicts: true);
+        await commit(allowConflicts: true);
       }
       if (mounted) Navigator.pop(context, true);
     } on InputProblem catch (e) {
@@ -137,7 +157,13 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
     return PopScope(
       canPop: !_busy,
       child: Scaffold(
-        appBar: AppBar(title: Text(widget.cancel ? '单次停课' : '单次调课')),
+        appBar: AppBar(
+          title: Text(
+            occurrence.isIndependent
+                ? (widget.cancel ? '取消独立补课' : '编辑独立补课')
+                : (widget.cancel ? '单次停课' : '单次调课'),
+          ),
+        ),
         body: SafeArea(
           top: false,
           child: AbsorbPointer(
@@ -170,7 +196,11 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Text('原课次 · ${dateText(occurrence.originalDate)}'),
+                        Text(
+                          occurrence.isIndependent
+                              ? '独立补课 · 不关联重复安排'
+                              : '原课次 · ${dateText(occurrence.originalDate)}',
+                        ),
                         const SizedBox(height: 6),
                         Text(
                           '当前安排 · ${dateText(occurrence.date)}\n${PeriodTime.format(occurrence.startMinutes)}–${PeriodTime.format(occurrence.endMinutes)} · ${occurrence.location.isEmpty ? '地点未填写' : occurrence.location}',
@@ -180,9 +210,13 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
                   ),
                   const SizedBox(height: 20),
                   if (widget.cancel)
-                    const SurfaceCard(
+                    SurfaceCard(
                       color: lavenderSoft,
-                      child: Text('仅取消这个原课次及其已调课安排。整门课程、其他课次与目标周原有课程均保留。'),
+                      child: Text(
+                        occurrence.isIndependent
+                            ? '仅删除这一次独立补课。整门课程、重复安排与其他课次均保留。'
+                            : '仅取消这个原课次及其已调课安排。整门课程、其他课次与目标周原有课程均保留。',
+                      ),
                     )
                   else ...[
                     SurfaceCard(
@@ -230,8 +264,10 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      '只调整这一次上课，可跨周。其他课次保持原安排；新安排有时间冲突时会先提示。',
+                    Text(
+                      occurrence.isIndependent
+                          ? '只修改这一次独立补课，可跨周。重复安排不受影响；时间冲突会先提示。'
+                          : '只调整这一次上课，可跨周。其他课次保持原安排；新安排有时间冲突时会先提示。',
                       style: TextStyle(fontSize: 13, color: Color(0xff52617a)),
                     ),
                   ],
@@ -243,8 +279,8 @@ class _ClassExceptionEditorState extends State<ClassExceptionEditor> {
                       _busy
                           ? '正在保存…'
                           : widget.cancel
-                          ? '确认停课'
-                          : '保存调课',
+                          ? (occurrence.isIndependent ? '确认取消补课' : '确认停课')
+                          : (occurrence.isIndependent ? '保存补课' : '保存调课'),
                     ),
                   ),
                   TextButton(
