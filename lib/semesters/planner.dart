@@ -3,6 +3,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../storage/planner_store.dart';
 import '../timetable/model.dart';
 import '../tasks/model.dart';
+import '../events/model.dart';
 import 'model.dart';
 
 /// The application boundary for local learning data. The same operations
@@ -12,6 +13,16 @@ class SemesterPlanner {
   final PlannerStore _store;
 
   Future<PlannerState> load() => _store.readState();
+
+  Future<int> saveEvent(CountdownEventDraft draft, {int? id}) async {
+    draft.validate();
+    return _store.saveEvent(draft, id: id);
+  }
+
+  Future<void> setEventPinned(int id, bool pinned) =>
+      _store.setEventPinned(id, pinned);
+
+  Future<void> deleteEvent(int id) => _store.deleteEvent(id);
 
   Future<void> setTaskCompleted(int id, bool completed) =>
       _store.setTaskCompleted(id, completed);

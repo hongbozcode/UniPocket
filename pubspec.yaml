@@ -28,6 +28,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - docs/design/resources/icons/pin.svg
+    - docs/design/resources/icons/more.svg
+    - docs/design/resources/illustrations/flag.svg
+    - docs/design/resources/materials/paper-grain.png
     - docs/design/resources/icons/task.svg
     - docs/design/resources/icons/back.svg
     - docs/design/resources/icons/check.svg

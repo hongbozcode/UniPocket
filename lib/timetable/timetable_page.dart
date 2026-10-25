@@ -223,6 +223,7 @@ class TimetablePage extends StatefulWidget {
     required this.onEdit,
     required this.onManage,
     this.onTasks,
+    this.onEvents,
     super.key,
   });
   final PlannerState state;
@@ -231,6 +232,7 @@ class TimetablePage extends StatefulWidget {
   final ValueChanged<Course> onEdit;
   final VoidCallback onManage;
   final VoidCallback? onTasks;
+  final VoidCallback? onEvents;
   @override
   State<TimetablePage> createState() => _TimetablePageState();
 }
@@ -374,6 +376,14 @@ class _TimetablePageState extends State<TimetablePage> {
               icon: 'task',
               label: '学习任务',
               onPressed: widget.onTasks,
+            ),
+            const SizedBox(width: 8),
+          ],
+          if (widget.onEvents != null) ...[
+            RoundDesignButton(
+              icon: 'calendar',
+              label: '倒计时',
+              onPressed: widget.onEvents,
             ),
             const SizedBox(width: 8),
           ],

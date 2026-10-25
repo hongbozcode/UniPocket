@@ -6,6 +6,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import '../semesters/model.dart';
 import '../timetable/model.dart';
 import '../tasks/model.dart';
+import '../events/model.dart';
 
 part 'planner_store.g.dart';
 
@@ -76,6 +77,15 @@ class LearningTaskRecords extends Table {
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
 }
 
+@DataClassName('StoredCountdownEvent')
+class CountdownEventRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text()();
+  TextColumn get targetDate => text()();
+  TextColumn get kind => text()();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -84,6 +94,7 @@ class LearningTaskRecords extends Table {
     CourseRecords,
     ScheduleRecords,
     LearningTaskRecords,
+    CountdownEventRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -100,7 +111,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,6 +126,7 @@ class PlannerStore extends _$PlannerStore {
         await m.createTable(scheduleRecords);
       }
       if (from < 3) await m.createTable(learningTaskRecords);
+      if (from < 4) await m.createTable(countdownEventRecords);
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -132,10 +144,21 @@ class PlannerStore extends _$PlannerStore {
             .get();
     final courses = await select(courseRecords).get();
     final tasks = await select(learningTaskRecords).get();
+    final events = await select(countdownEventRecords).get();
     final schedules = await (select(
       scheduleRecords,
     )..orderBy([(s) => OrderingTerm.asc(s.id)])).get();
     return PlannerState(
+      events: [
+        for (final event in events)
+          CountdownEvent(
+            id: event.id,
+            title: event.title,
+            targetDate: DateTime.parse(event.targetDate),
+            kind: EventKind.values.byName(event.kind),
+            isPinned: event.isPinned,
+          ),
+      ],
       tasks: [
         for (final task in tasks)
           LearningTask(
@@ -278,6 +301,21 @@ class PlannerStore extends _$PlannerStore {
         SettingsRecordsCompanion(campusTimeZone: Value(zone)),
       );
 
+  Future<int> saveEvent(CountdownEventDraft draft, {int? id}) async {
+    final values = CountdownEventRecordsCompanion(
+      title: Value(draft.title.trim()),
+      targetDate: Value(draft.targetDate.toIso8601String()),
+      kind: Value(draft.kind.name),
+      isPinned: Value(draft.isPinned),
+    );
+    if (id == null) return into(countdownEventRecords).insert(values);
+    final count = await (update(
+      countdownEventRecords,
+    )..where((e) => e.id.equals(id))).write(values);
+    if (count == 0) throw const InputProblem('事件不存在，请返回后重试。');
+    return id;
+  }
+
   Future<int> saveTask(LearningTaskDraft draft, {int? id}) async {
     final values = LearningTaskRecordsCompanion(
       title: Value(draft.title.trim()),
@@ -292,6 +330,20 @@ class PlannerStore extends _$PlannerStore {
     )..where((t) => t.id.equals(id))).write(values);
     if (count == 0) throw const InputProblem('任务不存在，请返回后重试。');
     return id;
+  }
+
+  Future<void> setEventPinned(int id, bool pinned) async {
+    final count =
+        await (update(countdownEventRecords)..where((e) => e.id.equals(id)))
+            .write(CountdownEventRecordsCompanion(isPinned: Value(pinned)));
+    if (count == 0) throw const InputProblem('事件不存在，请返回后重试。');
+  }
+
+  Future<void> deleteEvent(int id) async {
+    final count = await (delete(
+      countdownEventRecords,
+    )..where((e) => e.id.equals(id))).go();
+    if (count == 0) throw const InputProblem('事件不存在，请返回后重试。');
   }
 
   Future<void> setTaskCompleted(int id, bool completed) async {

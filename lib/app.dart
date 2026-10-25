@@ -16,6 +16,10 @@ import 'tasks/model.dart';
 import 'tasks/task_editor.dart';
 import 'tasks/task_widgets.dart';
 import 'tasks/tasks_page.dart';
+import 'events/model.dart';
+import 'events/event_editor.dart';
+import 'events/event_widgets.dart';
+import 'events/events_page.dart';
 
 class UniPocketApp extends StatelessWidget {
   const UniPocketApp({required this.planner, this.clock, super.key});
@@ -142,6 +146,76 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
       ),
     );
     await _load();
+  }
+
+  Future<void> _event([CountdownEvent? event]) async {
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EventEditor(
+          planner: widget.planner,
+          state: _state!,
+          clock: widget.clock,
+          event: event,
+        ),
+      ),
+    );
+    if (saved == true) await _load();
+  }
+
+  Future<void> _events() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            EventsPage(planner: widget.planner, clock: widget.clock),
+      ),
+    );
+    await _load();
+  }
+
+  Widget _eventSummary(DateTime now) {
+    final events = selectEvents(_state!.events, now);
+    return SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const DesignIcon('calendar', size: 20),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  '近期倒计时',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+              ),
+              RoundDesignButton(
+                icon: 'plus',
+                label: '创建倒计时',
+                onPressed: () => _event(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (events.isEmpty)
+            const Text(
+              '还没有进行中的事件，记下下一个重要的日子吧。',
+              style: TextStyle(fontSize: 13, color: Color(0xff73819a)),
+            ),
+          for (final event in events.take(3))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: EventCard(
+                event: event,
+                campusNow: now,
+                onEdit: () => _event(event),
+              ),
+            ),
+          TextButton(onPressed: _events, child: const Text('查看全部倒计时')),
+        ],
+      ),
+    );
   }
 
   Future<void> _toggleTask(LearningTask task, [bool? completed]) async {
@@ -407,6 +481,8 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         ],
         const SizedBox(height: 20),
         _taskSummary(now),
+        const SizedBox(height: 20),
+        _eventSummary(now),
       ],
     );
   }
@@ -419,6 +495,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           onEdit: _course,
           onManage: _manage,
           onTasks: _tasks,
+          onEvents: _events,
         )
       : PageContent(
           children: [
@@ -433,6 +510,12 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
               onPressed: _tasks,
               icon: const DesignIcon('task'),
               label: const Text('学习任务'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _events,
+              icon: const DesignIcon('calendar'),
+              label: const Text('倒计时'),
             ),
           ],
         );
