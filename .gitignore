@@ -67,6 +67,7 @@ __pycache__/
 /integration_test_results/
 /android/.kotlin/
 /android/.externalNativeBuild/
+/class_schedule_template/
 *.apk
 *.aab
 
