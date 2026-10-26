@@ -124,6 +124,24 @@ void main() {
       await waitFor(tester, find.text('UniPocket'));
       if (restore) await binding.convertFlutterSurfaceToImage();
       await capture(restore ? 'home-restored' : 'home');
+      for (final (name, screenshot) in [
+        ('测试导入数学', 'imported-course-detail'),
+        ('测试原有课程', 'existing-course-detail'),
+      ]) {
+        await tapVisible(tester, find.text(name));
+        await waitFor(tester, find.text('课程详情'));
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const ValueKey('course-name')))
+              .controller!
+              .text,
+          name,
+        );
+        await capture(screenshot);
+        await tapVisible(tester, find.byType(BackButton));
+        await waitFor(tester, find.text(name));
+        expect(find.byKey(const ValueKey('course-name')), findsNothing);
+      }
       await tapVisible(tester, find.text('课表'));
       await waitFor(tester, find.text('测试导入目标'));
       await capture(restore ? 'timetable-restored' : 'timetable');
