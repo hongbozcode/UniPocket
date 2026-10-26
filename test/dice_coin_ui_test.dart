@@ -81,7 +81,7 @@ void main() {
         );
         await waitFor(tester, find.text('UniPocket'));
         await tapVisible(tester, find.text('工具'));
-        expect(find.text('转盘'), findsNothing);
+        expect(find.text('转盘'), findsOneWidget);
         await tapVisible(tester, find.text('抛硬币'));
         expect(find.text('等待投掷'), findsOneWidget);
         for (final result in [('正面', '星星正面'), ('反面', '月牙反面')]) {

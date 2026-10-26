@@ -9,6 +9,7 @@ import '../reminders/notifications.dart';
 import '../reminders/course_reminders.dart';
 import '../reminders/event_reminders.dart';
 import 'model.dart';
+import '../random_tools/wheel_list.dart';
 
 /// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
@@ -24,6 +25,22 @@ class SemesterPlanner {
   NotificationAccess notificationAccess = NotificationAccess.unavailable;
   bool reminderSyncFailed = false;
   Future<void>? _notificationQueue;
+
+  Future<List<WheelList>> loadWheelLists() => _store.readWheelLists();
+
+  Future<WheelList> saveWheelList({
+    int? id,
+    required String name,
+    required List<String> items,
+  }) {
+    final title = name.trim();
+    if (title.isEmpty) throw const FormatException('请为转盘列表命名');
+    final entries = items.map((s) => s.trim()).toList();
+    if (entries.any((s) => s.isEmpty)) {
+      throw const FormatException('选项文字不能为空；空列表可以保存，但不能转动');
+    }
+    return _store.writeWheelList(id: id, name: title, items: entries);
+  }
 
   /// Serializes platform reconciliation and always reads committed SQLite data.
   /// Platform failure never turns a successful data save into a reported failure.

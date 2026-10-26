@@ -8,6 +8,7 @@ import '../timetable/model.dart';
 import '../tasks/model.dart';
 import '../events/model.dart';
 import '../timetable/course_change.dart';
+import '../random_tools/wheel_list.dart';
 
 part 'planner_store.g.dart';
 
@@ -119,6 +120,13 @@ class IndependentLessonRecords extends Table {
   TextColumn get location => text()();
 }
 
+@DataClassName('StoredWheelList')
+class WheelListRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get items => text()();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -130,6 +138,7 @@ class IndependentLessonRecords extends Table {
     CountdownEventRecords,
     ClassExceptionRecords,
     IndependentLessonRecords,
+    WheelListRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -146,7 +155,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -156,6 +165,7 @@ class PlannerStore extends _$PlannerStore {
           .insert(const SettingsRecordsCompanion(id: Value(1)));
     },
     onUpgrade: (m, from, to) async {
+      if (from < 10) await m.createTable(wheelListRecords);
       if (from < 2) {
         await m.createTable(courseRecords);
         await m.createTable(scheduleRecords);
@@ -182,6 +192,39 @@ class PlannerStore extends _$PlannerStore {
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
+
+  Future<List<WheelList>> readWheelLists() async =>
+      (await (select(
+            wheelListRecords,
+          )..orderBy([(t) => OrderingTerm.asc(t.id)])).get())
+          .map(
+            (row) => WheelList(
+              id: row.id,
+              name: row.name,
+              items: (jsonDecode(row.items) as List).cast<String>(),
+            ),
+          )
+          .toList();
+
+  Future<WheelList> writeWheelList({
+    int? id,
+    required String name,
+    required List<String> items,
+  }) => transaction(() async {
+    final entry = WheelListRecordsCompanion(
+      name: Value(name),
+      items: Value(jsonEncode(items)),
+    );
+    if (id == null) {
+      id = await into(wheelListRecords).insert(entry);
+    } else {
+      final changed = await (update(
+        wheelListRecords,
+      )..where((t) => t.id.equals(id!))).write(entry);
+      if (changed != 1) throw StateError('转盘列表不存在，请重新打开');
+    }
+    return WheelList(id: id!, name: name, items: items);
+  });
 
   Future<PlannerState> readState() => transaction(() async {
     final settings = await select(settingsRecords).getSingle();

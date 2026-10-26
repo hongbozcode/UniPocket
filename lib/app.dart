@@ -571,7 +571,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           ],
         );
 
-  Widget _tools() => ToolsPage(random: widget.random);
+  Widget _tools() => ToolsPage(planner: widget.planner, random: widget.random);
 
   Widget _settings() => PageContent(
     children: [

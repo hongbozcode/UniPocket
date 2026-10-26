@@ -3684,6 +3684,253 @@ class IndependentLessonRecordsCompanion
   }
 }
 
+class $WheelListRecordsTable extends WheelListRecords
+    with TableInfo<$WheelListRecordsTable, StoredWheelList> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WheelListRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemsMeta = const VerificationMeta('items');
+  @override
+  late final GeneratedColumn<String> items = GeneratedColumn<String>(
+    'items',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, items];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'wheel_list_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredWheelList> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('items')) {
+      context.handle(
+        _itemsMeta,
+        items.isAcceptableOrUnknown(data['items']!, _itemsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredWheelList map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredWheelList(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      items: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}items'],
+      )!,
+    );
+  }
+
+  @override
+  $WheelListRecordsTable createAlias(String alias) {
+    return $WheelListRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredWheelList extends DataClass implements Insertable<StoredWheelList> {
+  final int id;
+  final String name;
+  final String items;
+  const StoredWheelList({
+    required this.id,
+    required this.name,
+    required this.items,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['items'] = Variable<String>(items);
+    return map;
+  }
+
+  WheelListRecordsCompanion toCompanion(bool nullToAbsent) {
+    return WheelListRecordsCompanion(
+      id: Value(id),
+      name: Value(name),
+      items: Value(items),
+    );
+  }
+
+  factory StoredWheelList.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredWheelList(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      items: serializer.fromJson<String>(json['items']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'items': serializer.toJson<String>(items),
+    };
+  }
+
+  StoredWheelList copyWith({int? id, String? name, String? items}) =>
+      StoredWheelList(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        items: items ?? this.items,
+      );
+  StoredWheelList copyWithCompanion(WheelListRecordsCompanion data) {
+    return StoredWheelList(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      items: data.items.present ? data.items.value : this.items,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredWheelList(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('items: $items')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, items);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredWheelList &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.items == this.items);
+}
+
+class WheelListRecordsCompanion extends UpdateCompanion<StoredWheelList> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> items;
+  const WheelListRecordsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.items = const Value.absent(),
+  });
+  WheelListRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String items,
+  }) : name = Value(name),
+       items = Value(items);
+  static Insertable<StoredWheelList> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? items,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (items != null) 'items': items,
+    });
+  }
+
+  WheelListRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? items,
+  }) {
+    return WheelListRecordsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      items: items ?? this.items,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (items.present) {
+      map['items'] = Variable<String>(items.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WheelListRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('items: $items')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -3706,6 +3953,9 @@ abstract class _$PlannerStore extends GeneratedDatabase {
       $ClassExceptionRecordsTable(this);
   late final $IndependentLessonRecordsTable independentLessonRecords =
       $IndependentLessonRecordsTable(this);
+  late final $WheelListRecordsTable wheelListRecords = $WheelListRecordsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3720,6 +3970,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     countdownEventRecords,
     classExceptionRecords,
     independentLessonRecords,
+    wheelListRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7328,6 +7579,172 @@ typedef $$IndependentLessonRecordsTableProcessedTableManager =
       StoredIndependentLesson,
       PrefetchHooks Function({bool courseId})
     >;
+typedef $$WheelListRecordsTableCreateCompanionBuilder =
+    WheelListRecordsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String items,
+    });
+typedef $$WheelListRecordsTableUpdateCompanionBuilder =
+    WheelListRecordsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> items,
+    });
+
+class $$WheelListRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $WheelListRecordsTable> {
+  $$WheelListRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get items => $composableBuilder(
+    column: $table.items,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WheelListRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $WheelListRecordsTable> {
+  $$WheelListRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get items => $composableBuilder(
+    column: $table.items,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WheelListRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $WheelListRecordsTable> {
+  $$WheelListRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get items =>
+      $composableBuilder(column: $table.items, builder: (column) => column);
+}
+
+class $$WheelListRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $WheelListRecordsTable,
+          StoredWheelList,
+          $$WheelListRecordsTableFilterComposer,
+          $$WheelListRecordsTableOrderingComposer,
+          $$WheelListRecordsTableAnnotationComposer,
+          $$WheelListRecordsTableCreateCompanionBuilder,
+          $$WheelListRecordsTableUpdateCompanionBuilder,
+          (
+            StoredWheelList,
+            BaseReferences<
+              _$PlannerStore,
+              $WheelListRecordsTable,
+              StoredWheelList
+            >,
+          ),
+          StoredWheelList,
+          PrefetchHooks Function()
+        > {
+  $$WheelListRecordsTableTableManager(
+    _$PlannerStore db,
+    $WheelListRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WheelListRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WheelListRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WheelListRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> items = const Value.absent(),
+          }) => WheelListRecordsCompanion(id: id, name: name, items: items),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String items,
+              }) => WheelListRecordsCompanion.insert(
+                id: id,
+                name: name,
+                items: items,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$WheelListRecordsTable, StoredWheelList>(table),
+                  BaseReferences<
+                    _$PlannerStore,
+                    $WheelListRecordsTable,
+                    StoredWheelList
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WheelListRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $WheelListRecordsTable,
+      StoredWheelList,
+      $$WheelListRecordsTableFilterComposer,
+      $$WheelListRecordsTableOrderingComposer,
+      $$WheelListRecordsTableAnnotationComposer,
+      $$WheelListRecordsTableCreateCompanionBuilder,
+      $$WheelListRecordsTableUpdateCompanionBuilder,
+      (
+        StoredWheelList,
+        BaseReferences<_$PlannerStore, $WheelListRecordsTable, StoredWheelList>,
+      ),
+      StoredWheelList,
+      PrefetchHooks Function()
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -7353,4 +7770,6 @@ class $PlannerStoreManager {
         _db,
         _db.independentLessonRecords,
       );
+  $$WheelListRecordsTableTableManager get wheelListRecords =>
+      $$WheelListRecordsTableTableManager(_db, _db.wheelListRecords);
 }
