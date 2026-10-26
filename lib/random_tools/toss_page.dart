@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../ui/design.dart';
 import 'toss_visuals.dart';
+import 'result_paper.dart';
 
 enum TossTool {
   die('掷骰子', Color(0xffe7f5ee)),
@@ -201,7 +202,7 @@ class _TossPageState extends State<TossPage>
                 Semantics(
                   liveRegion: true,
                   child: ClipPath(
-                    clipper: _ResultPaperClipper(),
+                    clipper: ResultPaperClipper(),
                     child: Container(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 22),
                       decoration: BoxDecoration(
@@ -314,26 +315,4 @@ class _TossPageState extends State<TossPage>
       ),
     );
   }
-}
-
-class _ResultPaperClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path()
-      ..moveTo(18, 0)
-      ..lineTo(size.width - 18, 0)
-      ..quadraticBezierTo(size.width, 0, size.width, 18)
-      ..lineTo(size.width, size.height - 4);
-    for (var x = size.width; x > 0; x -= 12) {
-      path.lineTo(max(0, x - 6), size.height - 1);
-      path.lineTo(max(0, x - 12), size.height - 5);
-    }
-    return path
-      ..lineTo(0, 18)
-      ..quadraticBezierTo(0, 0, 18, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(_ResultPaperClipper oldClipper) => false;
 }

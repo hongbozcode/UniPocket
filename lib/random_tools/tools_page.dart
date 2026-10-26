@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../semesters/planner.dart';
 import '../ui/design.dart';
 import 'toss_page.dart';
-import '../semesters/planner.dart';
 import 'wheel_page.dart';
 
 class ToolsPage extends StatelessWidget {
@@ -31,103 +31,97 @@ class ToolsPage extends StatelessWidget {
       const SizedBox(height: 24),
       const PageHeading('随机工具箱', '给纠结一点灵感', art: 'badge'),
       LayoutBuilder(
-        builder: (context, constraints) => Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            SizedBox(
-              width: (constraints.maxWidth - 12) / 2,
-              child: Material(
-                color: const Color(0xffeee8fc),
-                borderRadius: BorderRadius.circular(24),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
+        builder: (context, constraints) {
+          final width = (constraints.maxWidth - 12) / 2;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _ToolCard(
+                width: width,
+                title: '转盘',
+                subtitle: '自定义你的选择',
+                art: 'wheel',
+                surface: const Color(0xffeee8fc),
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => WheelPage(planner: planner, random: random),
+                  ),
+                ),
+              ),
+              for (final tool in TossTool.values)
+                _ToolCard(
+                  width: width,
+                  title: tool.title,
+                  subtitle: tool == TossTool.die ? '一颗六面骰' : '正面还是反面',
+                  art: tool.name,
+                  surface: tool.surface,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          WheelPage(planner: planner, random: random),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: SvgPicture.asset(
-                            'docs/design/resources/illustrations/wheel.svg',
-                            width: 100,
-                            height: 100,
-                            excludeFromSemantics: true,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          '转盘',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          '自定义你的选择',
-                          style: TextStyle(color: Color(0xff73819a)),
-                        ),
-                      ],
+                      builder: (_) => TossPage(tool: tool, random: random),
                     ),
                   ),
                 ),
-              ),
-            ),
-            for (final tool in TossTool.values)
-              SizedBox(
-                width: (constraints.maxWidth - 12) / 2,
-                child: Material(
-                  color: tool.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () => Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        builder: (_) => TossPage(tool: tool, random: random),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: SvgPicture.asset(
-                              'docs/design/resources/illustrations/${tool.name}.svg',
-                              width: 100,
-                              height: 100,
-                              excludeFromSemantics: true,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            tool.title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            tool == TossTool.die ? '一颗六面骰' : '正面还是反面',
-                            style: const TextStyle(color: Color(0xff73819a)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     ],
+  );
+}
+
+class _ToolCard extends StatelessWidget {
+  const _ToolCard({
+    required this.width,
+    required this.title,
+    required this.subtitle,
+    required this.art,
+    required this.surface,
+    required this.onTap,
+  });
+  final double width;
+  final String title;
+  final String subtitle;
+  final String art;
+  final Color surface;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: width,
+    child: Material(
+      color: surface,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: SvgPicture.asset(
+                  'docs/design/resources/illustrations/$art.svg',
+                  width: 100,
+                  height: 100,
+                  excludeFromSemantics: true,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(subtitle, style: const TextStyle(color: Color(0xff73819a))),
+            ],
+          ),
+        ),
+      ),
+    ),
   );
 }

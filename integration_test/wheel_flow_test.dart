@@ -97,6 +97,7 @@ void main() {
         expect(find.text('面馆'), findsOneWidget);
         await capture('11-android-process-restored');
         await tapVisible(tester, find.text('午餐怎么选 · 6项'));
+        await binding.takeScreenshot('11-android-picker');
         await tapVisible(tester, find.text('周末计划'));
         await capture('11-android-list-restored');
       }

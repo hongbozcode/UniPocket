@@ -7,6 +7,7 @@ import '../ui/design.dart';
 import 'wheel_editor.dart';
 import 'wheel_list.dart';
 import 'wheel_visual.dart';
+import 'result_paper.dart';
 
 class WheelPage extends StatefulWidget {
   const WheelPage({required this.planner, this.random, super.key});
@@ -118,6 +119,9 @@ class _WheelPageState extends State<WheelPage>
                   title: Text(list.name),
                   subtitle: Text('${list.items.length}项'),
                   selected: list.id == _selected?.id,
+                  trailing: list.id == _selected?.id
+                      ? const DesignIcon('check')
+                      : null,
                   onTap: () => Navigator.pop(context, list.id),
                 ),
               TextButton.icon(
@@ -332,7 +336,7 @@ class _WheelPageState extends State<WheelPage>
                 Semantics(
                   liveRegion: true,
                   child: ClipPath(
-                    clipper: _PaperClipper(),
+                    clipper: ResultPaperClipper(),
                     child: Container(
                       decoration: const BoxDecoration(
                         color: Color(0xffeee8fc),
@@ -459,27 +463,4 @@ class _WheelPageState extends State<WheelPage>
       ),
     ),
   );
-}
-
-class _PaperClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path()
-      ..moveTo(18, 0)
-      ..lineTo(size.width - 18, 0)
-      ..quadraticBezierTo(size.width, 0, size.width, 18)
-      ..lineTo(size.width, size.height - 4);
-    for (var x = size.width; x > 0; x -= 12) {
-      path
-        ..lineTo(max(0, x - 6), size.height - 1)
-        ..lineTo(max(0, x - 12), size.height - 5);
-    }
-    return path
-      ..lineTo(0, 18)
-      ..quadraticBezierTo(0, 0, 18, 0)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(_PaperClipper old) => false;
 }
