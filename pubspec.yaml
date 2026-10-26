@@ -28,6 +28,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - docs/design/resources/icons/search.svg
+    - docs/design/resources/icons/close.svg
     - docs/design/resources/illustrations/groups.svg
     - docs/design/resources/illustrations/lottery-bag.png
     - docs/design/resources/icons/ticket.svg

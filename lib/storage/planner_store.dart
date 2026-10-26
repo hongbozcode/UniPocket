@@ -12,6 +12,7 @@ import '../random_tools/wheel_list.dart';
 import '../random_tools/roll_call.dart';
 import '../random_tools/lottery.dart';
 import '../random_tools/groups.dart';
+import '../random_tools/tool_library.dart';
 
 part 'planner_store.g.dart';
 
@@ -159,6 +160,16 @@ class GroupListRecords extends Table {
   TextColumn get members => text()();
 }
 
+@DataClassName('StoredToolUsage')
+class ToolUsageRecords extends Table {
+  TextColumn get toolId => text()();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
+  IntColumn get lastOpened => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {toolId};
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -174,6 +185,7 @@ class GroupListRecords extends Table {
     RollCallListRecords,
     LotteryPoolRecords,
     GroupListRecords,
+    ToolUsageRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -190,7 +202,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -200,6 +212,7 @@ class PlannerStore extends _$PlannerStore {
           .insert(const SettingsRecordsCompanion(id: Value(1)));
     },
     onUpgrade: (m, from, to) async {
+      if (from < 14) await m.createTable(toolUsageRecords);
       if (from < 13) await m.createTable(groupListRecords);
       if (from < 12) await m.createTable(lotteryPoolRecords);
       if (from < 11) await m.createTable(rollCallListRecords);
@@ -247,6 +260,42 @@ class PlannerStore extends _$PlannerStore {
   Future<List<GroupList>> readGroupLists() async => (await (select(
     groupListRecords,
   )..orderBy([(t) => OrderingTerm.asc(t.id)])).get()).map(_groupList).toList();
+
+  Future<ToolLibrary> readToolLibrary() async {
+    final rows = await select(toolUsageRecords).get();
+    return ToolLibrary({
+      for (final tool in RandomTool.values)
+        for (final row in rows)
+          if (row.toolId == tool.name)
+            tool: ToolUsage(
+              isFavorite: row.isFavorite,
+              lastOpened: row.lastOpened,
+            ),
+    });
+  }
+
+  Future<void> writeToolFavorite(RandomTool tool, bool favorite) async {
+    await into(toolUsageRecords).insertOnConflictUpdate(
+      ToolUsageRecordsCompanion(
+        toolId: Value(tool.name),
+        isFavorite: Value(favorite),
+      ),
+    );
+  }
+
+  Future<void> recordToolUse(RandomTool tool) => transaction(() async {
+    final rows = await select(toolUsageRecords).get();
+    final latest = rows.fold<int>(
+      0,
+      (value, row) => row.lastOpened > value ? row.lastOpened : value,
+    );
+    await into(toolUsageRecords).insertOnConflictUpdate(
+      ToolUsageRecordsCompanion(
+        toolId: Value(tool.name),
+        lastOpened: Value(latest + 1),
+      ),
+    );
+  });
 
   Future<GroupList> readGroupList(int id) async => _groupList(
     await (select(groupListRecords)..where((t) => t.id.equals(id))).getSingle(),

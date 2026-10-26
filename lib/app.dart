@@ -23,6 +23,7 @@ import 'events/event_widgets.dart';
 import 'events/events_page.dart';
 import 'reminders/notification_card.dart';
 import 'random_tools/tools_page.dart';
+import 'random_tools/home_tools.dart';
 
 class UniPocketApp extends StatelessWidget {
   const UniPocketApp({
@@ -533,6 +534,12 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
         _taskSummary(now),
         const SizedBox(height: 20),
         _eventSummary(now),
+        const SizedBox(height: 20),
+        HomeTools(
+          planner: widget.planner,
+          random: widget.random,
+          onAll: () => setState(() => _page = 2),
+        ),
       ],
     );
   }

@@ -15,6 +15,7 @@ import '../random_tools/wheel_list.dart';
 import '../random_tools/roll_call.dart';
 import '../random_tools/lottery.dart';
 import '../random_tools/groups.dart';
+import '../random_tools/tool_library.dart';
 
 /// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
@@ -32,6 +33,13 @@ class SemesterPlanner {
   Future<void>? _notificationQueue;
 
   Future<List<WheelList>> loadWheelLists() => _store.readWheelLists();
+
+  Future<ToolLibrary> loadToolLibrary() => _store.readToolLibrary();
+
+  Future<void> setToolFavorite(RandomTool tool, bool favorite) =>
+      _store.writeToolFavorite(tool, favorite);
+
+  Future<void> recordToolUse(RandomTool tool) => _store.recordToolUse(tool);
 
   Future<List<GroupList>> loadGroupLists() => _store.readGroupLists();
 

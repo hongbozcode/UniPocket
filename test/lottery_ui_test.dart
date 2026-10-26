@@ -199,7 +199,19 @@ void main() {
           expect(tester.widget<FilledButton>(draw).onPressed, isNull);
           if (background) {
             tester.binding.handleAppLifecycleStateChanged(
+              AppLifecycleState.inactive,
+            );
+            tester.binding.handleAppLifecycleStateChanged(
+              AppLifecycleState.hidden,
+            );
+            tester.binding.handleAppLifecycleStateChanged(
               AppLifecycleState.paused,
+            );
+            tester.binding.handleAppLifecycleStateChanged(
+              AppLifecycleState.hidden,
+            );
+            tester.binding.handleAppLifecycleStateChanged(
+              AppLifecycleState.inactive,
             );
             tester.binding.handleAppLifecycleStateChanged(
               AppLifecycleState.resumed,

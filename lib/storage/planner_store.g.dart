@@ -5048,6 +5048,276 @@ class GroupListRecordsCompanion extends UpdateCompanion<StoredGroupList> {
   }
 }
 
+class $ToolUsageRecordsTable extends ToolUsageRecords
+    with TableInfo<$ToolUsageRecordsTable, StoredToolUsage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ToolUsageRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _toolIdMeta = const VerificationMeta('toolId');
+  @override
+  late final GeneratedColumn<String> toolId = GeneratedColumn<String>(
+    'tool_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastOpenedMeta = const VerificationMeta(
+    'lastOpened',
+  );
+  @override
+  late final GeneratedColumn<int> lastOpened = GeneratedColumn<int>(
+    'last_opened',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [toolId, isFavorite, lastOpened];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tool_usage_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredToolUsage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('tool_id')) {
+      context.handle(
+        _toolIdMeta,
+        toolId.isAcceptableOrUnknown(data['tool_id']!, _toolIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_toolIdMeta);
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
+    }
+    if (data.containsKey('last_opened')) {
+      context.handle(
+        _lastOpenedMeta,
+        lastOpened.isAcceptableOrUnknown(data['last_opened']!, _lastOpenedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {toolId};
+  @override
+  StoredToolUsage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredToolUsage(
+      toolId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tool_id'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      lastOpened: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_opened'],
+      )!,
+    );
+  }
+
+  @override
+  $ToolUsageRecordsTable createAlias(String alias) {
+    return $ToolUsageRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredToolUsage extends DataClass implements Insertable<StoredToolUsage> {
+  final String toolId;
+  final bool isFavorite;
+  final int lastOpened;
+  const StoredToolUsage({
+    required this.toolId,
+    required this.isFavorite,
+    required this.lastOpened,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['tool_id'] = Variable<String>(toolId);
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    map['last_opened'] = Variable<int>(lastOpened);
+    return map;
+  }
+
+  ToolUsageRecordsCompanion toCompanion(bool nullToAbsent) {
+    return ToolUsageRecordsCompanion(
+      toolId: Value(toolId),
+      isFavorite: Value(isFavorite),
+      lastOpened: Value(lastOpened),
+    );
+  }
+
+  factory StoredToolUsage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredToolUsage(
+      toolId: serializer.fromJson<String>(json['toolId']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      lastOpened: serializer.fromJson<int>(json['lastOpened']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'toolId': serializer.toJson<String>(toolId),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'lastOpened': serializer.toJson<int>(lastOpened),
+    };
+  }
+
+  StoredToolUsage copyWith({
+    String? toolId,
+    bool? isFavorite,
+    int? lastOpened,
+  }) => StoredToolUsage(
+    toolId: toolId ?? this.toolId,
+    isFavorite: isFavorite ?? this.isFavorite,
+    lastOpened: lastOpened ?? this.lastOpened,
+  );
+  StoredToolUsage copyWithCompanion(ToolUsageRecordsCompanion data) {
+    return StoredToolUsage(
+      toolId: data.toolId.present ? data.toolId.value : this.toolId,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      lastOpened: data.lastOpened.present
+          ? data.lastOpened.value
+          : this.lastOpened,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredToolUsage(')
+          ..write('toolId: $toolId, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('lastOpened: $lastOpened')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(toolId, isFavorite, lastOpened);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredToolUsage &&
+          other.toolId == this.toolId &&
+          other.isFavorite == this.isFavorite &&
+          other.lastOpened == this.lastOpened);
+}
+
+class ToolUsageRecordsCompanion extends UpdateCompanion<StoredToolUsage> {
+  final Value<String> toolId;
+  final Value<bool> isFavorite;
+  final Value<int> lastOpened;
+  final Value<int> rowid;
+  const ToolUsageRecordsCompanion({
+    this.toolId = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.lastOpened = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ToolUsageRecordsCompanion.insert({
+    required String toolId,
+    this.isFavorite = const Value.absent(),
+    this.lastOpened = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : toolId = Value(toolId);
+  static Insertable<StoredToolUsage> custom({
+    Expression<String>? toolId,
+    Expression<bool>? isFavorite,
+    Expression<int>? lastOpened,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (toolId != null) 'tool_id': toolId,
+      if (isFavorite != null) 'is_favorite': isFavorite,
+      if (lastOpened != null) 'last_opened': lastOpened,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ToolUsageRecordsCompanion copyWith({
+    Value<String>? toolId,
+    Value<bool>? isFavorite,
+    Value<int>? lastOpened,
+    Value<int>? rowid,
+  }) {
+    return ToolUsageRecordsCompanion(
+      toolId: toolId ?? this.toolId,
+      isFavorite: isFavorite ?? this.isFavorite,
+      lastOpened: lastOpened ?? this.lastOpened,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (toolId.present) {
+      map['tool_id'] = Variable<String>(toolId.value);
+    }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
+    if (lastOpened.present) {
+      map['last_opened'] = Variable<int>(lastOpened.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ToolUsageRecordsCompanion(')
+          ..write('toolId: $toolId, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('lastOpened: $lastOpened, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -5080,6 +5350,9 @@ abstract class _$PlannerStore extends GeneratedDatabase {
   late final $GroupListRecordsTable groupListRecords = $GroupListRecordsTable(
     this,
   );
+  late final $ToolUsageRecordsTable toolUsageRecords = $ToolUsageRecordsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5098,6 +5371,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     rollCallListRecords,
     lotteryPoolRecords,
     groupListRecords,
+    toolUsageRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9553,6 +9827,187 @@ typedef $$GroupListRecordsTableProcessedTableManager =
       StoredGroupList,
       PrefetchHooks Function()
     >;
+typedef $$ToolUsageRecordsTableCreateCompanionBuilder =
+    ToolUsageRecordsCompanion Function({
+      required String toolId,
+      Value<bool> isFavorite,
+      Value<int> lastOpened,
+      Value<int> rowid,
+    });
+typedef $$ToolUsageRecordsTableUpdateCompanionBuilder =
+    ToolUsageRecordsCompanion Function({
+      Value<String> toolId,
+      Value<bool> isFavorite,
+      Value<int> lastOpened,
+      Value<int> rowid,
+    });
+
+class $$ToolUsageRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $ToolUsageRecordsTable> {
+  $$ToolUsageRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get toolId => $composableBuilder(
+    column: $table.toolId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastOpened => $composableBuilder(
+    column: $table.lastOpened,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ToolUsageRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $ToolUsageRecordsTable> {
+  $$ToolUsageRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get toolId => $composableBuilder(
+    column: $table.toolId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastOpened => $composableBuilder(
+    column: $table.lastOpened,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ToolUsageRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $ToolUsageRecordsTable> {
+  $$ToolUsageRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get toolId =>
+      $composableBuilder(column: $table.toolId, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastOpened => $composableBuilder(
+    column: $table.lastOpened,
+    builder: (column) => column,
+  );
+}
+
+class $$ToolUsageRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $ToolUsageRecordsTable,
+          StoredToolUsage,
+          $$ToolUsageRecordsTableFilterComposer,
+          $$ToolUsageRecordsTableOrderingComposer,
+          $$ToolUsageRecordsTableAnnotationComposer,
+          $$ToolUsageRecordsTableCreateCompanionBuilder,
+          $$ToolUsageRecordsTableUpdateCompanionBuilder,
+          (
+            StoredToolUsage,
+            BaseReferences<
+              _$PlannerStore,
+              $ToolUsageRecordsTable,
+              StoredToolUsage
+            >,
+          ),
+          StoredToolUsage,
+          PrefetchHooks Function()
+        > {
+  $$ToolUsageRecordsTableTableManager(
+    _$PlannerStore db,
+    $ToolUsageRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ToolUsageRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ToolUsageRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ToolUsageRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> toolId = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<int> lastOpened = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ToolUsageRecordsCompanion(
+                toolId: toolId,
+                isFavorite: isFavorite,
+                lastOpened: lastOpened,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String toolId,
+                Value<bool> isFavorite = const Value.absent(),
+                Value<int> lastOpened = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ToolUsageRecordsCompanion.insert(
+                toolId: toolId,
+                isFavorite: isFavorite,
+                lastOpened: lastOpened,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ToolUsageRecordsTable, StoredToolUsage>(table),
+                  BaseReferences<
+                    _$PlannerStore,
+                    $ToolUsageRecordsTable,
+                    StoredToolUsage
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ToolUsageRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $ToolUsageRecordsTable,
+      StoredToolUsage,
+      $$ToolUsageRecordsTableFilterComposer,
+      $$ToolUsageRecordsTableOrderingComposer,
+      $$ToolUsageRecordsTableAnnotationComposer,
+      $$ToolUsageRecordsTableCreateCompanionBuilder,
+      $$ToolUsageRecordsTableUpdateCompanionBuilder,
+      (
+        StoredToolUsage,
+        BaseReferences<_$PlannerStore, $ToolUsageRecordsTable, StoredToolUsage>,
+      ),
+      StoredToolUsage,
+      PrefetchHooks Function()
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -9586,4 +10041,6 @@ class $PlannerStoreManager {
       $$LotteryPoolRecordsTableTableManager(_db, _db.lotteryPoolRecords);
   $$GroupListRecordsTableTableManager get groupListRecords =>
       $$GroupListRecordsTableTableManager(_db, _db.groupListRecords);
+  $$ToolUsageRecordsTableTableManager get toolUsageRecords =>
+      $$ToolUsageRecordsTableTableManager(_db, _db.toolUsageRecords);
 }
