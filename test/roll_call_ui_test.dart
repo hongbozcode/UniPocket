@@ -276,6 +276,7 @@ void main() {
         await tester.ensureVisible(draw);
         await tester.tap(draw);
         await waitForRolling(tester);
+        await tester.pump(const Duration(milliseconds: 1300));
         await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();
         await tester.pumpWidget(const SizedBox.shrink());

@@ -74,6 +74,16 @@ void main() {
         await waitFor(tester, find.text('本次抽中'));
         expect((await planner.loadRollCallLists()).single.drawn, [1]);
         await capture('12-android-result');
+        await tester.drag(
+          find
+              .byWidgetPredicate(
+                (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+              )
+              .first,
+          const Offset(0, -500),
+        );
+        await tester.pumpAndSettle();
+        await binding.takeScreenshot('12-android-history');
         await tapVisible(tester, find.text('管理名单'));
         await binding.takeScreenshot('12-android-edit-confirm');
         await tapVisible(tester, find.text('继续编辑'));
@@ -90,6 +100,8 @@ void main() {
         for (var i = 0; i < 30 && find.text('名字滚动中…').evaluate().isEmpty; i++) {
           await tester.pump(const Duration(milliseconds: 10));
         }
+        expect(find.text('名字滚动中…'), findsOneWidget);
+        await tester.pump(const Duration(milliseconds: 1200));
         expect(find.text('名字滚动中…'), findsOneWidget);
         await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();

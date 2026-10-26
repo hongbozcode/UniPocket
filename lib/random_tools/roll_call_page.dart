@@ -296,6 +296,9 @@ class _RollCallPageState extends State<RollCallPage>
     final list = _selected;
     return PopScope(
       canPop: !_committing,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop && _working && !_committing) _cancel();
+      },
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -334,7 +337,7 @@ class _RollCallPageState extends State<RollCallPage>
                   if (_loading)
                     const Center(child: CircularProgressIndicator())
                   else if (list == null) ...[
-                    const RollCallVisual(members: [], progress: 0),
+                    const RollCallVisual(members: []),
                     const SizedBox(height: 20),
                     const Text(
                       '还没有名单，先保存一份自己的点名名单吧。',
@@ -437,15 +440,12 @@ class _RollCallPageState extends State<RollCallPage>
                     const SizedBox(height: 16),
                     Semantics(
                       liveRegion: !_working,
-                      child: AnimatedBuilder(
-                        animation: _motion,
-                        builder: (context, _) => RollCallVisual(
-                          members: list.members,
-                          progress: _motion.value,
-                          pending: _pending?.member,
-                          result: list.last,
-                          busy: _pending != null || (_working && !_committing),
-                        ),
+                      child: RollCallVisual(
+                        members: list.members,
+                        progress: _motion,
+                        pending: _pending?.member,
+                        result: list.last,
+                        busy: _pending != null || (_working && !_committing),
                       ),
                     ),
                     const SizedBox(height: 14),

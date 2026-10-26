@@ -15,6 +15,59 @@ import 'support/roll_call_random.dart';
 import 'support/widget_actions.dart';
 
 void main() {
+  testWidgets('长姓名备注在等待、滚动及落定期间保持结果卡高度稳定', (tester) async {
+    tester.view.physicalSize = const Size(320, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    await tester.runAsync(() async {
+      final store = PlannerStore(NativeDatabase.memory());
+      final planner = SemesterPlanner(store);
+      try {
+        await planner.saveRollCallList(
+          name: '长名字',
+          members: [
+            const RollCallMember(
+              id: 1,
+              name: '这是很长很长的成员姓名需要跨越多行完整显示并保持周围进度区域不跳动',
+              detail: '学号和备注也需要跨行完整呈现，不能在滚动结束时把进度条挤到另一个位置',
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: appTheme(),
+            home: RollCallPage(
+              planner: planner,
+              random: RollCallRandom([(1, 0)]),
+            ),
+          ),
+        );
+        await waitFor(tester, find.text('长名字 · 1人'));
+        final scene = find.byKey(const ValueKey('roll-call-scene'));
+        final before = tester.getSize(scene).height;
+        await tester.tap(find.byKey(const ValueKey('roll-call-draw')));
+        for (
+          var i = 0;
+          i < 100 && find.text('名字滚动中…').evaluate().isEmpty;
+          i++
+        ) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          await tester.pump();
+        }
+        expect(tester.getSize(scene).height, before);
+        await tester.pump(const Duration(milliseconds: 1401));
+        await waitFor(tester, find.text('本次抽中'));
+        expect(tester.getSize(scene).height, before);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await store.close();
+      }
+    });
+  });
+
   testWidgets('点名纵向滚动有连续绘制变化，1.4秒落定后姓名和备注才提交', (tester) async {
     tester.view.physicalSize = const Size(393, 1100);
     tester.view.devicePixelRatio = 1;
