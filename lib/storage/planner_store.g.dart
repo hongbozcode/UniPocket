@@ -3931,6 +3931,441 @@ class WheelListRecordsCompanion extends UpdateCompanion<StoredWheelList> {
   }
 }
 
+class $RollCallListRecordsTable extends RollCallListRecords
+    with TableInfo<$RollCallListRecordsTable, StoredRollCallList> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RollCallListRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _membersMeta = const VerificationMeta(
+    'members',
+  );
+  @override
+  late final GeneratedColumn<String> members = GeneratedColumn<String>(
+    'members',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _repeatMeta = const VerificationMeta('repeat');
+  @override
+  late final GeneratedColumn<bool> repeat = GeneratedColumn<bool>(
+    'repeat',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("repeat" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _roundMeta = const VerificationMeta('round');
+  @override
+  late final GeneratedColumn<int> round = GeneratedColumn<int>(
+    'round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _drawnMeta = const VerificationMeta('drawn');
+  @override
+  late final GeneratedColumn<String> drawn = GeneratedColumn<String>(
+    'drawn',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    members,
+    repeat,
+    round,
+    revision,
+    drawn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'roll_call_list_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredRollCallList> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('members')) {
+      context.handle(
+        _membersMeta,
+        members.isAcceptableOrUnknown(data['members']!, _membersMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_membersMeta);
+    }
+    if (data.containsKey('repeat')) {
+      context.handle(
+        _repeatMeta,
+        repeat.isAcceptableOrUnknown(data['repeat']!, _repeatMeta),
+      );
+    }
+    if (data.containsKey('round')) {
+      context.handle(
+        _roundMeta,
+        round.isAcceptableOrUnknown(data['round']!, _roundMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('drawn')) {
+      context.handle(
+        _drawnMeta,
+        drawn.isAcceptableOrUnknown(data['drawn']!, _drawnMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredRollCallList map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredRollCallList(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      members: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}members'],
+      )!,
+      repeat: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}repeat'],
+      )!,
+      round: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}round'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      drawn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}drawn'],
+      )!,
+    );
+  }
+
+  @override
+  $RollCallListRecordsTable createAlias(String alias) {
+    return $RollCallListRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredRollCallList extends DataClass
+    implements Insertable<StoredRollCallList> {
+  final int id;
+  final String name;
+  final String members;
+  final bool repeat;
+  final int round;
+  final int revision;
+  final String drawn;
+  const StoredRollCallList({
+    required this.id,
+    required this.name,
+    required this.members,
+    required this.repeat,
+    required this.round,
+    required this.revision,
+    required this.drawn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['members'] = Variable<String>(members);
+    map['repeat'] = Variable<bool>(repeat);
+    map['round'] = Variable<int>(round);
+    map['revision'] = Variable<int>(revision);
+    map['drawn'] = Variable<String>(drawn);
+    return map;
+  }
+
+  RollCallListRecordsCompanion toCompanion(bool nullToAbsent) {
+    return RollCallListRecordsCompanion(
+      id: Value(id),
+      name: Value(name),
+      members: Value(members),
+      repeat: Value(repeat),
+      round: Value(round),
+      revision: Value(revision),
+      drawn: Value(drawn),
+    );
+  }
+
+  factory StoredRollCallList.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredRollCallList(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      members: serializer.fromJson<String>(json['members']),
+      repeat: serializer.fromJson<bool>(json['repeat']),
+      round: serializer.fromJson<int>(json['round']),
+      revision: serializer.fromJson<int>(json['revision']),
+      drawn: serializer.fromJson<String>(json['drawn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'members': serializer.toJson<String>(members),
+      'repeat': serializer.toJson<bool>(repeat),
+      'round': serializer.toJson<int>(round),
+      'revision': serializer.toJson<int>(revision),
+      'drawn': serializer.toJson<String>(drawn),
+    };
+  }
+
+  StoredRollCallList copyWith({
+    int? id,
+    String? name,
+    String? members,
+    bool? repeat,
+    int? round,
+    int? revision,
+    String? drawn,
+  }) => StoredRollCallList(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    members: members ?? this.members,
+    repeat: repeat ?? this.repeat,
+    round: round ?? this.round,
+    revision: revision ?? this.revision,
+    drawn: drawn ?? this.drawn,
+  );
+  StoredRollCallList copyWithCompanion(RollCallListRecordsCompanion data) {
+    return StoredRollCallList(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      members: data.members.present ? data.members.value : this.members,
+      repeat: data.repeat.present ? data.repeat.value : this.repeat,
+      round: data.round.present ? data.round.value : this.round,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      drawn: data.drawn.present ? data.drawn.value : this.drawn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredRollCallList(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('members: $members, ')
+          ..write('repeat: $repeat, ')
+          ..write('round: $round, ')
+          ..write('revision: $revision, ')
+          ..write('drawn: $drawn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, members, repeat, round, revision, drawn);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredRollCallList &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.members == this.members &&
+          other.repeat == this.repeat &&
+          other.round == this.round &&
+          other.revision == this.revision &&
+          other.drawn == this.drawn);
+}
+
+class RollCallListRecordsCompanion extends UpdateCompanion<StoredRollCallList> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> members;
+  final Value<bool> repeat;
+  final Value<int> round;
+  final Value<int> revision;
+  final Value<String> drawn;
+  const RollCallListRecordsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.members = const Value.absent(),
+    this.repeat = const Value.absent(),
+    this.round = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.drawn = const Value.absent(),
+  });
+  RollCallListRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String members,
+    this.repeat = const Value.absent(),
+    this.round = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.drawn = const Value.absent(),
+  }) : name = Value(name),
+       members = Value(members);
+  static Insertable<StoredRollCallList> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? members,
+    Expression<bool>? repeat,
+    Expression<int>? round,
+    Expression<int>? revision,
+    Expression<String>? drawn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (members != null) 'members': members,
+      if (repeat != null) 'repeat': repeat,
+      if (round != null) 'round': round,
+      if (revision != null) 'revision': revision,
+      if (drawn != null) 'drawn': drawn,
+    });
+  }
+
+  RollCallListRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? members,
+    Value<bool>? repeat,
+    Value<int>? round,
+    Value<int>? revision,
+    Value<String>? drawn,
+  }) {
+    return RollCallListRecordsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      members: members ?? this.members,
+      repeat: repeat ?? this.repeat,
+      round: round ?? this.round,
+      revision: revision ?? this.revision,
+      drawn: drawn ?? this.drawn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (members.present) {
+      map['members'] = Variable<String>(members.value);
+    }
+    if (repeat.present) {
+      map['repeat'] = Variable<bool>(repeat.value);
+    }
+    if (round.present) {
+      map['round'] = Variable<int>(round.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (drawn.present) {
+      map['drawn'] = Variable<String>(drawn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RollCallListRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('members: $members, ')
+          ..write('repeat: $repeat, ')
+          ..write('round: $round, ')
+          ..write('revision: $revision, ')
+          ..write('drawn: $drawn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -3956,6 +4391,8 @@ abstract class _$PlannerStore extends GeneratedDatabase {
   late final $WheelListRecordsTable wheelListRecords = $WheelListRecordsTable(
     this,
   );
+  late final $RollCallListRecordsTable rollCallListRecords =
+      $RollCallListRecordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3971,6 +4408,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     classExceptionRecords,
     independentLessonRecords,
     wheelListRecords,
+    rollCallListRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7745,6 +8183,265 @@ typedef $$WheelListRecordsTableProcessedTableManager =
       StoredWheelList,
       PrefetchHooks Function()
     >;
+typedef $$RollCallListRecordsTableCreateCompanionBuilder =
+    RollCallListRecordsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String members,
+      Value<bool> repeat,
+      Value<int> round,
+      Value<int> revision,
+      Value<String> drawn,
+    });
+typedef $$RollCallListRecordsTableUpdateCompanionBuilder =
+    RollCallListRecordsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> members,
+      Value<bool> repeat,
+      Value<int> round,
+      Value<int> revision,
+      Value<String> drawn,
+    });
+
+class $$RollCallListRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $RollCallListRecordsTable> {
+  $$RollCallListRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get members => $composableBuilder(
+    column: $table.members,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get repeat => $composableBuilder(
+    column: $table.repeat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get round => $composableBuilder(
+    column: $table.round,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawn => $composableBuilder(
+    column: $table.drawn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RollCallListRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $RollCallListRecordsTable> {
+  $$RollCallListRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get members => $composableBuilder(
+    column: $table.members,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get repeat => $composableBuilder(
+    column: $table.repeat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get round => $composableBuilder(
+    column: $table.round,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawn => $composableBuilder(
+    column: $table.drawn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RollCallListRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $RollCallListRecordsTable> {
+  $$RollCallListRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get members =>
+      $composableBuilder(column: $table.members, builder: (column) => column);
+
+  GeneratedColumn<bool> get repeat =>
+      $composableBuilder(column: $table.repeat, builder: (column) => column);
+
+  GeneratedColumn<int> get round =>
+      $composableBuilder(column: $table.round, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get drawn =>
+      $composableBuilder(column: $table.drawn, builder: (column) => column);
+}
+
+class $$RollCallListRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $RollCallListRecordsTable,
+          StoredRollCallList,
+          $$RollCallListRecordsTableFilterComposer,
+          $$RollCallListRecordsTableOrderingComposer,
+          $$RollCallListRecordsTableAnnotationComposer,
+          $$RollCallListRecordsTableCreateCompanionBuilder,
+          $$RollCallListRecordsTableUpdateCompanionBuilder,
+          (
+            StoredRollCallList,
+            BaseReferences<
+              _$PlannerStore,
+              $RollCallListRecordsTable,
+              StoredRollCallList
+            >,
+          ),
+          StoredRollCallList,
+          PrefetchHooks Function()
+        > {
+  $$RollCallListRecordsTableTableManager(
+    _$PlannerStore db,
+    $RollCallListRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RollCallListRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RollCallListRecordsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$RollCallListRecordsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> members = const Value.absent(),
+                Value<bool> repeat = const Value.absent(),
+                Value<int> round = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> drawn = const Value.absent(),
+              }) => RollCallListRecordsCompanion(
+                id: id,
+                name: name,
+                members: members,
+                repeat: repeat,
+                round: round,
+                revision: revision,
+                drawn: drawn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String members,
+                Value<bool> repeat = const Value.absent(),
+                Value<int> round = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> drawn = const Value.absent(),
+              }) => RollCallListRecordsCompanion.insert(
+                id: id,
+                name: name,
+                members: members,
+                repeat: repeat,
+                round: round,
+                revision: revision,
+                drawn: drawn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RollCallListRecordsTable, StoredRollCallList>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$PlannerStore,
+                    $RollCallListRecordsTable,
+                    StoredRollCallList
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RollCallListRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $RollCallListRecordsTable,
+      StoredRollCallList,
+      $$RollCallListRecordsTableFilterComposer,
+      $$RollCallListRecordsTableOrderingComposer,
+      $$RollCallListRecordsTableAnnotationComposer,
+      $$RollCallListRecordsTableCreateCompanionBuilder,
+      $$RollCallListRecordsTableUpdateCompanionBuilder,
+      (
+        StoredRollCallList,
+        BaseReferences<
+          _$PlannerStore,
+          $RollCallListRecordsTable,
+          StoredRollCallList
+        >,
+      ),
+      StoredRollCallList,
+      PrefetchHooks Function()
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -7772,4 +8469,6 @@ class $PlannerStoreManager {
       );
   $$WheelListRecordsTableTableManager get wheelListRecords =>
       $$WheelListRecordsTableTableManager(_db, _db.wheelListRecords);
+  $$RollCallListRecordsTableTableManager get rollCallListRecords =>
+      $$RollCallListRecordsTableTableManager(_db, _db.rollCallListRecords);
 }

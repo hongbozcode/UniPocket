@@ -9,6 +9,7 @@ import '../tasks/model.dart';
 import '../events/model.dart';
 import '../timetable/course_change.dart';
 import '../random_tools/wheel_list.dart';
+import '../random_tools/roll_call.dart';
 
 part 'planner_store.g.dart';
 
@@ -127,6 +128,17 @@ class WheelListRecords extends Table {
   TextColumn get items => text()();
 }
 
+@DataClassName('StoredRollCallList')
+class RollCallListRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get members => text()();
+  BoolColumn get repeat => boolean().withDefault(const Constant(false))();
+  IntColumn get round => integer().withDefault(const Constant(1))();
+  IntColumn get revision => integer().withDefault(const Constant(0))();
+  TextColumn get drawn => text().withDefault(const Constant('[]'))();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -139,6 +151,7 @@ class WheelListRecords extends Table {
     ClassExceptionRecords,
     IndependentLessonRecords,
     WheelListRecords,
+    RollCallListRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -155,7 +168,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -165,6 +178,7 @@ class PlannerStore extends _$PlannerStore {
           .insert(const SettingsRecordsCompanion(id: Value(1)));
     },
     onUpgrade: (m, from, to) async {
+      if (from < 11) await m.createTable(rollCallListRecords);
       if (from < 10) await m.createTable(wheelListRecords);
       if (from < 2) {
         await m.createTable(courseRecords);
@@ -191,6 +205,97 @@ class PlannerStore extends _$PlannerStore {
       }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
+  );
+
+  RollCallList _rollCallList(StoredRollCallList row) => RollCallList(
+    id: row.id,
+    name: row.name,
+    repeat: row.repeat,
+    round: row.round,
+    revision: row.revision,
+    drawn: (jsonDecode(row.drawn) as List).cast<int>(),
+    members: [
+      for (final m in jsonDecode(row.members) as List)
+        RollCallMember(
+          id: m['id'] as int,
+          name: m['name'] as String,
+          detail: m['detail'] as String,
+        ),
+    ],
+  );
+
+  Future<List<RollCallList>> readRollCallLists() async =>
+      (await (select(
+            rollCallListRecords,
+          )..orderBy([(t) => OrderingTerm.asc(t.id)])).get())
+          .map(_rollCallList)
+          .toList();
+
+  Future<RollCallList> readRollCallList(int id) async => _rollCallList(
+    await (select(
+      rollCallListRecords,
+    )..where((t) => t.id.equals(id))).getSingle(),
+  );
+
+  Future<RollCallList> writeRollCallList({
+    int? id,
+    required String name,
+    required List<RollCallMember> members,
+  }) => transaction(() async {
+    final old = id == null ? null : await readRollCallList(id!);
+    final entry = RollCallListRecordsCompanion(
+      name: Value(name),
+      members: Value(
+        jsonEncode([
+          for (final m in members)
+            {'id': m.id, 'name': m.name, 'detail': m.detail},
+        ]),
+      ),
+      drawn: const Value('[]'),
+      round: Value(old == null ? 1 : old.round + 1),
+      revision: Value(old == null ? 0 : old.revision + 1),
+    );
+    if (id == null) {
+      id = await into(rollCallListRecords).insert(entry);
+    } else {
+      await (update(
+        rollCallListRecords,
+      )..where((t) => t.id.equals(id!))).write(entry);
+    }
+    return readRollCallList(id!);
+  });
+
+  Future<RollCallList> commitRollCall(RollCallList before, int memberId) =>
+      transaction(() async {
+        final count =
+            await (update(rollCallListRecords)..where(
+                  (t) =>
+                      t.id.equals(before.id) &
+                      t.revision.equals(before.revision),
+                ))
+                .write(
+                  RollCallListRecordsCompanion(
+                    drawn: Value(jsonEncode([...before.drawn, memberId])),
+                    revision: Value(before.revision + 1),
+                  ),
+                );
+        if (count != 1) throw StateError('名单或轮次已改变，请重新点名');
+        return readRollCallList(before.id);
+      });
+
+  Future<RollCallList> resetRollCall(int id, {bool? repeat}) => transaction(
+    () async {
+      final before = await readRollCallList(id);
+      await (update(rollCallListRecords)..where((t) => t.id.equals(id))).write(
+        RollCallListRecordsCompanion(
+          drawn: const Value('[]'),
+          round: Value(before.round + 1),
+          revision: Value(before.revision + 1),
+          repeat: repeat == null ? const Value.absent() : Value(repeat),
+        ),
+      );
+      return readRollCallList(id);
+    },
   );
 
   Future<List<WheelList>> readWheelLists() async =>

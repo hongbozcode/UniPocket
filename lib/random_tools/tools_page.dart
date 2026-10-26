@@ -7,6 +7,7 @@ import '../semesters/planner.dart';
 import '../ui/design.dart';
 import 'toss_page.dart';
 import 'wheel_page.dart';
+import 'roll_call_page.dart';
 
 class ToolsPage extends StatelessWidget {
   const ToolsPage({required this.planner, this.random, super.key});
@@ -46,6 +47,19 @@ class ToolsPage extends StatelessWidget {
                 onTap: () => Navigator.of(context).push<void>(
                   MaterialPageRoute(
                     builder: (_) => WheelPage(planner: planner, random: random),
+                  ),
+                ),
+              ),
+              _ToolCard(
+                width: width,
+                title: '随机点名',
+                subtitle: '下一位是谁',
+                art: 'badge',
+                surface: const Color(0xffeee8fc),
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        RollCallPage(planner: planner, random: random),
                   ),
                 ),
               ),

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:timezone/timezone.dart' as tz;
 
 import '../storage/planner_store.dart';
@@ -10,6 +12,7 @@ import '../reminders/course_reminders.dart';
 import '../reminders/event_reminders.dart';
 import 'model.dart';
 import '../random_tools/wheel_list.dart';
+import '../random_tools/roll_call.dart';
 
 /// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
@@ -27,6 +30,44 @@ class SemesterPlanner {
   Future<void>? _notificationQueue;
 
   Future<List<WheelList>> loadWheelLists() => _store.readWheelLists();
+
+  Future<List<RollCallList>> loadRollCallLists() => _store.readRollCallLists();
+
+  Future<RollCallDraw> prepareRollCall(int id, {Random? random}) async {
+    final list = await _store.readRollCallList(id);
+    final candidates = list.candidates;
+    if (candidates.isEmpty) throw StateError('没有剩余成员，请主动开始新一轮');
+    final member = candidates[(random ?? Random()).nextInt(candidates.length)];
+    return RollCallDraw(member, () => _store.commitRollCall(list, member.id));
+  }
+
+  /// Mode changes explicitly begin a fresh round, after UI confirmation.
+  Future<RollCallList> resetRollCall(int id, {bool? repeat}) =>
+      _store.resetRollCall(id, repeat: repeat);
+
+  Future<RollCallList> saveRollCallList({
+    int? id,
+    required String name,
+    required List<RollCallMember> members,
+  }) {
+    if (name.trim().isEmpty) throw const FormatException('请为名单命名');
+    if (members.any((m) => m.name.trim().isEmpty || m.id < 1) ||
+        members.map((m) => m.id).toSet().length != members.length) {
+      throw const FormatException('成员姓名不能为空，成员身份必须独立');
+    }
+    return _store.writeRollCallList(
+      id: id,
+      name: name.trim(),
+      members: [
+        for (final m in members)
+          RollCallMember(
+            id: m.id,
+            name: m.name.trim(),
+            detail: m.detail.trim(),
+          ),
+      ],
+    );
+  }
 
   Future<WheelList> saveWheelList({
     int? id,
