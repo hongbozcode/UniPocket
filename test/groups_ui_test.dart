@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:unipocket/random_tools/groups.dart';
 import 'package:unipocket/random_tools/groups_page.dart';
+import 'package:unipocket/random_tools/group_editor.dart';
 import 'package:unipocket/semesters/planner.dart';
 import 'package:unipocket/storage/planner_store.dart';
 import 'package:unipocket/ui/design.dart';
@@ -18,6 +19,40 @@ Finder verticalScroll() => find
     .first;
 
 void main() {
+  testWidgets('长名单离屏空姓名保存时显示明确原因且原数据保留', (tester) async {
+    await tester.runAsync(() async {
+      final store = PlannerStore(NativeDatabase.memory());
+      final planner = SemesterPlanner(store);
+      try {
+        final list = await planner.saveGroupList(
+          name: '名单',
+          members: [
+            for (var i = 1; i <= 20; i++) GroupMember(id: i, name: '同学$i'),
+          ],
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: appTheme(),
+            home: GroupEditor(planner: planner, list: list),
+          ),
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('member-name-1')),
+          ' ',
+        );
+        await tapVisible(tester, find.text('保存到本机'));
+        await waitFor(tester, find.text('成员姓名不能为空，成员身份必须独立'));
+        expect(
+          (await planner.loadGroupLists()).single.members.first.name,
+          '同学1',
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox());
+        await store.close();
+      }
+    });
+  });
   testWidgets('大名单可到末组，减少动效、系统返回和重新进入清理结果', (tester) async {
     tester.view.physicalSize = const Size(320, 740);
     tester.view.devicePixelRatio = 1;

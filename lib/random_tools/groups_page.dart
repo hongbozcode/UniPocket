@@ -404,25 +404,43 @@ class _GroupsPageState extends State<GroupsPage>
                           children: [
                             for (final mode in GroupMode.values)
                               Expanded(
-                                child: TextButton(
-                                  onPressed: _locked
-                                      ? null
-                                      : () => setState(() {
-                                          _mode = mode;
-                                          _invalidate();
-                                        }),
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: _mode == mode
-                                        ? const Color(0xffd9c2f5)
-                                        : Colors.transparent,
-                                    foregroundColor: inkColor,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                      horizontal: 6,
+                                child: Semantics(
+                                  selected: _mode == mode,
+                                  child: TextButton(
+                                    onPressed: _locked
+                                        ? null
+                                        : () => setState(() {
+                                            _mode = mode;
+                                            _invalidate();
+                                          }),
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: _mode == mode
+                                          ? const Color(0xffd9c2f5)
+                                          : Colors.transparent,
+                                      foregroundColor: inkColor,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                        horizontal: 6,
+                                      ),
                                     ),
-                                  ),
-                                  child: Text(
-                                    mode == GroupMode.count ? '按组数' : '按人数上限',
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (_mode == mode) ...[
+                                          const DesignIcon('check', size: 16),
+                                          const SizedBox(width: 4),
+                                        ],
+                                        Flexible(
+                                          child: Text(
+                                            mode == GroupMode.count
+                                                ? '按组数'
+                                                : '按人数上限',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

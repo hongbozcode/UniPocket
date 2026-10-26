@@ -64,11 +64,13 @@ class _GroupEditorState extends State<GroupEditor> {
         ],
       );
       if (mounted) Navigator.pop(context, list);
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = '保存失败，原名单未改变。请重试。';
+          _error = error is FormatException
+              ? error.message
+              : '保存失败，原名单未改变。请重试。';
         });
       }
     }

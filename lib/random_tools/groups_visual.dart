@@ -115,6 +115,12 @@ class _GroupsVisualState extends State<GroupsVisual> {
     Color(0xfffff1bb),
     Color(0xffe5f4eb),
   ];
+  static const _accents = [
+    Color(0xff387cff),
+    Color(0xff9269ff),
+    Color(0xffffba39),
+    Color(0xff63b99b),
+  ];
 
   void _measure() {
     if (_measureScheduled || widget.animation == null) return;
@@ -193,20 +199,31 @@ class _GroupsVisualState extends State<GroupsVisual> {
                         Row(
                           children: [
                             Container(
-                              width: 28,
-                              height: 28,
+                              width: 36,
+                              height: 36,
                               alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                color: Color(0xddffffff),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    _accents[i % 4].withValues(alpha: .72),
+                                    _accents[i % 4],
+                                  ],
+                                ),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 3,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
                                 '${i + 1}',
                                 textScaler: TextScaler.noScaling,
                                 style: const TextStyle(
-                                  fontSize: 17,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xffa9bde3),
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
@@ -215,18 +232,53 @@ class _GroupsVisualState extends State<GroupsVisual> {
                               child: Text(
                                 '第${i + 1}组',
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
                             Text(
                               '${widget.groups[i].length} 人',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xff7d8ca2),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: i % 4 == 2
+                                    ? const Color(0xffa67a13)
+                                    : _accents[i % 4],
                               ),
                             ),
+                            if (MediaQuery.textScalerOf(context).scale(12) <
+                                18) ...[
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      top: 0,
+                                      left: 0,
+                                      child: SvgPicture.asset(
+                                        'docs/design/resources/illustrations/spark-yellow.svg',
+                                        width: 20,
+                                        height: 20,
+                                        excludeFromSemantics: true,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: SvgPicture.asset(
+                                        'docs/design/resources/illustrations/spark-lavender.svg',
+                                        width: 16,
+                                        height: 16,
+                                        excludeFromSemantics: true,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 12),
