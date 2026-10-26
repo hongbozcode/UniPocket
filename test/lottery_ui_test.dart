@@ -63,6 +63,27 @@ void main() {
                   .data,
               longText,
             );
+            final slip = find.byKey(const ValueKey('lottery-slip-scroll'));
+            expect(
+              find.descendant(of: slip, matching: find.text(longText)),
+              findsOneWidget,
+            );
+            await tester.ensureVisible(slip);
+            await tester.pumpAndSettle();
+            await tester.drag(slip, const Offset(0, -80));
+            await tester.pumpAndSettle();
+            expect(
+              tester
+                  .state<ScrollableState>(
+                    find.descendant(
+                      of: slip,
+                      matching: find.byType(Scrollable),
+                    ),
+                  )
+                  .position
+                  .pixels,
+              greaterThan(0),
+            );
             await tester.scrollUntilVisible(
               draw,
               180,

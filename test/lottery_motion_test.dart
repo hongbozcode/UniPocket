@@ -43,7 +43,7 @@ void main() {
       try {
         await planner.saveLotteryPool(
           name: '学习小组',
-          items: ['好事将近', '休息一下', '勇敢出发'],
+          items: ['好事将近', '休息一下', '今天也顺利'],
         );
         await tester.pumpWidget(
           MaterialApp(
@@ -84,6 +84,7 @@ void main() {
         await waitFor(tester, find.text('本次抽中'));
         await tester.pumpAndSettle();
         await capture('landed');
+        expect(find.text('今\n天\n也\n顺\n利'), findsOneWidget);
         expect((await planner.loadLotteryPools()).single.drawn, [2]);
         expect(tester.takeException(), isNull);
       } finally {

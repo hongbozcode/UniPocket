@@ -77,7 +77,7 @@ void main() {
           if (i > 1) await tapVisible(tester, find.text('添加签项'));
           await tester.enterText(
             find.byKey(ValueKey('ticket-text-$i')),
-            i == 3 ? longText : '好事将近',
+            i == 3 ? longText : '今天也顺利',
           );
         }
         FocusManager.instance.primaryFocus?.unfocus();
@@ -130,7 +130,7 @@ void main() {
         final pools = await planner.loadLotteryPools();
         expect(pools.map((p) => p.name), ['今日签池', '活动签池']);
         expect(pools.first.drawn, [0]);
-        expect(pools.first.items, ['好事将近', '好事将近', longText]);
+        expect(pools.first.items, ['今天也顺利', '今天也顺利', longText]);
         await capture('13-android-process-restored');
         await tapVisible(tester, find.byKey(const ValueKey('lottery-draw')));
         await waitFor(tester, find.byKey(const ValueKey('lottery-result')));
@@ -144,6 +144,19 @@ void main() {
           longText,
         );
         await capture('13-android-long-result');
+        final slip = find.byKey(const ValueKey('lottery-slip-scroll'));
+        await tester.drag(slip, const Offset(0, -90));
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .state<ScrollableState>(
+                find.descendant(of: slip, matching: find.byType(Scrollable)),
+              )
+              .position
+              .pixels,
+          greaterThan(0),
+        );
+        await binding.takeScreenshot('13-android-slip-scrolled');
         await tapVisible(tester, find.byKey(const ValueKey('lottery-result')));
         await binding.takeScreenshot('13-android-full-text');
         await tapVisible(tester, find.text('今日签池 · 3项'));

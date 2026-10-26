@@ -189,24 +189,57 @@ class LotteryVisual extends StatelessWidget {
                                                   opacity: .18,
                                                 ),
                                               ),
-                                              child: Text(
-                                                short
-                                                    ? text.runes
-                                                          .map(
-                                                            String.fromCharCode,
-                                                          )
-                                                          .join('\n')
-                                                    : '完整\n签文\n见下方',
-                                                textAlign: TextAlign.center,
-                                                textScaler:
-                                                    TextScaler.noScaling,
-                                                style: TextStyle(
-                                                  fontSize: short ? 17 : 12,
-                                                  height: 1.4,
-                                                  color: const Color(
-                                                    0xff3e473f,
-                                                  ),
-                                                  fontWeight: FontWeight.w700,
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: SizedBox(
+                                                  height: short ? 100 : 92,
+                                                  child: short
+                                                      ? Text(
+                                                          text.characters.join(
+                                                            '\n',
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          textScaler: TextScaler
+                                                              .noScaling,
+                                                          // Vertical glyph advance follows the source's 17px font;
+                                                          // CSS line-height controls column spacing in vertical-rl.
+                                                          style:
+                                                              const TextStyle(
+                                                                fontSize: 17,
+                                                                height: 1,
+                                                                color: Color(
+                                                                  0xff3e473f,
+                                                                ),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                              ),
+                                                        )
+                                                      : SingleChildScrollView(
+                                                          key: const ValueKey(
+                                                            'lottery-slip-scroll',
+                                                          ),
+                                                          child: Text(
+                                                            text!,
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            textScaler:
+                                                                TextScaler
+                                                                    .noScaling,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 13,
+                                                                  height: 1.6,
+                                                                  color: Color(
+                                                                    0xff3e473f,
+                                                                  ),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                ),
+                                                          ),
+                                                        ),
                                                 ),
                                               ),
                                             ),
