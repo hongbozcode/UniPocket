@@ -13,6 +13,7 @@ import '../reminders/event_reminders.dart';
 import 'model.dart';
 import '../random_tools/wheel_list.dart';
 import '../random_tools/roll_call.dart';
+import '../random_tools/lottery.dart';
 
 /// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
@@ -30,6 +31,35 @@ class SemesterPlanner {
   Future<void>? _notificationQueue;
 
   Future<List<WheelList>> loadWheelLists() => _store.readWheelLists();
+
+  Future<List<LotteryPool>> loadLotteryPools() => _store.readLotteryPools();
+
+  Future<LotteryDraw> prepareLottery(int id, {Random? random}) async {
+    final pool = await _store.readLotteryPool(id);
+    final candidates = pool.candidates;
+    if (candidates.isEmpty) throw StateError('没有剩余签项，请主动开始新一轮');
+    final index = candidates[(random ?? Random()).nextInt(candidates.length)];
+    return LotteryDraw(
+      pool.items[index],
+      () => _store.commitLottery(pool, index),
+    );
+  }
+
+  Future<LotteryPool> resetLottery(int id, {bool? repeat}) =>
+      _store.resetLottery(id, repeat: repeat);
+
+  Future<LotteryPool> saveLotteryPool({
+    int? id,
+    required String name,
+    required List<String> items,
+  }) {
+    if (name.trim().isEmpty) throw const FormatException('请为签池命名');
+    final entries = items.map((s) => s.trim()).toList();
+    if (entries.any((s) => s.isEmpty)) {
+      throw const FormatException('签文不能为空，请输入或移除空签');
+    }
+    return _store.writeLotteryPool(id: id, name: name.trim(), items: entries);
+  }
 
   Future<List<RollCallList>> loadRollCallLists() => _store.readRollCallLists();
 

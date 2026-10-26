@@ -4366,6 +4366,439 @@ class RollCallListRecordsCompanion extends UpdateCompanion<StoredRollCallList> {
   }
 }
 
+class $LotteryPoolRecordsTable extends LotteryPoolRecords
+    with TableInfo<$LotteryPoolRecordsTable, StoredLotteryPool> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LotteryPoolRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemsMeta = const VerificationMeta('items');
+  @override
+  late final GeneratedColumn<String> items = GeneratedColumn<String>(
+    'items',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _repeatMeta = const VerificationMeta('repeat');
+  @override
+  late final GeneratedColumn<bool> repeat = GeneratedColumn<bool>(
+    'repeat',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("repeat" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _roundMeta = const VerificationMeta('round');
+  @override
+  late final GeneratedColumn<int> round = GeneratedColumn<int>(
+    'round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _drawnMeta = const VerificationMeta('drawn');
+  @override
+  late final GeneratedColumn<String> drawn = GeneratedColumn<String>(
+    'drawn',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    items,
+    repeat,
+    round,
+    revision,
+    drawn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lottery_pool_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredLotteryPool> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('items')) {
+      context.handle(
+        _itemsMeta,
+        items.isAcceptableOrUnknown(data['items']!, _itemsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemsMeta);
+    }
+    if (data.containsKey('repeat')) {
+      context.handle(
+        _repeatMeta,
+        repeat.isAcceptableOrUnknown(data['repeat']!, _repeatMeta),
+      );
+    }
+    if (data.containsKey('round')) {
+      context.handle(
+        _roundMeta,
+        round.isAcceptableOrUnknown(data['round']!, _roundMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('drawn')) {
+      context.handle(
+        _drawnMeta,
+        drawn.isAcceptableOrUnknown(data['drawn']!, _drawnMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredLotteryPool map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredLotteryPool(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      items: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}items'],
+      )!,
+      repeat: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}repeat'],
+      )!,
+      round: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}round'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      drawn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}drawn'],
+      )!,
+    );
+  }
+
+  @override
+  $LotteryPoolRecordsTable createAlias(String alias) {
+    return $LotteryPoolRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredLotteryPool extends DataClass
+    implements Insertable<StoredLotteryPool> {
+  final int id;
+  final String name;
+  final String items;
+  final bool repeat;
+  final int round;
+  final int revision;
+  final String drawn;
+  const StoredLotteryPool({
+    required this.id,
+    required this.name,
+    required this.items,
+    required this.repeat,
+    required this.round,
+    required this.revision,
+    required this.drawn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['items'] = Variable<String>(items);
+    map['repeat'] = Variable<bool>(repeat);
+    map['round'] = Variable<int>(round);
+    map['revision'] = Variable<int>(revision);
+    map['drawn'] = Variable<String>(drawn);
+    return map;
+  }
+
+  LotteryPoolRecordsCompanion toCompanion(bool nullToAbsent) {
+    return LotteryPoolRecordsCompanion(
+      id: Value(id),
+      name: Value(name),
+      items: Value(items),
+      repeat: Value(repeat),
+      round: Value(round),
+      revision: Value(revision),
+      drawn: Value(drawn),
+    );
+  }
+
+  factory StoredLotteryPool.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredLotteryPool(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      items: serializer.fromJson<String>(json['items']),
+      repeat: serializer.fromJson<bool>(json['repeat']),
+      round: serializer.fromJson<int>(json['round']),
+      revision: serializer.fromJson<int>(json['revision']),
+      drawn: serializer.fromJson<String>(json['drawn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'items': serializer.toJson<String>(items),
+      'repeat': serializer.toJson<bool>(repeat),
+      'round': serializer.toJson<int>(round),
+      'revision': serializer.toJson<int>(revision),
+      'drawn': serializer.toJson<String>(drawn),
+    };
+  }
+
+  StoredLotteryPool copyWith({
+    int? id,
+    String? name,
+    String? items,
+    bool? repeat,
+    int? round,
+    int? revision,
+    String? drawn,
+  }) => StoredLotteryPool(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    items: items ?? this.items,
+    repeat: repeat ?? this.repeat,
+    round: round ?? this.round,
+    revision: revision ?? this.revision,
+    drawn: drawn ?? this.drawn,
+  );
+  StoredLotteryPool copyWithCompanion(LotteryPoolRecordsCompanion data) {
+    return StoredLotteryPool(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      items: data.items.present ? data.items.value : this.items,
+      repeat: data.repeat.present ? data.repeat.value : this.repeat,
+      round: data.round.present ? data.round.value : this.round,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      drawn: data.drawn.present ? data.drawn.value : this.drawn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredLotteryPool(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('items: $items, ')
+          ..write('repeat: $repeat, ')
+          ..write('round: $round, ')
+          ..write('revision: $revision, ')
+          ..write('drawn: $drawn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, items, repeat, round, revision, drawn);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredLotteryPool &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.items == this.items &&
+          other.repeat == this.repeat &&
+          other.round == this.round &&
+          other.revision == this.revision &&
+          other.drawn == this.drawn);
+}
+
+class LotteryPoolRecordsCompanion extends UpdateCompanion<StoredLotteryPool> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> items;
+  final Value<bool> repeat;
+  final Value<int> round;
+  final Value<int> revision;
+  final Value<String> drawn;
+  const LotteryPoolRecordsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.items = const Value.absent(),
+    this.repeat = const Value.absent(),
+    this.round = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.drawn = const Value.absent(),
+  });
+  LotteryPoolRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String items,
+    this.repeat = const Value.absent(),
+    this.round = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.drawn = const Value.absent(),
+  }) : name = Value(name),
+       items = Value(items);
+  static Insertable<StoredLotteryPool> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? items,
+    Expression<bool>? repeat,
+    Expression<int>? round,
+    Expression<int>? revision,
+    Expression<String>? drawn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (items != null) 'items': items,
+      if (repeat != null) 'repeat': repeat,
+      if (round != null) 'round': round,
+      if (revision != null) 'revision': revision,
+      if (drawn != null) 'drawn': drawn,
+    });
+  }
+
+  LotteryPoolRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? items,
+    Value<bool>? repeat,
+    Value<int>? round,
+    Value<int>? revision,
+    Value<String>? drawn,
+  }) {
+    return LotteryPoolRecordsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      items: items ?? this.items,
+      repeat: repeat ?? this.repeat,
+      round: round ?? this.round,
+      revision: revision ?? this.revision,
+      drawn: drawn ?? this.drawn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (items.present) {
+      map['items'] = Variable<String>(items.value);
+    }
+    if (repeat.present) {
+      map['repeat'] = Variable<bool>(repeat.value);
+    }
+    if (round.present) {
+      map['round'] = Variable<int>(round.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (drawn.present) {
+      map['drawn'] = Variable<String>(drawn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LotteryPoolRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('items: $items, ')
+          ..write('repeat: $repeat, ')
+          ..write('round: $round, ')
+          ..write('revision: $revision, ')
+          ..write('drawn: $drawn')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -4393,6 +4826,8 @@ abstract class _$PlannerStore extends GeneratedDatabase {
   );
   late final $RollCallListRecordsTable rollCallListRecords =
       $RollCallListRecordsTable(this);
+  late final $LotteryPoolRecordsTable lotteryPoolRecords =
+      $LotteryPoolRecordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4409,6 +4844,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     independentLessonRecords,
     wheelListRecords,
     rollCallListRecords,
+    lotteryPoolRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -8442,6 +8878,262 @@ typedef $$RollCallListRecordsTableProcessedTableManager =
       StoredRollCallList,
       PrefetchHooks Function()
     >;
+typedef $$LotteryPoolRecordsTableCreateCompanionBuilder =
+    LotteryPoolRecordsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String items,
+      Value<bool> repeat,
+      Value<int> round,
+      Value<int> revision,
+      Value<String> drawn,
+    });
+typedef $$LotteryPoolRecordsTableUpdateCompanionBuilder =
+    LotteryPoolRecordsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> items,
+      Value<bool> repeat,
+      Value<int> round,
+      Value<int> revision,
+      Value<String> drawn,
+    });
+
+class $$LotteryPoolRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $LotteryPoolRecordsTable> {
+  $$LotteryPoolRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get items => $composableBuilder(
+    column: $table.items,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get repeat => $composableBuilder(
+    column: $table.repeat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get round => $composableBuilder(
+    column: $table.round,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawn => $composableBuilder(
+    column: $table.drawn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LotteryPoolRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $LotteryPoolRecordsTable> {
+  $$LotteryPoolRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get items => $composableBuilder(
+    column: $table.items,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get repeat => $composableBuilder(
+    column: $table.repeat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get round => $composableBuilder(
+    column: $table.round,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawn => $composableBuilder(
+    column: $table.drawn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LotteryPoolRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $LotteryPoolRecordsTable> {
+  $$LotteryPoolRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get items =>
+      $composableBuilder(column: $table.items, builder: (column) => column);
+
+  GeneratedColumn<bool> get repeat =>
+      $composableBuilder(column: $table.repeat, builder: (column) => column);
+
+  GeneratedColumn<int> get round =>
+      $composableBuilder(column: $table.round, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get drawn =>
+      $composableBuilder(column: $table.drawn, builder: (column) => column);
+}
+
+class $$LotteryPoolRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $LotteryPoolRecordsTable,
+          StoredLotteryPool,
+          $$LotteryPoolRecordsTableFilterComposer,
+          $$LotteryPoolRecordsTableOrderingComposer,
+          $$LotteryPoolRecordsTableAnnotationComposer,
+          $$LotteryPoolRecordsTableCreateCompanionBuilder,
+          $$LotteryPoolRecordsTableUpdateCompanionBuilder,
+          (
+            StoredLotteryPool,
+            BaseReferences<
+              _$PlannerStore,
+              $LotteryPoolRecordsTable,
+              StoredLotteryPool
+            >,
+          ),
+          StoredLotteryPool,
+          PrefetchHooks Function()
+        > {
+  $$LotteryPoolRecordsTableTableManager(
+    _$PlannerStore db,
+    $LotteryPoolRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LotteryPoolRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LotteryPoolRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LotteryPoolRecordsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> items = const Value.absent(),
+                Value<bool> repeat = const Value.absent(),
+                Value<int> round = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> drawn = const Value.absent(),
+              }) => LotteryPoolRecordsCompanion(
+                id: id,
+                name: name,
+                items: items,
+                repeat: repeat,
+                round: round,
+                revision: revision,
+                drawn: drawn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String items,
+                Value<bool> repeat = const Value.absent(),
+                Value<int> round = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> drawn = const Value.absent(),
+              }) => LotteryPoolRecordsCompanion.insert(
+                id: id,
+                name: name,
+                items: items,
+                repeat: repeat,
+                round: round,
+                revision: revision,
+                drawn: drawn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LotteryPoolRecordsTable, StoredLotteryPool>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$PlannerStore,
+                    $LotteryPoolRecordsTable,
+                    StoredLotteryPool
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LotteryPoolRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $LotteryPoolRecordsTable,
+      StoredLotteryPool,
+      $$LotteryPoolRecordsTableFilterComposer,
+      $$LotteryPoolRecordsTableOrderingComposer,
+      $$LotteryPoolRecordsTableAnnotationComposer,
+      $$LotteryPoolRecordsTableCreateCompanionBuilder,
+      $$LotteryPoolRecordsTableUpdateCompanionBuilder,
+      (
+        StoredLotteryPool,
+        BaseReferences<
+          _$PlannerStore,
+          $LotteryPoolRecordsTable,
+          StoredLotteryPool
+        >,
+      ),
+      StoredLotteryPool,
+      PrefetchHooks Function()
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -8471,4 +9163,6 @@ class $PlannerStoreManager {
       $$WheelListRecordsTableTableManager(_db, _db.wheelListRecords);
   $$RollCallListRecordsTableTableManager get rollCallListRecords =>
       $$RollCallListRecordsTableTableManager(_db, _db.rollCallListRecords);
+  $$LotteryPoolRecordsTableTableManager get lotteryPoolRecords =>
+      $$LotteryPoolRecordsTableTableManager(_db, _db.lotteryPoolRecords);
 }

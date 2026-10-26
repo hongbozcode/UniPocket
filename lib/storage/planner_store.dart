@@ -10,6 +10,7 @@ import '../events/model.dart';
 import '../timetable/course_change.dart';
 import '../random_tools/wheel_list.dart';
 import '../random_tools/roll_call.dart';
+import '../random_tools/lottery.dart';
 
 part 'planner_store.g.dart';
 
@@ -139,6 +140,17 @@ class RollCallListRecords extends Table {
   TextColumn get drawn => text().withDefault(const Constant('[]'))();
 }
 
+@DataClassName('StoredLotteryPool')
+class LotteryPoolRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get items => text()();
+  BoolColumn get repeat => boolean().withDefault(const Constant(false))();
+  IntColumn get round => integer().withDefault(const Constant(1))();
+  IntColumn get revision => integer().withDefault(const Constant(0))();
+  TextColumn get drawn => text().withDefault(const Constant('[]'))();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -152,6 +164,7 @@ class RollCallListRecords extends Table {
     IndependentLessonRecords,
     WheelListRecords,
     RollCallListRecords,
+    LotteryPoolRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -168,7 +181,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -178,6 +191,7 @@ class PlannerStore extends _$PlannerStore {
           .insert(const SettingsRecordsCompanion(id: Value(1)));
     },
     onUpgrade: (m, from, to) async {
+      if (from < 12) await m.createTable(lotteryPoolRecords);
       if (from < 11) await m.createTable(rollCallListRecords);
       if (from < 10) await m.createTable(wheelListRecords);
       if (from < 2) {
@@ -206,6 +220,84 @@ class PlannerStore extends _$PlannerStore {
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
+
+  LotteryPool _lotteryPool(StoredLotteryPool row) => LotteryPool(
+    id: row.id,
+    name: row.name,
+    repeat: row.repeat,
+    round: row.round,
+    revision: row.revision,
+    items: (jsonDecode(row.items) as List).cast<String>(),
+    drawn: (jsonDecode(row.drawn) as List).cast<int>(),
+  );
+
+  Future<List<LotteryPool>> readLotteryPools() async =>
+      (await (select(
+            lotteryPoolRecords,
+          )..orderBy([(t) => OrderingTerm.asc(t.id)])).get())
+          .map(_lotteryPool)
+          .toList();
+
+  Future<LotteryPool> readLotteryPool(int id) async => _lotteryPool(
+    await (select(
+      lotteryPoolRecords,
+    )..where((t) => t.id.equals(id))).getSingle(),
+  );
+
+  Future<LotteryPool> writeLotteryPool({
+    int? id,
+    required String name,
+    required List<String> items,
+  }) => transaction(() async {
+    final before = id == null ? null : await readLotteryPool(id!);
+    final values = LotteryPoolRecordsCompanion(
+      name: Value(name),
+      items: Value(jsonEncode(items)),
+      drawn: const Value('[]'),
+      round: Value(before == null ? 1 : before.round + 1),
+      revision: Value(before == null ? 0 : before.revision + 1),
+    );
+    if (id == null) {
+      id = await into(lotteryPoolRecords).insert(values);
+    } else {
+      await (update(
+        lotteryPoolRecords,
+      )..where((t) => t.id.equals(id!))).write(values);
+    }
+    return readLotteryPool(id!);
+  });
+
+  Future<LotteryPool> commitLottery(LotteryPool before, int index) =>
+      transaction(() async {
+        final count =
+            await (update(lotteryPoolRecords)..where(
+                  (t) =>
+                      t.id.equals(before.id) &
+                      t.revision.equals(before.revision),
+                ))
+                .write(
+                  LotteryPoolRecordsCompanion(
+                    drawn: Value(jsonEncode([...before.drawn, index])),
+                    revision: Value(before.revision + 1),
+                  ),
+                );
+        if (count != 1) throw StateError('签池或轮次已改变，请重新抽签');
+        return readLotteryPool(before.id);
+      });
+
+  Future<LotteryPool> resetLottery(int id, {bool? repeat}) =>
+      transaction(() async {
+        final before = await readLotteryPool(id);
+        await (update(lotteryPoolRecords)..where((t) => t.id.equals(id))).write(
+          LotteryPoolRecordsCompanion(
+            drawn: const Value('[]'),
+            round: Value(before.round + 1),
+            revision: Value(before.revision + 1),
+            repeat: repeat == null ? const Value.absent() : Value(repeat),
+          ),
+        );
+        return readLotteryPool(id);
+      });
 
   RollCallList _rollCallList(StoredRollCallList row) => RollCallList(
     id: row.id,

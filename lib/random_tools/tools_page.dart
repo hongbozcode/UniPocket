@@ -8,6 +8,7 @@ import '../ui/design.dart';
 import 'toss_page.dart';
 import 'wheel_page.dart';
 import 'roll_call_page.dart';
+import 'lottery_page.dart';
 
 class ToolsPage extends StatelessWidget {
   const ToolsPage({required this.planner, this.random, super.key});
@@ -63,6 +64,19 @@ class ToolsPage extends StatelessWidget {
                   ),
                 ),
               ),
+              _ToolCard(
+                width: width,
+                title: '抽签',
+                subtitle: '抽一份小期待',
+                art: 'lottery-bag',
+                surface: const Color(0xffffe7d7),
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        LotteryPage(planner: planner, random: random),
+                  ),
+                ),
+              ),
               for (final tool in TossTool.values)
                 _ToolCard(
                   width: width,
@@ -115,12 +129,19 @@ class _ToolCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: SvgPicture.asset(
-                  'docs/design/resources/illustrations/$art.svg',
-                  width: 100,
-                  height: 100,
-                  excludeFromSemantics: true,
-                ),
+                child: art == 'lottery-bag'
+                    ? Image.asset(
+                        'docs/design/resources/illustrations/lottery-bag.png',
+                        width: 100,
+                        height: 100,
+                        excludeFromSemantics: true,
+                      )
+                    : SvgPicture.asset(
+                        'docs/design/resources/illustrations/$art.svg',
+                        width: 100,
+                        height: 100,
+                        excludeFromSemantics: true,
+                      ),
               ),
               const SizedBox(height: 8),
               Text(
