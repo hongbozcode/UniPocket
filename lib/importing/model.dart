@@ -75,30 +75,30 @@ class ImportRow {
   final List<String> errors;
 }
 
-class ImportPreview {
-  ImportPreview(
-    this._save, {
-    required this.draft,
-    required List<ImportRow> rows,
-    required List<String> conflicts,
-  }) : rows = List.unmodifiable(rows),
-       conflicts = List.unmodifiable(conflicts);
-  final ImportDraft draft;
+class ImportAssessment {
+  ImportAssessment(List<ImportRow> rows, List<String> conflicts)
+    : rows = List.unmodifiable(rows),
+      conflicts = List.unmodifiable(conflicts);
   final List<ImportRow> rows;
   final List<String> conflicts;
-  final Future<List<int>> Function(bool) _save;
-  Future<List<int>>? _submission;
 
   int get selectedCount => rows.where((r) => r.candidate.selected).length;
   bool get canSubmit =>
       selectedCount > 0 &&
       rows.every((r) => !r.candidate.selected || r.errors.isEmpty);
+}
+
+class ImportPreview extends ImportAssessment {
+  ImportPreview(ImportAssessment assessment, this._save)
+    : super(assessment.rows, assessment.conflicts);
+  final Future<List<int>> Function(bool) _save;
+  Future<List<int>>? _submission;
 
   /// One successful submission per preview, including simultaneous taps.
   /// Failure releases the attempt so the same preview can be retried.
   Future<List<int>> commit({bool allowConflicts = false}) {
     if (!canSubmit) {
-      return Future.error(const InputProblem('请先修正或排除错误项，并至少选择一项。'));
+      return Future.error(const InputProblem('先勾选要导入的课程，再补好待核对的信息。'));
     }
     return _submission ??= _attempt(allowConflicts);
   }

@@ -37,6 +37,7 @@ void main() {
         await planner.saveCourse(testCandidate('测试原有课程').toCourse(target));
         await tester.pumpWidget(
           MaterialApp(
+            debugShowCheckedModeBanner: false,
             theme: appTheme(),
             locale: const Locale('zh', 'CN'),
             supportedLocales: const [Locale('zh', 'CN')],
@@ -46,7 +47,7 @@ void main() {
               sourceName: '测试候选数据 · 非学校解析结果',
               initialSemesterId: current,
               loadCandidates: () async => [
-                testCandidate('', id: 'correct', errors: ['测试识别错误：请核对课程名称']),
+                testCandidate('', id: 'correct', errors: ['还缺一个课程名称，请补充一下。']),
                 testCandidate('测试错误项', id: 'exclude', start: 99),
                 testCandidate(
                   '测试重复项',
@@ -72,32 +73,41 @@ void main() {
         );
         await tapVisible(tester, find.byKey(const ValueKey('import-reviewed')));
         await capture('correction');
-        await tapVisible(tester, find.text('应用修改'));
+        await tapVisible(
+          tester,
+          find.byKey(const ValueKey('apply-import-correction')),
+        );
         await tapVisible(
           tester,
           find.byKey(const ValueKey('select-import-exclude')),
         );
         await capture('excluded');
-        await tapVisible(tester, find.text('时间冲突 · 需要单独确认'));
+        await tapVisible(
+          tester,
+          find.byKey(const ValueKey('import-conflicts')),
+        );
         await capture('conflicts');
-        await tapVisible(tester, find.text('确认导入 1 项'));
+        await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
         await capture('confirmation');
-        await tapVisible(tester, find.text('继续核对'));
+        await tapVisible(
+          tester,
+          find.byKey(const ValueKey('keep-reviewing-import')),
+        );
         expect((await planner.load()).courses, hasLength(1));
         await store.customStatement(
           '''CREATE TRIGGER fail_acceptance_import BEFORE INSERT ON schedule_records
           WHEN NEW.course_id <> 1 BEGIN SELECT RAISE(ABORT, 'test write failure'); END''',
         );
-        await tapVisible(tester, find.text('确认导入 1 项'));
-        await tapVisible(tester, find.text('保留冲突并保存'));
+        await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+        await tapVisible(tester, find.byKey(const ValueKey('save-import')));
         await capture('rollback-result');
-        await waitFor(tester, find.textContaining('导入失败，未保存任何'));
+        await waitFor(tester, find.textContaining('这次没能保存'));
         await capture('rollback');
         expect((await planner.load()).courses.single.name, '测试原有课程');
         await store.customStatement('DROP TRIGGER fail_acceptance_import');
-        await tapVisible(tester, find.text('确认导入 1 项'));
-        await tapVisible(tester, find.text('保留冲突并保存'));
-        await waitFor(tester, find.text('导入完成'));
+        await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+        await tapVisible(tester, find.byKey(const ValueKey('save-import')));
+        await waitFor(tester, find.text('课表已更新'));
         await capture('success');
         final state = await planner.load();
         expect(state.currentSemesterId, current);

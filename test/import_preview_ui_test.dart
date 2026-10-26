@@ -28,6 +28,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: appTheme(),
         locale: const Locale('zh', 'CN'),
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -58,15 +59,18 @@ void main() {
       '已修正的测试课程',
     );
     await tapVisible(tester, find.byKey(const ValueKey('import-reviewed')));
-    await tapVisible(tester, find.text('应用修改'));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('apply-import-correction')),
+    );
     await tapVisible(
       tester,
       find.byKey(const ValueKey('select-import-exclude')),
     );
     expect((await planner.load()).courses, isEmpty);
-    await tapVisible(tester, find.text('确认导入 1 项'));
-    await tapVisible(tester, find.text('保存到目标学期'));
-    expect(find.text('导入完成'), findsOneWidget);
+    await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+    await tapVisible(tester, find.byKey(const ValueKey('save-import')));
+    expect(find.text('课表已更新'), findsOneWidget);
     expect((await planner.load()).courses.single.name, '已修正的测试课程');
     expect(tester.takeException(), isNull);
   });
@@ -85,6 +89,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: appTheme(),
         home: Builder(
           builder: (context) => Scaffold(
@@ -111,19 +116,22 @@ void main() {
     await tester.tap(find.text('打开测试预览'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('正在加载与检查候选结果…'), findsOneWidget);
+    expect(find.text('正在整理课表…'), findsOneWidget);
     pending.completeError(Exception('test parser boundary failure'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('解析结果加载失败'), findsOneWidget);
+    expect(find.textContaining('没能读出课表'), findsOneWidget);
     retry = true;
-    await tapVisible(tester, find.text('重试'));
+    await tapVisible(tester, find.text('重新读取'));
     await tapVisible(tester, find.byType(DropdownButtonFormField<int>));
     await tapVisible(tester, find.text('目标春季').last);
-    await tapVisible(tester, find.text('确认导入 1 项'));
+    await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
     expect(find.textContaining('目标春季'), findsWidgets);
-    await tapVisible(tester, find.text('继续核对'));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('keep-reviewing-import')),
+    );
     expect((await planner.load()).courses, isEmpty);
-    await tapVisible(tester, find.text('取消导入'));
+    await tapVisible(tester, find.byKey(const ValueKey('cancel-import')));
     expect(find.text('打开测试预览'), findsOneWidget);
     expect((await planner.load()).courses, isEmpty);
     expect((await planner.load()).currentSemesterId, first);
@@ -143,6 +151,7 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: appTheme(),
         home: ImportPreviewPage(
           planner: planner,
@@ -153,19 +162,107 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('时间冲突 · 需要单独确认'));
-    await tapVisible(tester, find.text('确认导入 1 项'));
-    await tapVisible(tester, find.text('继续核对'));
+    await tapVisible(tester, find.byKey(const ValueKey('import-conflicts')));
+    await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('keep-reviewing-import')),
+    );
     expect((await planner.load()).courses, hasLength(1));
-    await tapVisible(tester, find.text('确认导入 1 项'));
-    await tapVisible(tester, find.text('保留冲突并保存'));
-    expect(find.textContaining('导入失败，未保存任何'), findsOneWidget);
+    await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+    await tapVisible(tester, find.byKey(const ValueKey('save-import')));
+    expect(find.textContaining('这次没能保存'), findsOneWidget);
     expect((await planner.load()).courses, hasLength(1));
     await store.customStatement('DROP TRIGGER fail_ui_import');
-    await tapVisible(tester, find.text('确认导入 1 项'));
-    await tapVisible(tester, find.text('保留冲突并保存'));
-    expect(find.text('导入完成'), findsOneWidget);
+    await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+    await tapVisible(tester, find.byKey(const ValueKey('save-import')));
+    expect(find.text('课表已更新'), findsOneWidget);
     expect((await planner.load()).courses, hasLength(2));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('修改并删除一条安排后，其余安排显示的星期与保存结果一致', (tester) async {
+    final store = PlannerStore(NativeDatabase.memory());
+    addTearDown(store.close);
+    final planner = SemesterPlanner(store);
+    final semester = await planner.saveSemester(semesterDraft('测试学期'));
+    final candidate = testCandidate('多安排测试');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: appTheme(),
+        home: ImportPreviewPage(
+          planner: planner,
+          sourceName: '测试数据',
+          initialSemesterId: semester,
+          loadCandidates: () async => [
+            candidate.copyWith(
+              schedules: [...candidate.schedules, ...candidate.schedules],
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const ValueKey('edit-import-多安排测试')));
+    await tapVisible(tester, find.byType(DropdownButtonFormField<int>).first);
+    await tapVisible(tester, find.text('周三').last);
+    await tapVisible(tester, find.text('删除这条安排').first);
+    await tester.ensureVisible(find.byType(DropdownButtonFormField<int>));
+    await tester.pumpAndSettle();
+    expect(find.text('周一'), findsOneWidget);
+    expect(find.text('周三'), findsNothing);
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('apply-import-correction')),
+    );
+    await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+    await tapVisible(tester, find.byKey(const ValueKey('save-import')));
+    expect((await planner.load()).courses.single.schedules.single.weekday, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('数据库繁忙时按钮就地显示保存进度，重复点击不会重复导入', (tester) async {
+    final store = PlannerStore(NativeDatabase.memory());
+    addTearDown(store.close);
+    final planner = SemesterPlanner(store);
+    final semester = await planner.saveSemester(semesterDraft('测试目标'));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: appTheme(),
+        home: ImportPreviewPage(
+          planner: planner,
+          sourceName: '测试数据',
+          initialSemesterId: semester,
+          loadCandidates: () async => [testCandidate('进度测试')],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final started = Completer<void>();
+    final release = Completer<void>();
+    final busy = store.transaction(() async {
+      started.complete();
+      await release.future;
+    });
+    try {
+      await started.future;
+      await tapVisible(tester, find.byKey(const ValueKey('confirm-import')));
+      await tester.tap(find.byKey(const ValueKey('save-import')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(
+        find.byKey(const ValueKey('import-save-progress')),
+        findsOneWidget,
+      );
+      expect(find.text('正在加入课表…'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('confirm-import')));
+    } finally {
+      release.complete();
+      await busy;
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('课表已更新'), findsOneWidget);
+    expect((await planner.load()).courses.single.name, '进度测试');
     expect(tester.takeException(), isNull);
   });
 }

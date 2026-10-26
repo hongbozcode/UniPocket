@@ -299,23 +299,19 @@ class SemesterPlanner {
   Future<PlannerState> load() => _store.readState();
 
   Future<ImportPreview> previewImport(ImportDraft draft) async {
-    late final ImportPreview preview;
-    preview = buildImportPreview(
-      await load(),
-      draft,
+    final assessment = assessImport(await load(), draft);
+    return ImportPreview(
+      assessment,
       (allowConflicts) => _refreshAfter(
         _store.transaction(() async {
-          final fresh = buildImportPreview(
-            await load(),
-            draft,
-            (_) async => [],
-          );
+          final fresh = assessImport(await load(), draft);
           if (!fresh.canSubmit) {
-            throw const InputProblem('请先修正或排除错误项，并至少选择一项。');
+            throw const InputProblem('先勾选要导入的课程，再补好待核对的信息。');
           }
           if (fresh.conflicts.isNotEmpty &&
               (!allowConflicts ||
-                  fresh.conflicts.join('\n') != preview.conflicts.join('\n'))) {
+                  fresh.conflicts.join('\n') !=
+                      assessment.conflicts.join('\n'))) {
             throw CourseConflict(fresh.conflicts);
           }
           final ids = <int>[];
@@ -328,7 +324,6 @@ class SemesterPlanner {
         }),
       ),
     );
-    return preview;
   }
 
   Future<T> _refreshAfter<T>(Future<T> change) async {

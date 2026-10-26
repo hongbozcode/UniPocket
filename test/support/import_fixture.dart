@@ -13,7 +13,7 @@ ImportCandidate testCandidate(
   bool? selected,
 }) => ImportCandidate(
   id: id ?? name,
-  sourceLabel: '测试候选 · ${id ?? name}',
+  sourceLabel: '示例课程数据（仅用于测试）',
   name: name,
   errors: errors,
   duplicateDescription: duplicate,

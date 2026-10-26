@@ -4,6 +4,8 @@ import '../semesters/model.dart';
 import '../timetable/model.dart';
 import '../ui/design.dart';
 import 'model.dart';
+import 'messages.dart';
+import 'import_widgets.dart';
 
 class ImportCandidateEditor extends StatefulWidget {
   const ImportCandidateEditor({
@@ -37,18 +39,18 @@ class _ScheduleInput {
   ScheduleDraft read(int totalWeeks) {
     int number(String text) {
       final value = int.tryParse(text.trim());
-      if (value == null) throw const InputProblem('星期和节次须填写整数。');
+      if (value == null) throw const InputProblem('节次请填数字，例如第 1 节填“1”。');
       return value;
     }
 
     final selected = <int>{};
     for (final part in weeks.text.trim().split(RegExp(r'[、,，\s]+'))) {
       final range = RegExp(r'^(\d+)(?:-(\d+))?$').firstMatch(part);
-      if (range == null) throw const InputProblem('教学周请填写 1、3、5 或 1-8。');
+      if (range == null) throw const InputProblem('教学周可以这样填：1-8、10、12。');
       final first = int.parse(range[1]!);
       final last = int.parse(range[2] ?? range[1]!);
       if (first < 1 || last < first || last > totalWeeks) {
-        throw const InputProblem('请按从小到大的有效范围填写教学周。');
+        throw InputProblem('这个学期有 $totalWeeks 周，请在 1–$totalWeeks 周内填写。');
       }
       selected.addAll([for (var week = first; week <= last; week++) week]);
     }
@@ -86,7 +88,7 @@ class _ImportCandidateEditorState extends State<ImportCandidateEditor> {
   void _apply() {
     try {
       if (widget.candidate.errors.isNotEmpty && !_reviewed) {
-        throw const InputProblem('请核对识别问题，或返回预览排除此项。');
+        throw const InputProblem('核对好后，勾选“以上信息已核对”就能继续。');
       }
       final corrected = widget.candidate.copyWith(
         name: _name.text.trim(),
@@ -99,50 +101,57 @@ class _ImportCandidateEditorState extends State<ImportCandidateEditor> {
       corrected.toCourse(widget.semester.id).validate(widget.semester);
       Navigator.pop(context, corrected);
     } on InputProblem catch (error) {
-      setState(() => _error = error.message);
-      if (_scroll.hasClients) _scroll.jumpTo(0);
+      setState(() => _error = importGuidance(error.message));
     }
   }
 
-  Widget _field(String label, TextEditingController controller, {Key? key}) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: InputDecoration(labelText: label),
-        ),
-      );
+  Widget _field(
+    String label,
+    TextEditingController controller, {
+    Key? key,
+    String? hint,
+    bool number = false,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: TextField(
+      key: key,
+      controller: controller,
+      keyboardType: number ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(labelText: label, helperText: hint),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('修正候选课程')),
+    appBar: AppBar(title: const Text('修改课程信息')),
     body: SafeArea(
       child: PageContent(
         controller: _scroll,
         children: [
-          PageHeading('核对课程与安排', widget.candidate.sourceLabel, art: 'book'),
-          if (_error != null) ProblemBanner(_error!),
+          PageHeading(
+            '把课程信息补完整',
+            widget.candidate.sourceLabel,
+            art: 'book',
+            bottomSpacing: 20,
+          ),
           if (widget.candidate.errors.isNotEmpty) ...[
-            ProblemBanner(widget.candidate.errors.join('\n')),
-            CheckboxListTile(
-              key: const ValueKey('import-reviewed'),
-              value: _reviewed,
-              onChanged: (value) => setState(() => _reviewed = value!),
-              title: const Text('我已核对并修正以上识别问题'),
-              contentPadding: EdgeInsets.zero,
+            ImportNotice(
+              '这几处需要你看一下',
+              message: widget.candidate.errors.map((e) => '• $e').join('\n'),
             ),
+            const SizedBox(height: 16),
           ],
           SurfaceCard(
             child: Column(
               children: [
                 _field('课程名称', _name, key: const ValueKey('import-name')),
-                _field('教师（可不填）', _teacher),
+                _field('教师（选填）', _teacher),
               ],
             ),
           ),
           for (var i = 0; i < _schedules.length; i++)
             Padding(
+              key: ObjectKey(_schedules[i]),
               padding: const EdgeInsets.only(top: 16),
               child: SurfaceCard(
                 child: Column(
@@ -153,18 +162,36 @@ class _ImportCandidateEditorState extends State<ImportCandidateEditor> {
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 16),
-                    _field('星期（1 为周一，7 为周日）', _schedules[i].weekday),
-                    _field('开始节次', _schedules[i].start),
-                    _field('结束节次', _schedules[i].end),
-                    _field('地点（可不填）', _schedules[i].location),
-                    _field('教学周（如 1-8、10、12）', _schedules[i].weeks),
+                    DropdownButtonFormField<int>(
+                      initialValue: switch (int.tryParse(
+                        _schedules[i].weekday.text,
+                      )) {
+                        final int day when day >= 1 && day <= 7 => day,
+                        _ => null,
+                      },
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: '上课星期'),
+                      items: [
+                        for (var day = 1; day <= 7; day++)
+                          DropdownMenuItem(
+                            value: day,
+                            child: Text(weekdayNames[day - 1]),
+                          ),
+                      ],
+                      onChanged: (day) => _schedules[i].weekday.text = '$day',
+                    ),
+                    const SizedBox(height: 16),
+                    _field('开始节次', _schedules[i].start, number: true),
+                    _field('结束节次', _schedules[i].end, number: true),
+                    _field('上课地点（选填）', _schedules[i].location),
+                    _field('教学周', _schedules[i].weeks, hint: '例如 1-8、10、12'),
                     TextButton(
                       onPressed: () {
                         final removed = _schedules[i];
                         setState(() => _schedules.removeAt(i));
                         removed.dispose();
                       },
-                      child: const Text('移除此安排'),
+                      child: const Text('删除这条安排'),
                     ),
                   ],
                 ),
@@ -187,7 +214,24 @@ class _ImportCandidateEditorState extends State<ImportCandidateEditor> {
             child: const Text('添加上课安排'),
           ),
           const SizedBox(height: 16),
-          FilledButton(onPressed: _apply, child: const Text('应用修改')),
+          if (widget.candidate.errors.isNotEmpty)
+            CheckboxListTile(
+              key: const ValueKey('import-reviewed'),
+              value: _reviewed,
+              onChanged: (value) => setState(() => _reviewed = value!),
+              title: const Text('以上信息已核对'),
+              contentPadding: EdgeInsets.zero,
+            ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ImportNotice(_error!, error: true),
+            ),
+          FilledButton(
+            key: const ValueKey('apply-import-correction'),
+            onPressed: _apply,
+            child: const Text('完成核对'),
+          ),
         ],
       ),
     ),
