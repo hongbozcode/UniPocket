@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../storage/planner_store.dart';
+import '../importing/model.dart';
+import '../importing/preview.dart';
 import '../timetable/model.dart';
 import '../timetable/course_change.dart';
 import '../tasks/model.dart';
@@ -295,6 +297,39 @@ class SemesterPlanner {
   }
 
   Future<PlannerState> load() => _store.readState();
+
+  Future<ImportPreview> previewImport(ImportDraft draft) async {
+    late final ImportPreview preview;
+    preview = buildImportPreview(
+      await load(),
+      draft,
+      (allowConflicts) => _refreshAfter(
+        _store.transaction(() async {
+          final fresh = buildImportPreview(
+            await load(),
+            draft,
+            (_) async => [],
+          );
+          if (!fresh.canSubmit) {
+            throw const InputProblem('请先修正或排除错误项，并至少选择一项。');
+          }
+          if (fresh.conflicts.isNotEmpty &&
+              (!allowConflicts ||
+                  fresh.conflicts.join('\n') != preview.conflicts.join('\n'))) {
+            throw CourseConflict(fresh.conflicts);
+          }
+          final ids = <int>[];
+          for (final candidate in draft.candidates.where((c) => c.selected)) {
+            ids.add(
+              await _store.saveCourse(candidate.toCourse(draft.semesterId)),
+            );
+          }
+          return ids;
+        }),
+      ),
+    );
+    return preview;
+  }
 
   Future<T> _refreshAfter<T>(Future<T> change) async {
     final result = await change;
