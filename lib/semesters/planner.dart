@@ -14,6 +14,7 @@ import 'model.dart';
 import '../random_tools/wheel_list.dart';
 import '../random_tools/roll_call.dart';
 import '../random_tools/lottery.dart';
+import '../random_tools/groups.dart';
 
 /// The application boundary for local learning data. The same operations
 /// drive the UI and tests that close and reopen the real local database.
@@ -31,6 +32,60 @@ class SemesterPlanner {
   Future<void>? _notificationQueue;
 
   Future<List<WheelList>> loadWheelLists() => _store.readWheelLists();
+
+  Future<List<GroupList>> loadGroupLists() => _store.readGroupLists();
+
+  Future<List<List<GroupMember>>> makeGroups(
+    int id, {
+    required GroupMode mode,
+    required int amount,
+    Random? random,
+  }) async {
+    final list = await _store.readGroupList(id);
+    if (list.members.isEmpty) throw const FormatException('请先添加名单成员');
+    if (amount < 1) throw const FormatException('请输入大于 0 的整数');
+    if (mode == GroupMode.count && amount > list.members.length) {
+      throw const FormatException('组数不能超过名单人数');
+    }
+    final shuffled = List<GroupMember>.of(list.members);
+    final source = random ?? Random();
+    for (var i = shuffled.length - 1; i > 0; i--) {
+      final j = source.nextInt(i + 1);
+      final member = shuffled[i];
+      shuffled[i] = shuffled[j];
+      shuffled[j] = member;
+    }
+    final count = mode == GroupMode.count
+        ? amount
+        : 1 + (shuffled.length - 1) ~/ amount;
+    final groups = List.generate(count, (_) => <GroupMember>[]);
+    for (var i = 0; i < shuffled.length; i++) {
+      groups[i % count].add(shuffled[i]);
+    }
+    return List.unmodifiable(
+      groups.map((g) => List<GroupMember>.unmodifiable(g)),
+    );
+  }
+
+  Future<GroupList> saveGroupList({
+    int? id,
+    required String name,
+    required List<GroupMember> members,
+  }) {
+    if (name.trim().isEmpty) throw const FormatException('请为名单命名');
+    if (members.any((m) => m.name.trim().isEmpty || m.id < 1) ||
+        members.map((m) => m.id).toSet().length != members.length) {
+      throw const FormatException('成员姓名不能为空，成员身份必须独立');
+    }
+    return _store.writeGroupList(
+      id: id,
+      name: name.trim(),
+      members: [
+        for (final m in members)
+          GroupMember(id: m.id, name: m.name.trim(), detail: m.detail.trim()),
+      ],
+    );
+  }
 
   Future<List<LotteryPool>> loadLotteryPools() => _store.readLotteryPools();
 

@@ -4799,6 +4799,255 @@ class LotteryPoolRecordsCompanion extends UpdateCompanion<StoredLotteryPool> {
   }
 }
 
+class $GroupListRecordsTable extends GroupListRecords
+    with TableInfo<$GroupListRecordsTable, StoredGroupList> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GroupListRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _membersMeta = const VerificationMeta(
+    'members',
+  );
+  @override
+  late final GeneratedColumn<String> members = GeneratedColumn<String>(
+    'members',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, members];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'group_list_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoredGroupList> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('members')) {
+      context.handle(
+        _membersMeta,
+        members.isAcceptableOrUnknown(data['members']!, _membersMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_membersMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoredGroupList map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoredGroupList(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      members: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}members'],
+      )!,
+    );
+  }
+
+  @override
+  $GroupListRecordsTable createAlias(String alias) {
+    return $GroupListRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class StoredGroupList extends DataClass implements Insertable<StoredGroupList> {
+  final int id;
+  final String name;
+  final String members;
+  const StoredGroupList({
+    required this.id,
+    required this.name,
+    required this.members,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['members'] = Variable<String>(members);
+    return map;
+  }
+
+  GroupListRecordsCompanion toCompanion(bool nullToAbsent) {
+    return GroupListRecordsCompanion(
+      id: Value(id),
+      name: Value(name),
+      members: Value(members),
+    );
+  }
+
+  factory StoredGroupList.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoredGroupList(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      members: serializer.fromJson<String>(json['members']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'members': serializer.toJson<String>(members),
+    };
+  }
+
+  StoredGroupList copyWith({int? id, String? name, String? members}) =>
+      StoredGroupList(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        members: members ?? this.members,
+      );
+  StoredGroupList copyWithCompanion(GroupListRecordsCompanion data) {
+    return StoredGroupList(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      members: data.members.present ? data.members.value : this.members,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoredGroupList(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('members: $members')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, members);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StoredGroupList &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.members == this.members);
+}
+
+class GroupListRecordsCompanion extends UpdateCompanion<StoredGroupList> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> members;
+  const GroupListRecordsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.members = const Value.absent(),
+  });
+  GroupListRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String members,
+  }) : name = Value(name),
+       members = Value(members);
+  static Insertable<StoredGroupList> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? members,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (members != null) 'members': members,
+    });
+  }
+
+  GroupListRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? members,
+  }) {
+    return GroupListRecordsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      members: members ?? this.members,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (members.present) {
+      map['members'] = Variable<String>(members.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GroupListRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('members: $members')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PlannerStore extends GeneratedDatabase {
   _$PlannerStore(QueryExecutor e) : super(e);
   $PlannerStoreManager get managers => $PlannerStoreManager(this);
@@ -4828,6 +5077,9 @@ abstract class _$PlannerStore extends GeneratedDatabase {
       $RollCallListRecordsTable(this);
   late final $LotteryPoolRecordsTable lotteryPoolRecords =
       $LotteryPoolRecordsTable(this);
+  late final $GroupListRecordsTable groupListRecords = $GroupListRecordsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4845,6 +5097,7 @@ abstract class _$PlannerStore extends GeneratedDatabase {
     wheelListRecords,
     rollCallListRecords,
     lotteryPoolRecords,
+    groupListRecords,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9134,6 +9387,172 @@ typedef $$LotteryPoolRecordsTableProcessedTableManager =
       StoredLotteryPool,
       PrefetchHooks Function()
     >;
+typedef $$GroupListRecordsTableCreateCompanionBuilder =
+    GroupListRecordsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String members,
+    });
+typedef $$GroupListRecordsTableUpdateCompanionBuilder =
+    GroupListRecordsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> members,
+    });
+
+class $$GroupListRecordsTableFilterComposer
+    extends Composer<_$PlannerStore, $GroupListRecordsTable> {
+  $$GroupListRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get members => $composableBuilder(
+    column: $table.members,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GroupListRecordsTableOrderingComposer
+    extends Composer<_$PlannerStore, $GroupListRecordsTable> {
+  $$GroupListRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get members => $composableBuilder(
+    column: $table.members,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GroupListRecordsTableAnnotationComposer
+    extends Composer<_$PlannerStore, $GroupListRecordsTable> {
+  $$GroupListRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get members =>
+      $composableBuilder(column: $table.members, builder: (column) => column);
+}
+
+class $$GroupListRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$PlannerStore,
+          $GroupListRecordsTable,
+          StoredGroupList,
+          $$GroupListRecordsTableFilterComposer,
+          $$GroupListRecordsTableOrderingComposer,
+          $$GroupListRecordsTableAnnotationComposer,
+          $$GroupListRecordsTableCreateCompanionBuilder,
+          $$GroupListRecordsTableUpdateCompanionBuilder,
+          (
+            StoredGroupList,
+            BaseReferences<
+              _$PlannerStore,
+              $GroupListRecordsTable,
+              StoredGroupList
+            >,
+          ),
+          StoredGroupList,
+          PrefetchHooks Function()
+        > {
+  $$GroupListRecordsTableTableManager(
+    _$PlannerStore db,
+    $GroupListRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GroupListRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GroupListRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GroupListRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> members = const Value.absent(),
+          }) => GroupListRecordsCompanion(id: id, name: name, members: members),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String members,
+              }) => GroupListRecordsCompanion.insert(
+                id: id,
+                name: name,
+                members: members,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$GroupListRecordsTable, StoredGroupList>(table),
+                  BaseReferences<
+                    _$PlannerStore,
+                    $GroupListRecordsTable,
+                    StoredGroupList
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GroupListRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PlannerStore,
+      $GroupListRecordsTable,
+      StoredGroupList,
+      $$GroupListRecordsTableFilterComposer,
+      $$GroupListRecordsTableOrderingComposer,
+      $$GroupListRecordsTableAnnotationComposer,
+      $$GroupListRecordsTableCreateCompanionBuilder,
+      $$GroupListRecordsTableUpdateCompanionBuilder,
+      (
+        StoredGroupList,
+        BaseReferences<_$PlannerStore, $GroupListRecordsTable, StoredGroupList>,
+      ),
+      StoredGroupList,
+      PrefetchHooks Function()
+    >;
 
 class $PlannerStoreManager {
   final _$PlannerStore _db;
@@ -9165,4 +9584,6 @@ class $PlannerStoreManager {
       $$RollCallListRecordsTableTableManager(_db, _db.rollCallListRecords);
   $$LotteryPoolRecordsTableTableManager get lotteryPoolRecords =>
       $$LotteryPoolRecordsTableTableManager(_db, _db.lotteryPoolRecords);
+  $$GroupListRecordsTableTableManager get groupListRecords =>
+      $$GroupListRecordsTableTableManager(_db, _db.groupListRecords);
 }

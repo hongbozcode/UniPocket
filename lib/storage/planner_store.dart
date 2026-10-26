@@ -11,6 +11,7 @@ import '../timetable/course_change.dart';
 import '../random_tools/wheel_list.dart';
 import '../random_tools/roll_call.dart';
 import '../random_tools/lottery.dart';
+import '../random_tools/groups.dart';
 
 part 'planner_store.g.dart';
 
@@ -151,6 +152,13 @@ class LotteryPoolRecords extends Table {
   TextColumn get drawn => text().withDefault(const Constant('[]'))();
 }
 
+@DataClassName('StoredGroupList')
+class GroupListRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get members => text()();
+}
+
 @DriftDatabase(
   tables: [
     SemesterRecords,
@@ -165,6 +173,7 @@ class LotteryPoolRecords extends Table {
     WheelListRecords,
     RollCallListRecords,
     LotteryPoolRecords,
+    GroupListRecords,
   ],
 )
 class PlannerStore extends _$PlannerStore {
@@ -181,7 +190,7 @@ class PlannerStore extends _$PlannerStore {
   );
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -191,6 +200,7 @@ class PlannerStore extends _$PlannerStore {
           .insert(const SettingsRecordsCompanion(id: Value(1)));
     },
     onUpgrade: (m, from, to) async {
+      if (from < 13) await m.createTable(groupListRecords);
       if (from < 12) await m.createTable(lotteryPoolRecords);
       if (from < 11) await m.createTable(rollCallListRecords);
       if (from < 10) await m.createTable(wheelListRecords);
@@ -220,6 +230,51 @@ class PlannerStore extends _$PlannerStore {
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
+
+  GroupList _groupList(StoredGroupList row) => GroupList(
+    id: row.id,
+    name: row.name,
+    members: [
+      for (final m in jsonDecode(row.members) as List)
+        GroupMember(
+          id: m['id'] as int,
+          name: m['name'] as String,
+          detail: m['detail'] as String,
+        ),
+    ],
+  );
+
+  Future<List<GroupList>> readGroupLists() async => (await (select(
+    groupListRecords,
+  )..orderBy([(t) => OrderingTerm.asc(t.id)])).get()).map(_groupList).toList();
+
+  Future<GroupList> readGroupList(int id) async => _groupList(
+    await (select(groupListRecords)..where((t) => t.id.equals(id))).getSingle(),
+  );
+
+  Future<GroupList> writeGroupList({
+    int? id,
+    required String name,
+    required List<GroupMember> members,
+  }) => transaction(() async {
+    final entry = GroupListRecordsCompanion(
+      name: Value(name),
+      members: Value(
+        jsonEncode([
+          for (final m in members)
+            {'id': m.id, 'name': m.name, 'detail': m.detail},
+        ]),
+      ),
+    );
+    if (id == null) {
+      id = await into(groupListRecords).insert(entry);
+    } else {
+      await (update(
+        groupListRecords,
+      )..where((t) => t.id.equals(id!))).write(entry);
+    }
+    return readGroupList(id!);
+  });
 
   LotteryPool _lotteryPool(StoredLotteryPool row) => LotteryPool(
     id: row.id,

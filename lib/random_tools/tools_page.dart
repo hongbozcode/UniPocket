@@ -9,6 +9,7 @@ import 'toss_page.dart';
 import 'wheel_page.dart';
 import 'roll_call_page.dart';
 import 'lottery_page.dart';
+import 'groups_page.dart';
 
 class ToolsPage extends StatelessWidget {
   const ToolsPage({required this.planner, this.random, super.key});
@@ -74,6 +75,19 @@ class ToolsPage extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) =>
                         LotteryPage(planner: planner, random: random),
+                  ),
+                ),
+              ),
+              _ToolCard(
+                width: width,
+                title: '随机分组',
+                subtitle: '遇见新的学习伙伴',
+                art: 'groups',
+                surface: const Color(0xfffff1bb),
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        GroupsPage(planner: planner, random: random),
                   ),
                 ),
               ),
