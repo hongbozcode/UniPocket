@@ -110,6 +110,8 @@ class _ImportCandidateCardState extends State<ImportCandidateCard> {
               : '重复课程 · 已跳过'
         : needsCheck
         ? '需要核对'
+        : c.schoolIdentity && widget.row.duplicateScheduleCount > 0
+        ? '重复安排自动跳过 · 仅加入新安排'
         : c.duplicateDescription == null
         ? '准备导入'
         : '重复课程 · 仍将导入';
@@ -164,6 +166,14 @@ class _ImportCandidateCardState extends State<ImportCandidateCard> {
                     : null,
               ),
               if (showDetails) ...[
+                if (widget.row.duplicateScheduleCount > 0)
+                  Text(
+                    '${widget.row.duplicateScheduleCount} 个重复安排将自动跳过',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xff73819a),
+                    ),
+                  ),
                 Container(
                   margin: const EdgeInsets.only(top: 8, bottom: 12),
                   padding: const EdgeInsets.all(12),

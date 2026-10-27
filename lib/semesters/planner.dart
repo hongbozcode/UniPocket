@@ -304,8 +304,11 @@ class SemesterPlanner {
       assessment,
       (allowConflicts) => _refreshAfter(
         _store.transaction(() async {
-          final fresh = assessImport(await load(), draft);
-          if (!fresh.canSubmit) {
+          final state = await load();
+          final fresh = assessImport(state, draft);
+          if (fresh.rows.any(
+            (r) => r.candidate.selected && r.errors.isNotEmpty,
+          )) {
             throw const InputProblem('先勾选要导入的课程，再补好待核对的信息。');
           }
           if (fresh.conflicts.isNotEmpty &&
@@ -315,12 +318,37 @@ class SemesterPlanner {
             throw CourseConflict(fresh.conflicts);
           }
           final ids = <int>[];
-          for (final candidate in draft.candidates.where((c) => c.selected)) {
-            ids.add(
-              await _store.saveCourse(candidate.toCourse(draft.semesterId)),
-            );
+          final courses = [...state.courses];
+          for (final row in fresh.rows.where(
+            (r) => r.candidate.selected && r.schedulesToSave.isNotEmpty,
+          )) {
+            final candidate = row.candidate;
+            final course = candidate
+                .copyWith(schedules: row.schedulesToSave)
+                .toCourse(draft.semesterId);
+            final existing = candidate.schoolIdentity
+                ? courses
+                      .where(
+                        (c) =>
+                            c.semesterId == draft.semesterId &&
+                            c.name.trim() == candidate.name.trim() &&
+                            c.teacher.trim() == candidate.teacher.trim(),
+                      )
+                      .firstOrNull
+                : null;
+            if (existing == null) {
+              final id = await _store.saveCourse(course);
+              ids.add(id);
+              courses.add(Course.fromDraft(id, course));
+            } else {
+              await _store.appendImportedSchedules(
+                existing.id,
+                row.schedulesToSave,
+              );
+              ids.add(existing.id);
+            }
           }
-          return ids;
+          return ids.toSet().toList();
         }),
       ),
     );

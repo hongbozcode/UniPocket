@@ -24,6 +24,7 @@ import 'events/events_page.dart';
 import 'reminders/notification_card.dart';
 import 'random_tools/tools_page.dart';
 import 'random_tools/home_tools.dart';
+import 'importing/school_import_page.dart';
 
 class UniPocketApp extends StatelessWidget {
   const UniPocketApp({
@@ -133,6 +134,16 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
       context,
       MaterialPageRoute(
         builder: (_) => SemesterManagement(planner: widget.planner),
+      ),
+    );
+    await _load();
+  }
+
+  Future<void> _importSchool() async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SchoolImportPage(planner: widget.planner),
       ),
     );
     await _load();
@@ -425,6 +436,8 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           icon: const Icon(Icons.add),
           label: const Text('创建学期'),
         ),
+        const SizedBox(height: 12),
+        OutlinedButton(onPressed: _importSchool, child: const Text('导入学校课表')),
       ],
     ),
   );
@@ -554,6 +567,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
           onManage: _manage,
           onTasks: _tasks,
           onEvents: _events,
+          onImport: _importSchool,
         )
       : PageContent(
           children: [

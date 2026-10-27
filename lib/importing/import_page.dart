@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../semesters/model.dart';
 import '../semesters/planner.dart';
+import '../semesters/semester_editor.dart';
 import '../timetable/model.dart';
 import '../ui/design.dart';
 import 'candidate_editor.dart';
@@ -16,12 +17,14 @@ class ImportPreviewPage extends StatefulWidget {
     required this.sourceName,
     required this.loadCandidates,
     this.initialSemesterId,
+    this.schoolPeriods,
     super.key,
   });
   final SemesterPlanner planner;
   final String sourceName;
   final Future<List<ImportCandidate>> Function() loadCandidates;
   final int? initialSemesterId;
+  final List<PeriodTime>? schoolPeriods;
 
   @override
   State<ImportPreviewPage> createState() => _ImportPreviewPageState();
@@ -122,6 +125,28 @@ class _ImportPreviewPageState extends State<ImportPreviewPage> {
       for (final c in _candidates)
         if (c.id == corrected.id) corrected else c,
     ];
+    await _refresh();
+  }
+
+  Future<void> _configureSemester() async {
+    final semester = _state!.semesters.singleWhere((s) => s.id == _semesterId);
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SemesterEditor(
+          planner: widget.planner,
+          campusNow: _state!.campusTime(DateTime.now().toUtc()),
+          campusTimeZone: _state!.campusTimeZone,
+          currentSemesterId: _state!.currentSemesterId,
+          semester: semester,
+          suggestedPeriods: widget.schoolPeriods,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    final state = await widget.planner.load();
+    if (!mounted) return;
+    _state = state;
     await _refresh();
   }
 
@@ -396,6 +421,11 @@ class _ImportPreviewPageState extends State<ImportPreviewPage> {
                 const SizedBox(height: 20),
               ],
               if (_preview != null) ...[
+                if (widget.schoolPeriods != null)
+                  TextButton(
+                    onPressed: _loading || _saving ? null : _configureSemester,
+                    child: const Text('核对学期设置与节次时间'),
+                  ),
                 _summary(_preview!),
                 const SizedBox(height: 16),
                 if (_candidates.isEmpty)

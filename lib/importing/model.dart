@@ -14,9 +14,12 @@ class ImportCandidate {
     required List<ScheduleDraft> schedules,
     List<String> errors = const [],
     this.duplicateDescription,
+    this.schoolIdentity = false,
+    this.sourcePeriods,
     bool? selected,
   }) : schedules = List.unmodifiable(schedules),
        errors = List.unmodifiable(errors),
+       selectionOverride = selected,
        selected = selected ?? duplicateDescription == null;
 
   final String id;
@@ -29,6 +32,9 @@ class ImportCandidate {
   final List<String> errors;
   final String? duplicateDescription;
   final bool selected;
+  final bool schoolIdentity;
+  final bool? selectionOverride;
+  final List<PeriodTime>? sourcePeriods;
 
   ImportCandidate copyWith({
     String? name,
@@ -36,6 +42,7 @@ class ImportCandidate {
     List<ScheduleDraft>? schedules,
     List<String>? errors,
     bool? selected,
+    String? duplicateDescription,
   }) => ImportCandidate(
     id: id,
     sourceLabel: sourceLabel,
@@ -45,8 +52,10 @@ class ImportCandidate {
     reminderMinutesBefore: reminderMinutesBefore,
     schedules: schedules ?? this.schedules,
     errors: errors ?? this.errors,
-    duplicateDescription: duplicateDescription,
-    selected: selected ?? this.selected,
+    duplicateDescription: duplicateDescription ?? this.duplicateDescription,
+    schoolIdentity: schoolIdentity,
+    sourcePeriods: sourcePeriods,
+    selected: selected ?? selectionOverride,
   );
 
   CourseDraft toCourse(int semesterId) => CourseDraft(
@@ -69,10 +78,19 @@ class ImportDraft {
 }
 
 class ImportRow {
-  ImportRow(this.candidate, List<String> errors)
-    : errors = List.unmodifiable(errors);
+  ImportRow(
+    this.candidate,
+    List<String> errors, {
+    List<ScheduleDraft>? schedulesToSave,
+    this.duplicateScheduleCount = 0,
+  }) : errors = List.unmodifiable(errors),
+       schedulesToSave = List.unmodifiable(
+         schedulesToSave ?? candidate.schedules,
+       );
   final ImportCandidate candidate;
   final List<String> errors;
+  final List<ScheduleDraft> schedulesToSave;
+  final int duplicateScheduleCount;
 }
 
 class ImportAssessment {
@@ -85,6 +103,7 @@ class ImportAssessment {
   int get selectedCount => rows.where((r) => r.candidate.selected).length;
   bool get canSubmit =>
       selectedCount > 0 &&
+      rows.any((r) => r.candidate.selected && r.schedulesToSave.isNotEmpty) &&
       rows.every((r) => !r.candidate.selected || r.errors.isEmpty);
 }
 

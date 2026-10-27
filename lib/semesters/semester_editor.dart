@@ -13,6 +13,8 @@ class SemesterEditor extends StatefulWidget {
     required this.campusTimeZone,
     required this.currentSemesterId,
     this.semester,
+    this.suggestedPeriods,
+    this.suggestedName,
     super.key,
   });
   final SemesterPlanner planner;
@@ -20,6 +22,8 @@ class SemesterEditor extends StatefulWidget {
   final String campusTimeZone;
   final int? currentSemesterId;
   final Semester? semester;
+  final List<PeriodTime>? suggestedPeriods;
+  final String? suggestedName;
 
   @override
   State<SemesterEditor> createState() => _SemesterEditorState();
@@ -59,7 +63,9 @@ class _SemesterEditorState extends State<SemesterEditor> {
       now.month,
       now.day - now.weekday + 1,
     );
-    _name = TextEditingController(text: semester?.name ?? '');
+    _name = TextEditingController(
+      text: semester?.name ?? widget.suggestedName ?? '',
+    );
     _monday = TextEditingController(
       text: dateText(semester?.firstMonday ?? nearestMonday),
     );
@@ -70,12 +76,13 @@ class _SemesterEditorState extends State<SemesterEditor> {
         day: [
           for (final period
               in semester == null
-                  ? (day <= 5
-                        ? [
-                            const PeriodTime(480, 525),
-                            const PeriodTime(535, 580),
-                          ]
-                        : <PeriodTime>[])
+                  ? (widget.suggestedPeriods ??
+                        (day <= 5
+                            ? [
+                                const PeriodTime(480, 525),
+                                const PeriodTime(535, 580),
+                              ]
+                            : <PeriodTime>[]))
                   : (semester.periods[day] ?? <PeriodTime>[]))
             _PeriodFields(
               PeriodTime.format(period.startMinutes),
@@ -405,6 +412,27 @@ class _SemesterEditorState extends State<SemesterEditor> {
                     ),
                     const SizedBox(height: 8),
                     const Text('每天可分别设置。初始时间仅供修改，请按学校作息调整；没有节次的日期可以留空。'),
+                    if (widget.suggestedPeriods != null)
+                      OutlinedButton(
+                        key: const ValueKey('use-school-periods'),
+                        onPressed: _saving
+                            ? null
+                            : () => setState(() {
+                                for (var day = 1; day <= 7; day++) {
+                                  for (final fields in _periods[day]!) {
+                                    fields.dispose();
+                                  }
+                                  _periods[day] = [
+                                    for (final p in widget.suggestedPeriods!)
+                                      _PeriodFields(
+                                        PeriodTime.format(p.startMinutes),
+                                        PeriodTime.format(p.endMinutes),
+                                      ),
+                                  ];
+                                }
+                              }),
+                        child: const Text('从学校文件填写每天的 12 节时间'),
+                      ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,

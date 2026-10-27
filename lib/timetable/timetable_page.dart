@@ -242,6 +242,7 @@ class TimetablePage extends StatefulWidget {
     required this.onManage,
     this.onTasks,
     this.onEvents,
+    this.onImport,
     super.key,
   });
   final PlannerState state;
@@ -252,6 +253,7 @@ class TimetablePage extends StatefulWidget {
   final VoidCallback onManage;
   final VoidCallback? onTasks;
   final VoidCallback? onEvents;
+  final VoidCallback? onImport;
   @override
   State<TimetablePage> createState() => _TimetablePageState();
 }
@@ -424,6 +426,14 @@ class _TimetablePageState extends State<TimetablePage> {
             onPressed: widget.onAdd,
             primary: true,
           ),
+          if (widget.onImport != null) ...[
+            const SizedBox(width: 8),
+            RoundDesignButton(
+              icon: 'folder',
+              label: '导入学校课表',
+              onPressed: widget.onImport,
+            ),
+          ],
         ],
       ),
       const SizedBox(height: 20),

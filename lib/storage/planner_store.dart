@@ -706,10 +706,18 @@ class PlannerStore extends _$PlannerStore {
         reminderMinutesBefore: Value(draft.reminderMinutesBefore),
       ),
     );
-    for (final schedule in draft.schedules) {
+    await appendImportedSchedules(id, draft.schedules);
+    return id;
+  });
+
+  Future<void> appendImportedSchedules(
+    int courseId,
+    List<ScheduleDraft> schedules,
+  ) async {
+    for (final schedule in schedules) {
       await into(scheduleRecords).insert(
         ScheduleRecordsCompanion.insert(
-          courseId: id,
+          courseId: courseId,
           weekday: schedule.weekday,
           startPeriod: schedule.startPeriod,
           endPeriod: schedule.endPeriod,
@@ -718,8 +726,7 @@ class PlannerStore extends _$PlannerStore {
         ),
       );
     }
-    return id;
-  });
+  }
 
   Future<void> writeTimeZone(String zone) =>
       (update(settingsRecords)..where((s) => s.id.equals(1))).write(
