@@ -1,0 +1,56 @@
+{
+  "all_tables_equal_after_clean_install_restore_and_process_restart": true,
+  "tables": {
+    "semester_records": 2,
+    "period_records": 42,
+    "settings_records": 1,
+    "course_records": 1,
+    "schedule_records": 1,
+    "learning_task_records": 3,
+    "countdown_event_records": 2,
+    "class_exception_records": 2,
+    "independent_lesson_records": 1,
+    "wheel_list_records": 1,
+    "roll_call_list_records": 1,
+    "lottery_pool_records": 1,
+    "group_list_records": 1,
+    "tool_usage_records": 3
+  },
+  "future_reminders": {
+    "task18/ddl/task:1": {
+      "at": 1793888940000,
+      "title": "关联数学作业",
+      "body": "11月5日 23:59 截止，记得按时完成。",
+      "key": "task:1",
+      "scope": "task18/ddl"
+    },
+    "task18/course/class:1:2026-11-02T00:00:00.000Z": {
+      "at": 1793670300000,
+      "title": "高等数学",
+      "body": "已调至 11月3日 11:00，地点：补课教室。",
+      "key": "class:1:2026-11-02T00:00:00.000Z",
+      "scope": "task18/course"
+    },
+    "task18/course/independent:1": {
+      "at": 1794275100000,
+      "title": "高等数学",
+      "body": "补课时间：11月10日 11:00，地点：补课教室。",
+      "key": "independent:1",
+      "scope": "task18/course"
+    },
+    "task18/course/class:1:2026-11-23T00:00:00.000Z": {
+      "at": 1795387500000,
+      "title": "高等数学",
+      "body": "11月23日 08:00 上课，地点：A201。",
+      "key": "class:1:2026-11-23T00:00:00.000Z",
+      "scope": "task18/course"
+    },
+    "task18/event/event:1": {
+      "at": 1794013200000,
+      "title": "未来考试",
+      "body": "今天是11月7日，记得关注这项安排。",
+      "key": "event:1",
+      "scope": "task18/event"
+    }
+  }
+}
