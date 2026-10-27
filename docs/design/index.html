@@ -20,7 +20,7 @@
     <p class="sidebar-label">从画面，到页面</p>
     <nav><a href="#references"><span>01</span>效果图</a><a href="#prototypes"><span>02</span>样板截图</a><a href="#assets"><span>03</span>设计资源</a><a href="#guidelines"><span>04</span>设计规范</a></nav>
     <div class="sidebar-note paper-surface paper-torn" style="--paper-color:var(--color-lavender-soft)"><strong>一点纸感，<br>一点好心情。</strong><p>浅蓝白底，圆润色块，<br>把校园日常轻轻收好。</p></div>
-    <div class="sidebar-footer"><a href="../product/design.md">AI 文档版 ↗</a><small>2026-10-24</small></div>
+    <div class="sidebar-footer"><a href="../product/design.md">AI 文档版 ↗</a><small>2026-10-27</small></div>
   </aside>
   <main id="main">
     <header class="intro" id="top">
@@ -29,7 +29,7 @@
     </header>
     <div class="summary"><div><b>9</b><span>当前效果图</span></div><div><b>12</b><span>应用页面</span></div><div><b>59</b><span>可复用素材</span></div><div><b>01→04</b><span>完整设计路径</span></div></div>
     <div class="scope-note"><span class="status-dot"></span><p>本手册提供效果图、样板截图、交互动效和设计资源。<a href="../../.scratch/unipocket-v1/spec.md">首版范围 ↗</a> · <a href="verification.md">验证记录 ↗</a></p></div>
-    <div class="rule-grid"><article class="rule-card"><h3>依据与范围</h3><ul><li>用户最新明确要求优先；业务范围、行为与发布验收以首版规格为准，视觉表现与资源使用以本规范为准。</li><li>效果图提供视觉方向，运行截图记录采集时布局；提示词、示例文案和展示外壳不覆盖现行规范。</li><li>Flutter 应用尚未实现；HTML 演示和截图的验证范围见检查记录。</li></ul></article><article class="rule-card"><h3>使用流程</h3><ol><li>按效果图、HTML 样板截图与交互说明、设计资源、设计规范的顺序查看所改页面；缺少的状态明确标为待设计或待采集。</li><li>复用现有变量与素材，按首版规格核对业务行为；页面规则描述采用目标，实际达成情况查看检查记录。</li><li>完成与变更相关的验收项，在维护源更新说明与资源关联，再生成两版手册。</li></ol></article></div>
+    <div class="rule-grid"><article class="rule-card"><h3>依据与范围</h3><ul><li>用户最新明确要求优先；业务范围、行为与发布验收以首版规格为准，视觉表现与资源使用以本规范为准。</li><li>效果图提供视觉方向，运行截图记录采集时布局；提示词、示例文案和展示外壳不覆盖现行规范。</li><li>Flutter 应用已进入实现阶段，应用交付与验收以仓库 README 的任务检查记录为准；本手册的 HTML 演示和截图仅提供设计参考，其验证范围见设计检查记录。</li></ul></article><article class="rule-card"><h3>使用流程</h3><ol><li>按效果图、HTML 样板截图与交互说明、设计资源、设计规范的顺序查看所改页面；缺少的状态明确标为待设计或待采集。</li><li>复用现有变量与素材，按首版规格核对业务行为；页面规则描述采用目标，实际达成情况查看检查记录。</li><li>完成与变更相关的验收项，在维护源更新说明与资源关联，再生成两版手册。</li></ol></article></div>
 
     <section id="references" class="chapter">
       <div class="chapter-heading"><div><p class="eyebrow">01 / VISUAL DIRECTION</p><h2>先看，页面的样子。</h2></div><span class="chapter-mark">效果图</span></div>
@@ -68,7 +68,7 @@
       <div class="subheading"><h3>更新与验收清单</h3><span>按变更影响检查</span></div><div class="rule-card"><ul><li>页面标识与当前采用的参考稿明确；已实现状态关联运行截图，尚未设计或实现的状态明确标注缺项。</li><li>复用现行变量、图标与材质；新增资源记录来源、用途及替代关系，历史证据与当前稿分开索引。</li><li>视觉、布局或交互变更后更新对应运行截图，检查受影响的 393px、320px 布局、长文本、空状态、焦点、滚动与交互。纯说明或链接修改只检查相关文档和入口。</li><li>涉及随机工具时核对结果、轮次和反馈；修改 HTML 动效时按动作参考检查取消、落位与临时图层清理。</li><li>两版手册同步，本地引用有效；检查记录注明对象、方式、证据与未验证项，只将实际检查的内容记为通过。</li></ul></div>
       <div class="final-note"><div><p class="eyebrow">KEEP IT IN SYNC</p><h3>维护源与检查记录</h3><p>两版手册由同一资源清单生成；更新方式和验证结果分别在维护说明与检查记录中查阅。</p></div><a class="primary-link" href="README.md">阅读维护说明 ↗</a></div>
     </section>
-    <footer><span>UniPocket · 2026-10-24</span><a href="catalog.json">资源清单 ↗</a><a href="#top">回到顶部 ↑</a></footer>
+    <footer><span>UniPocket · 2026-10-27</span><a href="catalog.json">资源清单 ↗</a><a href="#top">回到顶部 ↑</a></footer>
   </main>
   <dialog id="viewer" aria-labelledby="viewer-title"><div class="viewer-header"><h2 id="viewer-title"></h2><button id="viewer-close" aria-label="关闭预览">关闭 ×</button></div><div id="viewer-content"></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>

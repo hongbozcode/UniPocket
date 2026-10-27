@@ -24,7 +24,34 @@
 - [产品讨论记录](.scratch/product-design/discussion.md)：当时的讨论与决定，不替代现行规格。
 - [设计生成记录与截图索引](docs/design/resources/README.md)：提示词、页面截图及检查证据。
 
-当前仓库已实现任务 1–14 的 Flutter Android/Web 工程，支持离线学期、每日节次、校园时区、手动录课、今日／周课表、学习任务、倒计时事件、单次调停课、重复安排变更影响处理、课程删除后保留 DDL，以及学习任务／有效课程／倒计时事件本地提醒与真实通知状态反馈、六面骰／硬币随机工具（含翻滚／翻面和落地回弹）、支持多列表命名保存的自定义转盘（含源参考旋转与指针落位）、多名单随机点名（含持久化轮次及源参考姓名滚动）、多签池抽签（含持久化轮次、摇袋与纸签升起、纸签内长文滚动）、独立名单随机分组（支持按组数或人数上限均衡分配、洗牌与逐张发牌）；任务 7–9 真机验收后续完成，其余任务尚未交付，学校 XLSX 格式适配等待真实样例。实现验证记录见[任务 1 检查记录](.scratch/unipocket-v1/verification/01-bootstrap-semester.md)、[任务 2 检查记录](.scratch/unipocket-v1/verification/02-manual-timetable.md)、[任务 3 检查记录](.scratch/unipocket-v1/verification/03-learning-tasks.md)、[任务 4 检查记录](.scratch/unipocket-v1/verification/04-countdown-events.md)、[任务 5 检查记录](.scratch/unipocket-v1/verification/05-class-exceptions.md)、[任务 6 检查记录](.scratch/unipocket-v1/verification/06-schedule-impact.md)、[任务 7 检查记录](.scratch/unipocket-v1/verification/07-ddl-notifications.md)、[任务 8 检查记录](.scratch/unipocket-v1/verification/08-class-notifications.md)、[任务 9 检查记录](.scratch/unipocket-v1/verification/09-event-notifications.md)、[任务 10 检查记录](.scratch/unipocket-v1/verification/10-dice-coin.md)、[任务 11 检查记录](.scratch/unipocket-v1/verification/11-custom-wheel.md)、[任务 12 检查记录](.scratch/unipocket-v1/verification/12-random-roll-call.md)、[任务 13 检查记录](.scratch/unipocket-v1/verification/13-lottery-pool.md)与[任务 14 检查记录](.scratch/unipocket-v1/verification/14-random-groups.md)。
+## 实现进度与检查记录
+
+当前仓库已实现任务 1–16 的功能，支持 Flutter Android/Web 构建：
+
+- 学习管理：离线学期、每日节次、校园时区、手动录课、今日／周课表、学习任务、倒计时事件、单次调停课、重复安排变更影响处理、课程删除后保留 DDL，以及学习任务／有效课程／倒计时事件本地提醒与真实通知状态反馈。
+- 随机工具：六面骰／硬币（翻滚／翻面与落地回弹）、多列表自定义转盘（旋转与指针落位）、多名单随机点名（持久化轮次与姓名滚动）、多签池抽签（持久化轮次、摇袋、升签与长文滚动）、独立名单随机分组（按组数或人数上限均衡分配、洗牌与逐张发牌），以及统一搜索、收藏、最近使用和首页常用入口。
+- 导入候选：已解析结果的目标学期选择、逐项纠错／跳过、重复标记展示、冲突确认与原子提交；尚未接入真实学校文件选择与 XLSX 解析。
+
+任务 7–9 仍待实体 Android 真机验收；任务 17 学校 XLSX 适配、任务 18 完整备份恢复、任务 19 整版发布验收尚未交付。学校真实样例已收到，格式分析、必要字段含义及课程身份／精确去重规则仍待任务 17 确认。各次检查的证据与限制以对应记录为准，不把模拟器结果视为真机或整版验收。
+
+| 任务 | 检查记录 |
+| --- | --- |
+| 01 · 应用工程与学期配置 | [任务 1 检查记录](.scratch/unipocket-v1/verification/01-bootstrap-semester.md) |
+| 02 · 手动录课与课表 | [任务 2 检查记录](.scratch/unipocket-v1/verification/02-manual-timetable.md) |
+| 03 · 学习任务 | [任务 3 检查记录](.scratch/unipocket-v1/verification/03-learning-tasks.md) |
+| 04 · 倒计时事件 | [任务 4 检查记录](.scratch/unipocket-v1/verification/04-countdown-events.md) |
+| 05 · 单次调课与停课 | [任务 5 检查记录](.scratch/unipocket-v1/verification/05-class-exceptions.md) |
+| 06 · 重复安排变更与删除影响 | [任务 6 检查记录](.scratch/unipocket-v1/verification/06-schedule-impact.md) |
+| 07 · DDL 提醒 | [任务 7 检查记录](.scratch/unipocket-v1/verification/07-ddl-notifications.md) |
+| 08 · 有效课程提醒 | [任务 8 检查记录](.scratch/unipocket-v1/verification/08-class-notifications.md) |
+| 09 · 倒计时事件提醒 | [任务 9 检查记录](.scratch/unipocket-v1/verification/09-event-notifications.md) |
+| 10 · 掷骰子与抛硬币 | [任务 10 检查记录](.scratch/unipocket-v1/verification/10-dice-coin.md) |
+| 11 · 自定义转盘 | [任务 11 检查记录](.scratch/unipocket-v1/verification/11-custom-wheel.md) |
+| 12 · 随机点名 | [任务 12 检查记录](.scratch/unipocket-v1/verification/12-random-roll-call.md) |
+| 13 · 抽签 | [任务 13 检查记录](.scratch/unipocket-v1/verification/13-lottery-pool.md) |
+| 14 · 随机分组 | [任务 14 检查记录](.scratch/unipocket-v1/verification/14-random-groups.md) |
+| 15 · 工具发现与首页常用入口 | [任务 15 检查记录](.scratch/unipocket-v1/verification/15-tool-discovery.md) |
+| 16 · 导入预览、纠错与原子提交 | [任务 16 检查记录](.scratch/unipocket-v1/verification/16-import-preview.md) |
 
 设计手册、效果图、HTML 样板截图和六项随机工具的[独立动效演示](docs/design/motion.html)仍是设计参考。原完整应用样板源码未纳入仓库；独立演示源码维护在 `docs/design/motion-demo.js` 和 `motion-demo.css`。
 
@@ -55,3 +82,13 @@ Android 进程重启验收分为创建与恢复两个阶段，使用同一个专
 flutter drive --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/semester_flow_test.dart -d <设备ID> --dart-define=ACCEPTANCE_DATABASE=unipocket_acceptance_01
 flutter drive --keep-app-running --driver=test_driver/integration_test.dart --target=integration_test/semester_flow_test.dart -d <设备ID> --dart-define=ACCEPTANCE_DATABASE=unipocket_acceptance_01 --dart-define=ACCEPTANCE_RESTORE=true
 ```
+
+`flutter drive` 安装的是自动验收包。`--keep-app-running` 用于保留进程恢复验收的数据，不表示测试结束后可以正常手动操作；测试绑定可能拦截真实点击并保留最后的截图画面。人工体验前应重新运行正常入口 `lib/main.dart`。
+
+需要手动查看任务 16 的冲突样例时，使用独立的[导入预览入口](tool/import_preview.dart)：
+
+```powershell
+flutter run --no-pub --no-resident -d <设备ID> --target=tool/import_preview.dart
+```
+
+该入口使用正常 Flutter binding 和专用演示数据库，不向正式应用数据库写入样例；首次创建两门时间重叠的测试课程，导入课程以淡紫色区分，展示时钟固定为校园时间 2026-08-31 08:15。详细说明见[任务 16 跟进记录](.scratch/unipocket-v1/verification/16-import-preview.md)。
