@@ -55,6 +55,9 @@ void main() {
         );
       }
       final initial = await planner.load();
+      const restore = bool.fromEnvironment('ACCEPTANCE_RESTORE');
+      expect(initial.courses, restore ? hasLength(10) : isEmpty);
+      debugPrint('TASK17_INITIAL_COURSES=${initial.courses.length}');
       await tester.pumpWidget(
         MaterialApp(
           theme: appTheme(),
@@ -82,7 +85,9 @@ void main() {
       }
       expect(find.byType(ImportPreviewPage), findsOneWidget);
       await tester.pumpAndSettle();
-      await capture('17-android-school-preview');
+      await capture(
+        restore ? '17-android-repeat-preview' : '17-android-school-preview',
+      );
       expect((await planner.load()).courses.length, initial.courses.length);
       if (initial.courses.isEmpty) {
         for (var i = 0; i < 3; i++) {
@@ -109,8 +114,11 @@ void main() {
           );
         }
         await capture('17-android-repeat-skipped');
-        await tester.ensureVisible(
+        await tester.scrollUntilVisible(
           find.byKey(const ValueKey('confirm-import')),
+          250,
+          scrollable: find.byType(Scrollable).first,
+          maxScrolls: 80,
         );
         expect(
           tester
