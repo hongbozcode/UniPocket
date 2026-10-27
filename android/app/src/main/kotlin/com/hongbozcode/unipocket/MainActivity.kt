@@ -111,11 +111,13 @@ class MainActivity : FlutterActivity() {
                     output.toByteArray()
                 } ?: throw java.io.IOException("unreadable")
                 runOnUiThread {
+                    if (schoolFileResult !== pending) return@runOnUiThread
                     schoolFileResult = null
                     pending.success(mapOf("name" to name, "bytes" to bytes))
                 }
             } catch (e: Exception) {
                 runOnUiThread {
+                    if (schoolFileResult !== pending) return@runOnUiThread
                     schoolFileResult = null
                     pending.error(if (e.message == "file_too_large") "file_too_large" else "file_unreadable",
                         "无法读取课表文件", null)

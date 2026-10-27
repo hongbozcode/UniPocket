@@ -222,6 +222,34 @@ void main() {
     expect(preview.rows.single.errors.join(), contains('节次时间'));
     expect((await planner.load()).courses, isEmpty);
   });
+
+  test('预览纠错后同一课程内出现完全相同的安排也只保存一次', () async {
+    final parsed = parseSchoolTimetable(
+      File('test/fixtures/hbkj_schedule.xlsx').readAsBytesSync(),
+    );
+    final store = PlannerStore(NativeDatabase.memory());
+    addTearDown(store.close);
+    final planner = SemesterPlanner(store);
+    final semester = await planner.saveSemester(
+      SemesterDraft(
+        name: '纠错去重',
+        firstMonday: DateTime.utc(2026, 8, 31),
+        totalWeeks: 20,
+        periods: {for (var d = 1; d <= 7; d++) d: parsed.periods},
+      ),
+    );
+    final original = parsed.candidates.singleWhere((c) => c.name == '计算机组成原理');
+    final candidate = original.copyWith(
+      schedules: [original.schedules.first, original.schedules.first],
+    );
+    final preview = await planner.previewImport(
+      ImportDraft(semesterId: semester, candidates: [candidate]),
+    );
+    expect(preview.rows.single.duplicateScheduleCount, 1);
+    expect(preview.conflicts, isEmpty);
+    await preview.commit();
+    expect((await planner.load()).courses.single.schedules, hasLength(1));
+  });
 }
 
 Uint8List changeXml(

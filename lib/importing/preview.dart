@@ -29,10 +29,12 @@ ImportAssessment assessImport(PlannerState state, ImportDraft draft) {
   for (var i = 0; i < draft.candidates.length; i++) {
     var candidate = draft.candidates[i];
     final schedules = <ScheduleDraft>[];
+    final withinCandidate = <String>{};
     var duplicates = 0;
     for (final schedule in candidate.schedules) {
       final key = _scheduleKey(candidate.name, candidate.teacher, schedule);
-      if (candidate.schoolIdentity && known.contains(key)) {
+      if (candidate.schoolIdentity &&
+          (known.contains(key) || !withinCandidate.add(key))) {
         duplicates++;
       } else {
         schedules.add(schedule);
