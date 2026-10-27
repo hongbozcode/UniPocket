@@ -279,7 +279,7 @@ class _WeekGridState extends State<WeekGrid> {
                               left: axisWidth + (day - 1) * dayWidth,
                               top: 0,
                               width: dayWidth,
-                              height: height,
+                              height: headerHeight,
                               child: const ColoredBox(color: Color(0xfff5f1ff)),
                             ),
                         for (var day = 0; day <= 7; day++)

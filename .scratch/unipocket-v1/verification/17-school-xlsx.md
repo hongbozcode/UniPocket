@@ -85,3 +85,16 @@ flutter run --no-pub --no-resident -d emulator-5554 --target=tool/school_import_
 两轴最终审查范围 `git diff 42826533ab15428b921697d500c79863469508df...f15bd79`。Standards 0 项，Spec 0 项，两轴均无最高严重问题。规则已同步任务文件及首版规格。
 
 证据限于真实 SQLite、Flutter 界面和 Android 模拟器；实体手机及整版导入／备份／恢复验收仍属于任务 19，未在本任务宣称完成。
+
+## 跟进：课程下方紫色空白
+
+2026-10-27，基线 `7268ce9`。用户指出周二“职业教育学”下方第 9–12 节无课却显示紫色。
+
+实际原因是 `WeekGrid` 为“今天”所在列绘制从表头到课表底部的淡紫背景，并非额外课程数据。现将背景高度限制在日期表头，保留今天的日期圆点及文字标记，所有空课时使用统一底色。
+
+- 新增 `test/week_grid_highlight_test.dart`，从真实 Flutter 渲染结果比较今日最后一个空课时与相邻日期相同位置的像素；修复前分别为 `#f5f1ff` 与 `#fcfdff`，失败记录 `build/task17-highlight-red.log`，修复后相等。
+- `build/task17-highlight-tests.log`：该视觉回归及既有课表界面测试共 9 项通过，覆盖 320／393 宽、双倍文字、课程详情与编辑。
+- `build/task17-highlight-analyze.log`：`No issues found!`；`build/task17-highlight-android.log`：正常手动包重新编译、安装、启动成功。
+- 在原验收数据库中实际进入课表并滚动到第 9–12 节，确认空白底色一致；未改变已导入课程或安排。模拟器保留修复后的正常手动应用。
+
+[Android 修复后的空课时](evidence/17-android-empty-periods-fixed.png)。先前恢复截图保留为历史证据，以本次截图作为空课时底色的最新依据。
