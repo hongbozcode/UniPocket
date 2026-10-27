@@ -19,6 +19,36 @@ import 'package:unipocket/random_tools/tool_library.dart';
 void main() {
   setUpAll(tz.initializeTimeZones);
 
+  test('恢复开始后旧点名与抽签完成请求即使与事务并发也不能写入新轮次', () async {
+    final store = PlannerStore(NativeDatabase.memory());
+    addTearDown(store.close);
+    final planner = SemesterPlanner(
+      store,
+      clock: () => DateTime.utc(2026, 8, 30),
+    );
+    await seedBackupFixture(planner);
+    final before = await planner.exportBackup();
+    final preview = await planner.previewBackup(before);
+    final roll = await planner.prepareRollCall(
+      (await planner.loadRollCallLists()).single.id,
+    );
+    final lottery = await planner.prepareLottery(
+      (await planner.loadLotteryPools()).single.id,
+    );
+    final restore = preview.restore(confirmOverwrite: true);
+    final rollCheck = expectLater(
+      Future.sync(roll.complete),
+      throwsA(isA<StateError>()),
+    );
+    final lotteryCheck = expectLater(
+      Future.sync(lottery.complete),
+      throwsA(isA<StateError>()),
+    );
+    await restore;
+    await Future.wait([rollCheck, lotteryCheck]);
+    expect(await planner.exportBackup(), before);
+  });
+
   test('全部领域数据、设置及工具状态精确往返，恢复替换旧数据并仅重建未来提醒', () async {
     final source = PlannerStore(NativeDatabase.memory());
     final target = PlannerStore(NativeDatabase.memory());

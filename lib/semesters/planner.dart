@@ -57,8 +57,11 @@ class SemesterPlanner {
           '${count('semester_records')} 个学期 · ${count('course_records')} 门课程 · '
           '${count('learning_task_records')} 个任务 · ${count('countdown_event_records')} 个事件',
       restore: () async {
-        await _store.applyBackup(data);
+        // Invalidate provisional draws synchronously, before any restore awaits.
+        // Otherwise an old completion can queue behind the restore transaction
+        // and match the revision stored in the backup.
         _restoreGeneration++;
+        await _store.applyBackup(data);
         await refreshReminders();
       },
     );

@@ -76,10 +76,13 @@ void main() {
               isNull,
             );
             await tapVisible(tester, find.byTooltip('返回'));
-            await waitFor(tester, find.byKey(const ValueKey('main-navigation')));
+            await waitFor(
+              tester,
+              find.byKey(const ValueKey('main-navigation')),
+            );
             await tapVisible(tester, find.text('设置'));
-            await waitFor(tester, find.text('设备通知已关闭'));
             await tapVisible(tester, find.text('系统通知设置'));
+            await waitFor(tester, find.text('设备通知已关闭'));
             expect(notifications.settingsOpened, isTrue);
             expect(tester.takeException(), isNull);
           } finally {
