@@ -1,4 +1,8 @@
 import 'dart:math';
+import 'dart:typed_data';
+
+import '../backup/archive.dart';
+import '../backup/store.dart';
 
 import 'package:timezone/timezone.dart' as tz;
 
@@ -33,6 +37,32 @@ class SemesterPlanner {
   NotificationAccess notificationAccess = NotificationAccess.unavailable;
   bool reminderSyncFailed = false;
   Future<void>? _notificationQueue;
+  int _restoreGeneration = 0;
+
+  Future<Uint8List> exportBackup() async =>
+      encodeBackup(await _store.backupSnapshot(_clock()));
+
+  Future<BackupPreview> previewBackup(Uint8List bytes) async {
+    final data = await decodeBackup(bytes);
+    try {
+      await _store.applyBackup(data, validateOnly: true);
+    } catch (_) {
+      throw const FormatException('备份校验失败：文件版本、内容或数据关系不完整，当前数据未改变');
+    }
+    final tables = data['tables'] as Map<String, dynamic>;
+    int count(String name) => (tables[name] as List).length;
+    return BackupPreview(
+      createdAt: DateTime.parse(data['createdAt'] as String),
+      summary:
+          '${count('semester_records')} 个学期 · ${count('course_records')} 门课程 · '
+          '${count('learning_task_records')} 个任务 · ${count('countdown_event_records')} 个事件',
+      restore: () async {
+        await _store.applyBackup(data);
+        _restoreGeneration++;
+        await refreshReminders();
+      },
+    );
+  }
 
   Future<List<WheelList>> loadWheelLists() => _store.readWheelLists();
 
@@ -100,14 +130,15 @@ class SemesterPlanner {
   Future<List<LotteryPool>> loadLotteryPools() => _store.readLotteryPools();
 
   Future<LotteryDraw> prepareLottery(int id, {Random? random}) async {
+    final generation = _restoreGeneration;
     final pool = await _store.readLotteryPool(id);
     final candidates = pool.candidates;
     if (candidates.isEmpty) throw StateError('没有剩余签项，请主动开始新一轮');
     final index = candidates[(random ?? Random()).nextInt(candidates.length)];
-    return LotteryDraw(
-      pool.items[index],
-      () => _store.commitLottery(pool, index),
-    );
+    return LotteryDraw(pool.items[index], () {
+      if (generation != _restoreGeneration) throw StateError('数据已恢复，请重新抽签');
+      return _store.commitLottery(pool, index);
+    });
   }
 
   Future<LotteryPool> resetLottery(int id, {bool? repeat}) =>
@@ -129,11 +160,15 @@ class SemesterPlanner {
   Future<List<RollCallList>> loadRollCallLists() => _store.readRollCallLists();
 
   Future<RollCallDraw> prepareRollCall(int id, {Random? random}) async {
+    final generation = _restoreGeneration;
     final list = await _store.readRollCallList(id);
     final candidates = list.candidates;
     if (candidates.isEmpty) throw StateError('没有剩余成员，请主动开始新一轮');
     final member = candidates[(random ?? Random()).nextInt(candidates.length)];
-    return RollCallDraw(member, () => _store.commitRollCall(list, member.id));
+    return RollCallDraw(member, () {
+      if (generation != _restoreGeneration) throw StateError('数据已恢复，请重新点名');
+      return _store.commitRollCall(list, member.id);
+    });
   }
 
   /// Mode changes explicitly begin a fresh round, after UI confirmation.

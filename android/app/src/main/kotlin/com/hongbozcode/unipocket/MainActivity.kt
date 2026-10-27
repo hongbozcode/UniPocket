@@ -13,12 +13,15 @@ import android.provider.OpenableColumns
 import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
+    private val backupDocuments by lazy { BackupDocuments(this) }
     private var permissionResult: MethodChannel.Result? = null
     private var schoolFileResult: MethodChannel.Result? = null
     private val fileReader = Executors.newSingleThreadExecutor()
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "unipocket/backup-file")
+            .setMethodCallHandler { call, result -> backupDocuments.handle(call, result) }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "unipocket/school-file")
             .setMethodCallHandler { call, result ->
                 if (call.method != "pick") {
@@ -83,6 +86,7 @@ class MainActivity : FlutterActivity() {
     @Deprecated("Android activity result callback used by FlutterActivity")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        backupDocuments.onResult(requestCode, resultCode, data)
         if (requestCode != 71) return
         val pending = schoolFileResult ?: return
         val uri = data?.data
@@ -127,6 +131,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
+        backupDocuments.close()
         schoolFileResult?.error("picker_closed", "文件选择已关闭", null)
         schoolFileResult = null
         fileReader.shutdown()

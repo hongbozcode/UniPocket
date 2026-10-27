@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -25,6 +24,7 @@ import 'reminders/notification_card.dart';
 import 'random_tools/tools_page.dart';
 import 'random_tools/home_tools.dart';
 import 'importing/school_import_page.dart';
+import 'backup/backup_card.dart';
 
 class UniPocketApp extends StatelessWidget {
   const UniPocketApp({
@@ -67,6 +67,7 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
   String? _error;
   var _page = 0;
   var _busy = false;
+  var _backupBusy = false;
   Timer? _clockRefresh;
 
   @override
@@ -594,88 +595,86 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
 
   Widget _tools() => ToolsPage(planner: widget.planner, random: widget.random);
 
-  Widget _settings() => PageContent(
-    children: [
-      const PageHeading('校园设置', '让校园日常，更合你的节奏'),
-      Text(
-        '学习安排',
-        style: Theme.of(context).textTheme.titleMedium
-            ?.copyWith(fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 12),
-      Card(
-        child: Column(
-          children: [
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              leading: const DesignIcon('calendar'),
-              title: const Text('学期管理'),
-              subtitle: Text(_state!.currentSemester?.name ?? '尚未创建学期'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _manage,
-            ),
-            const Divider(height: 1, indent: 20, endIndent: 20),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              leading: const DesignIcon('clock'),
-              title: const Text('节次时间'),
-              subtitle: Text(
-                _state!.currentSemester == null ? '请先创建学期' : '按当前学期分别设置每天的节次',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _edit(_state!.currentSemester),
-            ),
-            const Divider(height: 1, indent: 20, endIndent: 20),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              leading: const DesignIcon('globe'),
-              title: const Text('校园时区'),
-              subtitle: Text(_state!.campusTimeZone),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _busy ? null : _timeZone,
-            ),
-          ],
+  Widget _settings() => AbsorbPointer(
+    absorbing: _backupBusy,
+    child: PageContent(
+      children: [
+        const PageHeading('校园设置', '让校园日常，更合你的节奏', art: 'badge'),
+        Text(
+          '学习安排',
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
-      ),
-      const SizedBox(height: 24),
-      Text(
-        '提醒',
-        style: Theme.of(context).textTheme.titleMedium
-            ?.copyWith(fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 12),
-      NotificationCard(planner: widget.planner),
-      const SizedBox(height: 24),
-      SurfaceCard(
-        color: const Color(0xffe6f5ed),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '数据留在自己手中',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text('无需账号，离线使用。学习数据保存在当前设备，应用不会主动上传。'),
-            if (kIsWeb) ...[
-              const SizedBox(height: 10),
-              const Text('网页数据保存在当前浏览器的此站点中。清除站点数据或结束隐私浏览可能会丢失记录。'),
+        const SizedBox(height: 12),
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                leading: const DesignIcon('calendar'),
+                title: const Text('学期管理'),
+                subtitle: Text(_state!.currentSemester?.name ?? '尚未创建学期'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _manage,
+              ),
+              const Divider(height: 1, indent: 20, endIndent: 20),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                leading: const DesignIcon('clock'),
+                title: const Text('节次时间'),
+                subtitle: Text(
+                  _state!.currentSemester == null ? '请先创建学期' : '按当前学期分别设置每天的节次',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _edit(_state!.currentSemester),
+              ),
+              const Divider(height: 1, indent: 20, endIndent: 20),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                leading: const DesignIcon('globe'),
+                title: const Text('校园时区'),
+                subtitle: Text(_state!.campusTimeZone),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _busy ? null : _timeZone,
+              ),
             ],
-            const SizedBox(height: 10),
-            const Text('备份恢复将在后续版本开放。'),
-          ],
+          ),
         ),
-      ),
-    ],
+        const SizedBox(height: 24),
+        Text(
+          '提醒',
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        NotificationCard(planner: widget.planner),
+        const SizedBox(height: 24),
+        Text(
+          '数据与备份',
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        BackupCard(
+          planner: widget.planner,
+          onRestored: _load,
+          onBusyChanged: (busy) {
+            if (mounted) setState(() => _backupBusy = busy);
+          },
+        ),
+        const SizedBox(height: 16),
+        const Center(child: Text('无需账号 · 离线使用 · 核心数据不主动上传')),
+      ],
+    ),
   );
 
   @override
@@ -730,7 +729,9 @@ class _AppShellState extends State<_AppShell> with WidgetsBindingObserver {
                     icon: entry.$1,
                     label: entry.$2,
                     selected: index == _page,
-                    onTap: () => setState(() => _page = index),
+                    onTap: () {
+                      if (!_backupBusy) setState(() => _page = index);
+                    },
                   ),
                 ),
             ],

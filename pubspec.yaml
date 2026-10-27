@@ -30,6 +30,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - docs/design/resources/icons/export.svg
+    - docs/design/resources/icons/restore.svg
+    - docs/design/resources/illustrations/folder.svg
     - docs/design/resources/icons/folder.svg
     - docs/design/resources/icons/search.svg
     - docs/design/resources/icons/close.svg
